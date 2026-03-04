@@ -22,25 +22,11 @@ export function ProjectCard({
   const clientName = (project as unknown as { clients?: { name: string } })?.clients?.name;
   const clientColour = (project as unknown as { clients?: { avatar_colour?: string } })?.clients?.avatar_colour;
 
-  const bannerStyle: CSSProperties = project.banner_url
-    ? {
-        backgroundImage: `url(${project.banner_url})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : (() => {
-        // Deterministic gradient based on project id
-        const base = project.id ?? project.title;
-        let hash = 0;
-        for (let i = 0; i < base.length; i += 1) {
-          hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
-        }
-        const hue = hash % 360;
-        const hue2 = (hue + 45) % 360;
-        return {
-          backgroundImage: `linear-gradient(135deg, hsl(${hue},70%,28%), hsl(${hue2},70%,18%))`,
-        };
-      })();
+  const bannerStyle: CSSProperties = {
+    backgroundImage: `url(${project.banner_url || "/images/default-project-banner.svg"})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
 
   return (
     <Link
@@ -78,20 +64,17 @@ export function ProjectCard({
           </p>
         )}
         <div className="flex flex-wrap gap-1.5 mb-3 px-4">
-          <Badge variant="default">[{project.type.toUpperCase().replace("_", " ")}]</Badge>
+          <Badge variant="default">{project.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
           {(project.stack as string[])?.slice(0, 3).map((s) => (
             <Badge key={s} variant="muted">
               {s}
             </Badge>
           ))}
-          {project.overall_score != null && (
-            <Badge variant="success">SCORE: {project.overall_score}/10</Badge>
-          )}
-          <Badge variant="default">[{project.status.toUpperCase()}]</Badge>
+          <Badge variant="default">{project.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
         </div>
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] mb-3 px-4">
           <span>
-            ████░░░░ {doneCount}/{taskCount} TASKS
+            {doneCount}/{taskCount} tasks
           </span>
           <span>{formatDate(project.created_at)}</span>
         </div>

@@ -58,7 +58,7 @@ export function RecentTimeLogs({ logs }: RecentTimeLogsProps) {
       )}
       <Link
         href="/time-logs"
-        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent-blue)] hover:underline"
+        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline"
       >
         View all
         <ChevronRight className="w-4 h-4 shrink-0" />

@@ -62,7 +62,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">░░░░░░░░░░ Loading...</div>
+        <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
       </main>
     );
   }
@@ -171,7 +171,7 @@ export default function DashboardPage() {
           {upcomingTasks.length > 10 && (
             <Link
               href="/projects"
-              className="inline-flex items-center gap-2 mt-2 text-xs text-[var(--accent-blue)] hover:underline"
+              className="inline-flex items-center gap-2 mt-2 text-xs text-[var(--accent)] hover:underline"
             >
               <ChevronRight className="w-3.5 h-3.5 shrink-0" />
               View all projects

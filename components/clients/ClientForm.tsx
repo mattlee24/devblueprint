@@ -101,7 +101,7 @@ export function ClientForm({
               type="button"
               onClick={() => onChange({ ...data, avatar_colour: c })}
               className={`w-8 h-8 rounded border-2 ${
-                data.avatar_colour === c ? "border-[var(--accent-green)]" : "border-[var(--border)]"
+                data.avatar_colour === c ? "border-[var(--accent)]" : "border-[var(--border)]"
               }`}
               style={{ backgroundColor: c }}
             />
@@ -126,7 +126,7 @@ export function ClientForm({
       </div>
       <button
         type="submit"
-        className="px-4 py-2 bg-[var(--accent-green)] text-[var(--bg-base)] font-medium rounded-[var(--radius-card)] hover:opacity-90"
+        className="px-4 py-2 bg-[var(--accent)] text-[var(--accent-foreground)] font-medium rounded-[var(--radius-card)] hover:opacity-90"
       >
         {submitLabel}
       </button>

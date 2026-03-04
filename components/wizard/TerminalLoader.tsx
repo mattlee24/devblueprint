@@ -3,23 +3,35 @@
 import { useEffect, useState } from "react";
 
 export type GenerationStep =
+  | "preparing"
   | "analyzing"
   | "blueprint"
+  | "validating"
   | "creating_project"
   | "tasks"
   | "redirecting";
 
 const STEP_CONFIG: Record<
   GenerationStep,
-  { label: string; description: string }
+  { label: string; description: string; expectedOutput?: string }
 > = {
+  preparing: {
+    label: "Preparing request",
+    description: "Validating your project details and preparing the brief",
+  },
   analyzing: {
     label: "Analyzing project brief",
     description: "Reading your goals, audience, and constraints",
   },
   blueprint: {
-    label: "Generating blueprint",
-    description: "AI is building requirements, features, and risk analysis",
+    label: "Generating blueprint & tasks",
+    description: "AI is building the full project plan",
+    expectedOutput:
+      "12–25 features · 4–8 milestones · 5–12 risks · 25–55 tasks",
+  },
+  validating: {
+    label: "Validating output",
+    description: "Checking blueprint structure and task list",
   },
   creating_project: {
     label: "Creating project",
@@ -36,8 +48,10 @@ const STEP_CONFIG: Record<
 };
 
 const STEPS: GenerationStep[] = [
+  "preparing",
   "analyzing",
   "blueprint",
+  "validating",
   "creating_project",
   "tasks",
   "redirecting",
@@ -50,12 +64,18 @@ interface TerminalLoaderProps {
   taskProgress?: { current: number; total: number };
   /** Optional project title to show in header */
   projectTitle?: string;
+  /** During "blueprint" step: rotating status (e.g. "Contacting AI…", "Generating features…") */
+  blueprintPhase?: string;
+  /** After blueprint returns: counts to show (e.g. "24 features, 42 tasks generated") */
+  generatedCounts?: { features?: number; tasks?: number };
 }
 
 export function TerminalLoader({
   currentStep: controlledStep,
   taskProgress,
   projectTitle,
+  blueprintPhase,
+  generatedCounts,
 }: TerminalLoaderProps) {
   const [autoStep, setAutoStep] = useState(0);
   const isControlled = controlledStep != null;
@@ -124,11 +144,24 @@ export function TerminalLoader({
                     )}
                   </div>
                   {(isCurrent || isDone) && (
-                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 ml-6">
-                      {isTasks && taskProgress && isCurrent
-                        ? `Adding task ${taskProgress.current} of ${taskProgress.total}…`
-                        : config.description}
-                    </p>
+                    <div className="mt-0.5 ml-6 space-y-0.5">
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {isTasks && taskProgress && isCurrent
+                          ? `Adding task ${taskProgress.current} of ${taskProgress.total}…`
+                          : isCurrent && key === "blueprint" && blueprintPhase
+                            ? blueprintPhase
+                            : config.description}
+                      </p>
+                      {key === "blueprint" && (
+                        <p className="text-xs text-[var(--text-muted)]">
+                          {isDone && generatedCounts
+                            ? `Generated ${generatedCounts.features ?? "—"} features, ${generatedCounts.tasks ?? "—"} tasks`
+                            : config.expectedOutput
+                              ? `Target: ${config.expectedOutput}`
+                              : null}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               );

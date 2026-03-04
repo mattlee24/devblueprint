@@ -16,7 +16,7 @@ import { Select } from "@/components/ui/Select";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 type StatusFilter = "all" | "active" | "completed" | "archived";
-type SortKey = "newest" | "oldest" | "score" | "alpha";
+type SortKey = "newest" | "oldest" | "alpha";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectRow[]>([]);
@@ -71,14 +71,13 @@ export default function ProjectsPage() {
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     if (sort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    if (sort === "score") return (b.overall_score ?? 0) - (a.overall_score ?? 0);
     return a.title.localeCompare(b.title);
   });
 
   if (loading) {
     return (
       <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">░░░░░░░░░░ Loading...</div>
+        <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
       </main>
     );
   }
@@ -116,7 +115,7 @@ export default function ProjectsPage() {
                   : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
               }`}
             >
-              [{s.toUpperCase()}]
+              {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
             </button>
           ))}
         </div>
@@ -147,7 +146,6 @@ export default function ProjectsPage() {
           options={[
             { value: "newest", label: "Newest" },
             { value: "oldest", label: "Oldest" },
-            { value: "score", label: "Score high → low" },
             { value: "alpha", label: "A–Z" },
           ]}
           value={sort}

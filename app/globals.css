@@ -1,63 +1,59 @@
 @import "tailwindcss";
 
-/* Dark theme (default) */
+/* Refined neutral palette + single accent (deep slate). No neon, no techy glows. */
 :root,
 [data-theme="dark"] {
-  --bg-base: #0a0a0a;
-  --bg-surface: #111111;
-  --bg-elevated: #1a1a1a;
-  --bg-hover: #222222;
-  --border: #2a2a2a;
-  --border-active: #3a3a3a;
-  --accent-green: #00ff88;
-  --accent-blue: #0088ff;
-  --accent-amber: #ffaa00;
-  --accent-red: #ff4444;
-  --accent-purple: #aa66ff;
-  --text-primary: #e8e8e8;
-  --text-secondary: #888888;
-  --text-muted: #444444;
-  --radius-card: 4px;
-  --radius-badge: 2px;
+  --bg-base: #0f1419;
+  --bg-surface: #1a1f26;
+  --bg-elevated: #232a33;
+  --bg-hover: #2d3640;
+  --border: #374151;
+  --border-active: #4b5563;
+  --accent: #475569;
+  --accent-foreground: #f8fafc;
+  --accent-green: #4ade80;
+  --accent-blue: #64748b;
+  --accent-amber: #d4a574;
+  --accent-red: #dc2626;
+  --accent-purple: #7c6ea8;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --radius-card: 12px;
+  --radius-badge: 8px;
   --transition: 150ms ease;
 }
 
-/* Light theme */
+/* Light theme: warm whites, light greys, same accent */
 [data-theme="light"] {
-  --bg-base: #f5f5f5;
+  --bg-base: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-elevated: #fafafa;
-  --bg-hover: #eeeeee;
-  --border: #e0e0e0;
-  --border-active: #b0b0b0;
-  --accent-green: #00aa55;
-  --accent-blue: #0066cc;
-  --accent-amber: #cc8800;
-  --accent-red: #cc3333;
-  --accent-purple: #7744bb;
-  --text-primary: #1a1a1a;
-  --text-secondary: #555555;
-  --text-muted: #888888;
+  --bg-elevated: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --border: #e2e8f0;
+  --border-active: #cbd5e1;
+  --accent: #334155;
+  --accent-foreground: #ffffff;
+  --accent-green: #16a34a;
+  --accent-blue: #475569;
+  --accent-amber: #b45309;
+  --accent-red: #b91c1c;
+  --accent-purple: #6d28d9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 }
 
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
 }
 
-/* Noise/grain overlay for depth */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-}
-[data-theme="light"] body::before {
-  opacity: 0.015;
+/* Headings use display font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* User flow (ReactFlow) – dark theme for readability */
@@ -104,7 +100,7 @@ body::before {
   color: var(--text-muted) !important;
 }
 .user-flow-dark .react-flow__attribution a {
-  color: var(--accent-blue) !important;
+  color: var(--accent) !important;
 }
 
 @media print {

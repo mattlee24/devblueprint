@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { CommandPalette } from "@/components/CommandPalette";
 import { ContextMenuProvider } from "@/components/ContextMenuProvider";
+import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 
 export default function AppLayout({
   children,
@@ -9,7 +10,9 @@ export default function AppLayout({
 }) {
   return (
     <ContextMenuProvider>
-      <AppShell>{children}</AppShell>
+      <AppShell>
+        <WelcomeGate>{children}</WelcomeGate>
+      </AppShell>
       <CommandPalette />
     </ContextMenuProvider>
   );

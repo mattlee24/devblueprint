@@ -37,7 +37,7 @@ export default function NewClientPage() {
 
   return (
     <main className="p-6">
-      <Link href="/clients" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)] mb-4 inline-block">
+      <Link href="/clients" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] mb-4 inline-block">
         ← Back to clients
       </Link>
       <h1 className="text-2xl font-semibold mb-6">New Client</h1>

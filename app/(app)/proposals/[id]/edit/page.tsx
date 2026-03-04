@@ -5,13 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { getProposal, updateProposal } from "@/lib/queries/proposals";
-import type { ProposalRow } from "@/lib/queries/proposals";
-import type { ProjectType } from "@/lib/types";
-import { WizardShell } from "@/components/wizard/WizardShell";
-import { StepIdentity } from "@/components/wizard/StepIdentity";
-import { StepStack } from "@/components/wizard/StepStack";
-import { StepGoals } from "@/components/wizard/StepGoals";
+import type { ProposalRow, GeneratedProposalContent } from "@/lib/queries/proposals";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { getClients } from "@/lib/queries/clients";
 import type { ClientRow } from "@/lib/queries/clients";
 
@@ -20,20 +16,15 @@ export default function EditProposalPage() {
   const router = useRouter();
   const id = params.id as string;
 
-  const [step, setStep] = useState(0);
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<ProjectType>("website");
   const [clientId, setClientId] = useState("");
-  const [stack, setStack] = useState<string[]>([]);
-  const [targetAudience, setTargetAudience] = useState("");
-  const [goals, setGoals] = useState<string[]>([]);
-  const [constraints, setConstraints] = useState("");
-  const [isClientProject, setIsClientProject] = useState(false);
-  const [hourlyRateOverride, setHourlyRateOverride] = useState("");
+  const [estimatedPrice, setEstimatedPrice] = useState("");
+  const [currency, setCurrency] = useState("GBP");
   const [submitting, setSubmitting] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -43,44 +34,57 @@ export default function EditProposalPage() {
       if (p) {
         setTitle(p.title);
         setDescription(p.description ?? "");
-        setType(p.type as ProjectType);
         setClientId(p.client_id ?? "");
-        setStack(Array.isArray(p.stack) ? p.stack : []);
-        setTargetAudience(p.target_audience ?? "");
-        setGoals(Array.isArray(p.goals) ? p.goals : []);
-        setConstraints(p.constraints ?? "");
-        setHourlyRateOverride(p.hourly_rate_override != null ? String(p.hourly_rate_override) : "");
+        setEstimatedPrice(p.estimated_price != null ? String(p.estimated_price) : "");
+        setCurrency(p.currency ?? "GBP");
       }
       setLoading(false);
     }
     load();
   }, [id]);
 
-  function toggleStack(value: string) {
-    setStack((prev) =>
-      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
-    );
-  }
-
-  const canNext =
-    step === 0
-      ? title.trim().length > 0
-      : step === 1
-        ? stack.length > 0
-        : true;
-
   async function handleSubmit(status?: "draft" | "sent") {
+    const t = title.trim();
+    const d = description.trim();
+    if (!t || !d) {
+      toast.error("Title and description are required");
+      return;
+    }
     setSubmitting(true);
+    setRegenerating(true);
+
+    let generated: GeneratedProposalContent = {};
+    try {
+      const res = await fetch("/api/proposals/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: t, description: d }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Failed to regenerate proposal");
+        setSubmitting(false);
+        setRegenerating(false);
+        return;
+      }
+      generated = data.generated ?? {};
+    } catch {
+      toast.error("Failed to regenerate proposal");
+      setSubmitting(false);
+      setRegenerating(false);
+      return;
+    }
+
+    setRegenerating(false);
+    const numPrice = estimatedPrice.trim() ? parseFloat(estimatedPrice) : null;
+    const priceValue = numPrice !== null && Number.isFinite(numPrice) ? numPrice : null;
     const updates = {
-      title: title.trim(),
-      description: description.trim() || null,
-      type,
+      title: t,
+      description: d,
       client_id: clientId || null,
-      stack,
-      target_audience: targetAudience.trim() || null,
-      goals,
-      constraints: constraints.trim() || null,
-      hourly_rate_override: hourlyRateOverride ? parseFloat(hourlyRateOverride) : null,
+      generated_content: Object.keys(generated).length > 0 ? generated : null,
+      estimated_price: priceValue,
+      currency: currency || "GBP",
       ...(status && { status }),
     };
     const { error } = await updateProposal(id, updates);
@@ -103,76 +107,106 @@ export default function EditProposalPage() {
   }
 
   return (
-    <main className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <Link href={`/proposals/${id}`} className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)]">
+    <main className="p-6 max-w-2xl mx-auto">
+      <div className="mb-6">
+        <Link
+          href={`/proposals/${id}`}
+          className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]"
+        >
           ← Back to proposal
         </Link>
       </div>
-      <WizardShell step={step}>
-        {step === 0 && (
-          <StepIdentity
-            title={title}
-            description={description}
-            type={type}
-            clientId={clientId}
-            onTitleChange={setTitle}
-            onDescriptionChange={setDescription}
-            onTypeChange={setType}
-            onClientChange={setClientId}
-            clients={clients}
+      <h1 className="text-2xl font-semibold mb-2">Edit proposal</h1>
+      <p className="text-sm text-[var(--text-muted)] mb-6">
+        Update the project title and description. Saving will regenerate the full proposal document.
+      </p>
+
+      <div className="space-y-5">
+        <Input
+          label="Project title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. Acme Corp Marketing Website"
+          required
+        />
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            Project description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the project..."
+            rows={6}
+            className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)]"
           />
-        )}
-        {step === 1 && (
-          <StepStack type={type} selected={stack} onToggle={toggleStack} />
-        )}
-        {step === 2 && (
-          <StepGoals
-            targetAudience={targetAudience}
-            goals={goals}
-            constraints={constraints}
-            isClientProject={isClientProject}
-            hourlyRateOverride={hourlyRateOverride}
-            onTargetAudienceChange={setTargetAudience}
-            onGoalsChange={setGoals}
-            onConstraintsChange={setConstraints}
-            onIsClientProjectChange={setIsClientProject}
-            onHourlyRateOverrideChange={setHourlyRateOverride}
-          />
-        )}
-        {step === 3 && (
-          <div className="space-y-4">
-            <p className="text-[var(--text-secondary)]">Save your changes:</p>
-            <p className="font-medium">{title}</p>
-          </div>
-        )}
-        <div className="flex justify-between mt-8">
-          <Button
-            variant="secondary"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-          >
-            Back
-          </Button>
-          {step < 3 ? (
-            <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext}>
-              Next
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => handleSubmit()} disabled={submitting}>
-                Save changes
-              </Button>
-              <Button onClick={() => handleSubmit("draft")} disabled={submitting}>
-                Save as draft
-              </Button>
-              <Button onClick={() => handleSubmit("sent")} disabled={submitting}>
-                Send proposal
-              </Button>
-            </div>
-          )}
         </div>
-      </WizardShell>
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            Client (optional)
+          </label>
+          <select
+            value={clientId}
+            onChange={(e) => setClientId(e.target.value)}
+            className="w-full bg-[var(--bg-base)] border border-[var(--border)] rounded-[var(--radius-card)] px-3 py-2 text-sm"
+          >
+            <option value="">No client</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            Estimated price (optional)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={estimatedPrice}
+              onChange={(e) => setEstimatedPrice(e.target.value)}
+              placeholder="e.g. 12500"
+              className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-sm"
+            />
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="w-20 px-2 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-sm"
+            >
+              <option value="GBP">GBP</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3 mt-8">
+        <Button
+          variant="secondary"
+          onClick={() => handleSubmit()}
+          disabled={submitting || !title.trim() || !description.trim()}
+        >
+          {regenerating ? "Regenerating..." : "Save changes"}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => handleSubmit("draft")}
+          disabled={submitting || !title.trim() || !description.trim()}
+        >
+          Save as draft
+        </Button>
+        <Button
+          onClick={() => handleSubmit("sent")}
+          disabled={submitting || !title.trim() || !description.trim()}
+        >
+          Save & send
+        </Button>
+      </div>
     </main>
   );
 }

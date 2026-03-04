@@ -110,11 +110,11 @@ export default function ClientDetailPage() {
               href={`/proposals/${pr.id}`}
               className="block border border-[var(--border)] rounded p-3 hover:border-[var(--border-active)]"
             >
-              {pr.title} · [{pr.status}]
+              {pr.title} · {pr.status.replace(/\b\w/g, (c) => c.toUpperCase())}
             </Link>
           ))}
           <Link href={`/proposals/new?client=${id}`}>
-            <Button variant="secondary">[+ NEW PROPOSAL]</Button>
+            <Button variant="secondary">New proposal</Button>
           </Link>
         </div>
       ),
@@ -130,11 +130,11 @@ export default function ClientDetailPage() {
               href={`/projects/${p.id}`}
               className="block border border-[var(--border)] rounded p-3 hover:border-[var(--border-active)]"
             >
-              {p.title} · [{p.status}] · {p.overall_score != null ? `${p.overall_score}/10` : "—"}
+              {p.title} · {p.status.replace(/\b\w/g, (c) => c.toUpperCase())}
             </Link>
           ))}
           <Link href="/projects/new">
-            <Button variant="secondary">[+ NEW PROJECT]</Button>
+            <Button variant="secondary">New project</Button>
           </Link>
         </div>
       ),
@@ -146,11 +146,11 @@ export default function ClientDetailPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
-              <th className="text-left py-2">DATE</th>
-              <th className="text-left py-2">PROJECT</th>
-              <th className="text-left py-2">DESCRIPTION</th>
-              <th className="text-right py-2">HOURS</th>
-              <th className="text-right py-2">AMOUNT</th>
+              <th className="text-left py-2">Date</th>
+              <th className="text-left py-2">Project</th>
+              <th className="text-left py-2">Description</th>
+              <th className="text-right py-2">Hours</th>
+              <th className="text-right py-2">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -185,15 +185,15 @@ export default function ClientDetailPage() {
               <span>{formatDate(inv.issue_date)}</span>
               <span>{formatCurrency(inv.total, inv.currency)}</span>
               <Badge variant={inv.status === "paid" ? "success" : inv.status === "overdue" ? "danger" : "default"}>
-                [{inv.status.toUpperCase()}]
+                {inv.status.replace(/\b\w/g, (c) => c.toUpperCase())}
               </Badge>
               <Link href={`/invoices/${inv.id}`}>
-                <Button variant="ghost">[VIEW]</Button>
+                <Button variant="ghost">View</Button>
               </Link>
             </div>
           ))}
           <Link href={`/invoices/new?client=${id}`}>
-            <Button variant="secondary">[+ NEW INVOICE]</Button>
+            <Button variant="secondary">New invoice</Button>
           </Link>
         </div>
       ),
@@ -220,22 +220,22 @@ export default function ClientDetailPage() {
         <div>
           <h1 className="text-2xl font-semibold">{client.name}</h1>
           {client.company && <p className="text-[var(--text-secondary)]">{client.company}</p>}
-          <Badge variant="default" className="mt-2">[{client.status.toUpperCase()}]</Badge>
+          <Badge variant="default" className="mt-2">{client.status.replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
           <p className="text-sm text-[var(--text-muted)] mt-2">
             {client.email ?? "—"} · {client.phone ?? "—"} · {client.website ?? "—"}
           </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            {"// "}{projects.length} PROJECTS · {formatHoursShort(totalHours)} TOTAL HOURS · {formatCurrency(totalBilled, client.currency)} BILLED · {formatCurrency(outstanding, client.currency)} OUTSTANDING
+            {projects.length} projects · {formatHoursShort(totalHours)} total hours · {formatCurrency(totalBilled, client.currency)} billed · {formatCurrency(outstanding, client.currency)} outstanding
           </p>
           <div className="flex gap-2 mt-4">
             <Link href={`/time-logs?client=${id}`}>
-              <Button variant="secondary">[LOG TIME]</Button>
+              <Button variant="secondary">Log time</Button>
             </Link>
             <Link href={`/invoices/new?client=${id}`}>
-              <Button variant="secondary">[NEW INVOICE]</Button>
+              <Button variant="secondary">New invoice</Button>
             </Link>
             <Link href={`/clients/${id}/edit`}>
-              <Button variant="ghost">[EDIT]</Button>
+              <Button variant="ghost">Edit</Button>
             </Link>
             <Button
               variant="ghost"

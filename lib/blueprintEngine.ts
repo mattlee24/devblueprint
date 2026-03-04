@@ -5,6 +5,9 @@ import type {
   FeasibilityAnalysis,
   Feature,
   Risk,
+  Milestone,
+  FeatureDependency,
+  SuggestedIntegration,
   ScoreBreakdown,
   TaskTemplate,
   TaskStatus,
@@ -237,29 +240,84 @@ function getSuggestedImprovements(input: ProjectInput): string[] {
   return list;
 }
 
-// ─── Risk factors ─────────────────────────────────────────────────────────
+// ─── Risk factors (with mitigation) ─────────────────────────────────────
 function getRiskFactors(input: ProjectInput, feasibility: FeasibilityAnalysis): Risk[] {
   const risks: Risk[] = [];
   if (input.description.length > 400) {
-    risks.push({ level: "medium", description: "Scope creep — description suggests a broad feature surface" });
+    risks.push({
+      level: "medium",
+      description: "Scope creep — description suggests a broad feature surface",
+      mitigation: "Lock scope in a signed SOW and use change requests for additions.",
+    });
   }
   if (input.stack.some((s) => /wordpress|elementor|bricks|mosaic/i.test(s))) {
     risks.push({
       level: "medium",
       description: "Reliance on third-party plugin ecosystem (WordPress)",
+      mitigation: "Pin versions, use staging for updates, and prefer well-maintained plugins.",
     });
   }
   if (feasibility.technicalComplexity >= 7) {
-    risks.push({ level: "high", description: "Technical complexity may require phased delivery" });
+    risks.push({
+      level: "high",
+      description: "Technical complexity may require phased delivery",
+      mitigation: "Define clear phases and MVP; deliver in increments with client sign-off.",
+    });
   }
-  risks.push({ level: "low", description: "Initial performance tuning required for page speed targets" });
-  risks.push({ level: "low", description: "SEO setup complexity for multi-page architecture" });
-  risks.push({ level: "low", description: "Browser and device fragmentation may require extra QA" });
-  risks.push({ level: "low", description: "Content and copy delays can impact launch timeline" });
+  risks.push({
+    level: "low",
+    description: "Initial performance tuning required for page speed targets",
+    mitigation: "Include performance budgets and Lighthouse checks in the definition of done.",
+  });
+  risks.push({
+    level: "low",
+    description: "SEO setup complexity for multi-page architecture",
+    mitigation: "Define SEO checklist early (meta, sitemap, structured data) and track in tasks.",
+  });
+  risks.push({
+    level: "low",
+    description: "Browser and device fragmentation may require extra QA",
+    mitigation: "Test on target devices and use feature detection; document supported browsers.",
+  });
+  risks.push({
+    level: "low",
+    description: "Content and copy delays can impact launch timeline",
+    mitigation: "Request copy and assets by a set deadline; use placeholders for development.",
+  });
   if (input.stack.some((s) => /next|react/i.test(s))) {
-    risks.push({ level: "low", description: "Dependency updates and breaking changes in the ecosystem" });
+    risks.push({
+      level: "low",
+      description: "Dependency updates and breaking changes in the ecosystem",
+      mitigation: "Lock dependency versions and schedule regular, tested upgrades.",
+    });
   }
   return risks;
+}
+
+function getDefaultMilestones(input: ProjectType): Milestone[] {
+  const common: Milestone[] = [
+    { name: "Discovery & requirements", description: "Clarify scope, user flows, and success criteria.", target: "Week 1" },
+    { name: "Design", description: "UI/UX and content structure; design system and key screens.", target: "Weeks 2–3" },
+    { name: "Build", description: "Implementation of core features and integrations.", target: "Weeks 4–8" },
+    { name: "QA & launch", description: "Testing, fixes, and go-live.", target: "Weeks 9–10" },
+  ];
+  return common;
+}
+
+function getDefaultIntegrations(input: ProjectInput): SuggestedIntegration[] {
+  const list: SuggestedIntegration[] = [];
+  const stackStr = input.stack.join(" ").toLowerCase();
+  if (stackStr.includes("wordpress") || stackStr.includes("bricks")) {
+    list.push({ name: "Cloudflare", purpose: "CDN and DDoS protection" });
+    list.push({ name: "WP Rocket or Perfmatters", purpose: "Caching and performance" });
+    list.push({ name: "Rank Math or Yoast", purpose: "SEO and sitemaps" });
+  }
+  if (stackStr.includes("next") || stackStr.includes("react")) {
+    list.push({ name: "Vercel or Netlify", purpose: "Hosting and CI/CD" });
+    list.push({ name: "Sentry", purpose: "Error monitoring" });
+  }
+  list.push({ name: "Google Analytics or Plausible", purpose: "Analytics" });
+  return list;
 }
 
 // ─── Main blueprint generator ─────────────────────────────────────────────
@@ -278,12 +336,21 @@ export function generateBlueprint(input: ProjectInput): Blueprint {
     `Overall score ${overallScore.toFixed(1)}/10. ${feasibility.summary} ` +
     `Key features identified: ${coreFeatures.map((f) => f.name).join(", ") || "core layout"}.`;
 
+  const milestones = getDefaultMilestones(input.type);
+  const featureDependencies: FeatureDependency[] = coreFeatures.length >= 2
+    ? [{ feature: coreFeatures[1].name, dependsOn: coreFeatures[0].name }]
+    : [];
+  const integrations = getDefaultIntegrations(input);
+
   return {
     technicalRequirements,
     feasibility,
     coreFeatures,
     suggestedImprovements,
     riskFactors,
+    milestones,
+    featureDependencies,
+    integrations,
     scores,
     overallScore: Math.min(10, Math.max(0, overallScore)),
     summary,

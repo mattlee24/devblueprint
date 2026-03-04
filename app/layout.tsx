@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Toaster } from "sonner";
-import { JetBrains_Mono, IBM_Plex_Mono } from "next/font/google";
+import { PT_Mono, Source_Sans_3 } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
-const jetbrainsMono = JetBrains_Mono({
+const ptMono = PT_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  weight: "400",
+  variable: "--font-display",
   display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["400", "500", "600"],
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
-  variable: "--font-mono-secondary",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jetbrainsMono.variable} ${ibmPlexMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${ptMono.variable} ${sourceSans.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
         <Script
           id="theme-init"

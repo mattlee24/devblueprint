@@ -144,7 +144,7 @@ export default function ReportsPage() {
                         {clientId === "_none_" ? (
                           "—"
                         ) : (
-                          <Link href={`/clients/${clientId}`} className="text-[var(--accent-blue)] hover:underline">
+                          <Link href={`/clients/${clientId}`} className="text-[var(--accent)] hover:underline">
                             {clientNames[clientId] ?? clientId}
                           </Link>
                         )}

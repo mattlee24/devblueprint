@@ -16,7 +16,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
       <TerminalSectionHeader>
         <span className="flex items-center gap-2">
           <FolderKanban className="w-4 h-4 shrink-0" />
-          RECENT PROJECTS
+          Recent projects
         </span>
       </TerminalSectionHeader>
       {list.length === 0 ? (
@@ -39,12 +39,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                     {p.title}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <Badge variant="default">[{p.type.toUpperCase().replace("_", " ")}]</Badge>
-                    {p.overall_score != null && (
-                      <span className="text-xs text-[var(--accent-green)]">
-                        {p.overall_score}/10
-                      </span>
-                    )}
+                    <Badge variant="default">{p.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
                   </div>
                 </div>
                 <span className="text-xs text-[var(--text-muted)] shrink-0">
@@ -57,7 +52,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
       )}
       <Link
         href="/projects"
-        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent-blue)] hover:underline"
+        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline"
       >
         View all
         <ChevronRight className="w-4 h-4 shrink-0" />

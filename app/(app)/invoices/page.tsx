@@ -188,7 +188,7 @@ export default function InvoicesPage() {
               <td className="text-right py-2">
                 <Link
                   href={`/invoices/${inv.id}`}
-                  className="inline-flex items-center gap-2 text-[var(--accent-blue)] hover:underline text-sm"
+                  className="inline-flex items-center gap-2 text-[var(--accent)] hover:underline text-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   View

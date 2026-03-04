@@ -55,7 +55,7 @@ function NewInvoiceForm() {
 
   return (
     <main className="p-6">
-      <Link href="/invoices" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)] mb-4 inline-block">
+      <Link href="/invoices" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] mb-4 inline-block">
         ← Back to invoices
       </Link>
       <h1 className="text-2xl font-semibold mb-6">New Invoice</h1>

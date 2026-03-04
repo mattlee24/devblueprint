@@ -92,7 +92,7 @@ export default function EditProjectPage() {
 
   return (
     <main className="p-6 max-w-2xl">
-      <Link href={`/projects/${id}`} className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)] mb-4 inline-block">
+      <Link href={`/projects/${id}`} className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] mb-4 inline-block">
         ← Back to project
       </Link>
       <h1 className="text-2xl font-semibold mb-6">Edit project</h1>

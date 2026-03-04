@@ -350,13 +350,13 @@ export default function InvoiceDetailPage() {
         <Button onClick={() => updateStatus("sent")}>[MARK AS SENT]</Button>
         <Button variant="secondary" onClick={() => updateStatus("paid")}>[MARK AS PAID]</Button>
         <Button variant="secondary" onClick={() => updateStatus("overdue")}>[MARK AS OVERDUE]</Button>
-        <Button variant="ghost" onClick={() => window.print()} className="no-print">[DOWNLOAD PDF]</Button>
+        <Button variant="ghost" onClick={() => window.print()} className="no-print">Download PDF</Button>
         {client && "email" in client && client.email ? (
           <a
             href={`mailto:${client.email}?subject=Invoice ${invoice.invoice_number}&body=Please find your invoice attached.`}
             className="no-print"
           >
-            <Button variant="ghost">[SEND TO CLIENT]</Button>
+            <Button variant="ghost">Send to client</Button>
           </a>
         ) : null}
         <Button variant="danger" onClick={() => setDeleteConfirmOpen(true)} className="no-print ml-auto">

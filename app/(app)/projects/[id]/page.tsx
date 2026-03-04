@@ -169,7 +169,7 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">░░░░░░░░░░ Loading...</div>
+        <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
       </main>
     );
   }

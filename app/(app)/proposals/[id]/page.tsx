@@ -5,11 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { getProposal, updateProposal, deleteProposal } from "@/lib/queries/proposals";
-import type { ProposalRow } from "@/lib/queries/proposals";
+import type { ProposalRow, GeneratedProposalContent } from "@/lib/queries/proposals";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { GeneratedProposalView } from "@/components/proposals/GeneratedProposalView";
 import { formatDate } from "@/lib/utils";
 import { Pencil, Check, X, FolderKanban, Trash2 } from "lucide-react";
 
@@ -64,6 +65,8 @@ export default function ProposalDetailPage() {
   }
 
   const clientName = (proposal.clients as { name?: string } | null)?.name ?? "No client";
+  const generated = proposal.generated_content as GeneratedProposalContent | null | undefined;
+  const hasGenerated = generated && Object.keys(generated).length > 0;
 
   return (
     <main className="p-6">
@@ -93,6 +96,11 @@ export default function ProposalDetailPage() {
           >
             [{proposal.status.toUpperCase()}]
           </Badge>
+          {proposal.estimated_price != null && (
+            <p className="text-sm text-[var(--text-secondary)] mt-2">
+              Estimated price: {proposal.currency ?? "GBP"} {Number(proposal.estimated_price).toLocaleString()}
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href={`/proposals/${id}/edit`}>
@@ -130,56 +138,22 @@ export default function ProposalDetailPage() {
         </div>
       </header>
 
-      <div className="space-y-6 max-w-3xl">
-        <section className="border border-[var(--border)] rounded-lg p-4">
-          <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Description</h2>
-          <p className="text-[var(--text-secondary)] whitespace-pre-wrap">
-            {proposal.description || "—"}
-          </p>
+      {proposal.description && (
+        <section className="mb-8 max-w-3xl">
+          <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">
+            Summary
+          </h2>
+          <p className="text-[var(--text-secondary)] whitespace-pre-wrap">{proposal.description}</p>
         </section>
-        <section className="border border-[var(--border)] rounded-lg p-4">
-          <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Type & stack</h2>
-          <p className="capitalize text-[var(--text-secondary)]">{proposal.type.replace("_", " ")}</p>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {(proposal.stack ?? []).map((s) => (
-              <span
-                key={s}
-                className="px-2 py-0.5 rounded border border-[var(--border)] text-sm"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        </section>
-        {proposal.target_audience && (
-          <section className="border border-[var(--border)] rounded-lg p-4">
-            <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Target audience</h2>
-            <p className="text-[var(--text-secondary)]">{proposal.target_audience}</p>
-          </section>
-        )}
-        {(proposal.goals ?? []).length > 0 && (
-          <section className="border border-[var(--border)] rounded-lg p-4">
-            <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Key goals</h2>
-            <ul className="list-disc list-inside space-y-1 text-[var(--text-secondary)]">
-              {(proposal.goals as string[]).map((g, i) => (
-                <li key={i}>{g}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-        {proposal.constraints && (
-          <section className="border border-[var(--border)] rounded-lg p-4">
-            <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Constraints</h2>
-            <p className="text-[var(--text-secondary)] whitespace-pre-wrap">{proposal.constraints}</p>
-          </section>
-        )}
-        {proposal.hourly_rate_override != null && (
-          <section className="border border-[var(--border)] rounded-lg p-4">
-            <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2">Hourly rate override</h2>
-            <p className="text-[var(--text-secondary)]">{proposal.hourly_rate_override}</p>
-          </section>
-        )}
-      </div>
+      )}
+
+      {hasGenerated ? (
+        <GeneratedProposalView content={generated!} />
+      ) : (
+        <div className="border border-[var(--border)] rounded-xl p-6 bg-[var(--bg-surface)] max-w-3xl text-[var(--text-muted)] text-sm">
+          This proposal was created before automatic generation. Use “Create project from proposal” to start a project with the title and description above.
+        </div>
+      )}
 
       <ConfirmDialog
         open={deleteOpen}

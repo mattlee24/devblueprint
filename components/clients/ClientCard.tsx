@@ -51,7 +51,7 @@ export function ClientCard({
               <p className="text-xs text-[var(--text-muted)] truncate">{client.email}</p>
             )}
             <div className="flex gap-2 mt-2">
-              <Badge variant="default">[{client.status.toUpperCase()}]</Badge>
+              <Badge variant="default">{client.status.replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
             </div>
             <div className="flex flex-wrap gap-2 mt-2 text-xs text-[var(--text-muted)]">
               <span>[{projectCount} PROJECTS]</span>
@@ -60,7 +60,7 @@ export function ClientCard({
             </div>
           </div>
         </div>
-        <p className="text-sm text-[var(--accent-blue)] mt-2 group-hover:underline inline-flex items-center gap-2">
+        <p className="text-sm text-[var(--accent)] mt-2 group-hover:underline inline-flex items-center gap-2">
           <ArrowRight className="w-4 h-4 shrink-0" />
           View
         </p>

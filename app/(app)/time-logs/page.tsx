@@ -249,7 +249,7 @@ export default function TimeLogsPage() {
               <td className="text-right py-2">{formatHoursShort(log.hours)}</td>
               <td className="py-2">
                 <Badge variant={log.billable ? "success" : "muted"}>
-                  {log.billable ? "[BILLABLE]" : "[NON-BILLABLE]"}
+                  {log.billable ? "Billable" : "Non-billable"}
                 </Badge>
               </td>
               <td className="text-right py-2">
@@ -265,7 +265,7 @@ export default function TimeLogsPage() {
                       setEditingLog(log);
                       setDrawerOpen(true);
                     }}
-                    className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-blue)] text-xs"
+                    className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent)] text-xs"
                   >
                     <Pencil className="w-3.5 h-3.5 shrink-0" />
                     Edit

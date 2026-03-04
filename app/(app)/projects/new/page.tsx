@@ -9,7 +9,11 @@ import { StepIdentity } from "@/components/wizard/StepIdentity";
 import { StepStack } from "@/components/wizard/StepStack";
 import { StepGoals } from "@/components/wizard/StepGoals";
 import { TerminalLoader, type GenerationStep } from "@/components/wizard/TerminalLoader";
+import { GenerationPreview } from "@/components/wizard/GenerationPreview";
 import { Button } from "@/components/ui/Button";
+import type { Blueprint } from "@/lib/types";
+import type { TaskTemplate } from "@/lib/types";
+import type { ProjectInput } from "@/lib/types";
 import { getClients } from "@/lib/queries/clients";
 import { getProposal, updateProposal } from "@/lib/queries/proposals";
 import { createProject } from "@/lib/queries/projects";
@@ -25,8 +29,19 @@ function NewProjectForm() {
 
   const [step, setStep] = useState(0);
   const [generating, setGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<GenerationStep>("analyzing");
+  const [generationStep, setGenerationStep] = useState<GenerationStep>("preparing");
   const [taskProgress, setTaskProgress] = useState<{ current: number; total: number } | undefined>();
+  const [blueprintPhase, setBlueprintPhase] = useState<string>("");
+  const [generatedCounts, setGeneratedCounts] = useState<{ features?: number; tasks?: number } | undefined>();
+  const [previewReady, setPreviewReady] = useState<{
+    blueprint: Blueprint;
+    tasks: TaskTemplate[];
+    input: ProjectInput;
+    rawResponse?: string | null;
+    /** Full JSON body from API when rawResponse is missing (for debugging) */
+    fullApiResponse?: string | null;
+  } | null>(null);
+  const [creating, setCreating] = useState(false);
   const [clients, setClients] = useState<ClientRow[]>([]);
 
   const [title, setTitle] = useState("");
@@ -51,13 +66,8 @@ function NewProjectForm() {
       if (!p) return;
       setTitle(p.title);
       setDescription(p.description ?? "");
-      setType((p.type as ProjectType) ?? "website");
       setClientId(p.client_id ?? "");
-      setStack(Array.isArray(p.stack) ? p.stack : []);
-      setTargetAudience(p.target_audience ?? "");
-      setGoals(Array.isArray(p.goals) ? p.goals : []);
-      setConstraints(p.constraints ?? "");
-      setHourlyRateOverride(p.hourly_rate_override != null ? String(p.hourly_rate_override) : "");
+      // Type, stack, goals, etc. are only set when formally creating a project — not from proposal
     });
   }, [fromProposalId]);
 
@@ -74,12 +84,25 @@ function NewProjectForm() {
         ? stack.length > 0
         : true;
 
-  async function handleGenerate() {
-    setGenerating(true);
-    setGenerationStep("analyzing");
-    setTaskProgress(undefined);
+  const BLUEPRINT_PHASES = [
+    "Contacting AI…",
+    "Analyzing project scope…",
+    "Drafting features & milestones…",
+    "Generating risk analysis…",
+    "Building feature dependencies…",
+    "Building task list (25–55 tasks)…",
+    "Validating structure…",
+    "Finalizing blueprint…",
+  ];
 
-    const input = {
+  async function handleGenerate() {
+    setPreviewReady(null);
+    setGenerating(true);
+    setGenerationStep("preparing");
+    setTaskProgress(undefined);
+    setGeneratedCounts(undefined);
+
+    const input: ProjectInput = {
       title: title.trim(),
       description: description.trim(),
       type,
@@ -89,10 +112,23 @@ function NewProjectForm() {
       targetAudience,
     };
 
-    let blueprint: ReturnType<typeof generateBlueprint>;
-    let tasks: ReturnType<typeof generateTasks>;
+    await new Promise((r) => setTimeout(r, 400));
+    setGenerationStep("analyzing");
+    await new Promise((r) => setTimeout(r, 500));
+
+    let blueprint: Blueprint;
+    let tasks: TaskTemplate[];
+    let rawResponse: string | undefined;
+    let fullApiResponse: string | undefined;
 
     setGenerationStep("blueprint");
+    setBlueprintPhase(BLUEPRINT_PHASES[0] ?? "");
+    let phaseIndex = 0;
+    const phaseInterval = setInterval(() => {
+      phaseIndex = (phaseIndex + 1) % BLUEPRINT_PHASES.length;
+      setBlueprintPhase(BLUEPRINT_PHASES[phaseIndex] ?? "");
+    }, 2600);
+
     try {
       const res = await fetch("/api/projects/generate", {
         method: "POST",
@@ -100,27 +136,71 @@ function NewProjectForm() {
         body: JSON.stringify(input),
       });
       const data = await res.json();
+      clearInterval(phaseInterval);
+      setBlueprintPhase("");
+      rawResponse = typeof data.rawResponse === "string" ? data.rawResponse : undefined;
+      fullApiResponse = JSON.stringify(data, null, 2);
 
-      if (res.ok && data.blueprint && Array.isArray(data.tasks)) {
-        blueprint = data.blueprint;
-        tasks = data.tasks;
+      if (res.status === 429 || data.code === "RATE_LIMIT") {
+        toast.warning(data.error ?? "Rate limit exceeded. Using built-in generator.");
+      }
+
+      const aiFeatures = data.blueprint?.coreFeatures?.length ?? 0;
+      const aiTasks = Array.isArray(data.tasks) ? data.tasks.length : 0;
+      const useAi = res.ok && data.blueprint && Array.isArray(data.tasks) && aiFeatures >= 12 && aiTasks >= 25;
+
+      if (useAi) {
+        blueprint = data.blueprint as Blueprint;
+        tasks = data.tasks as TaskTemplate[];
+        setGeneratedCounts({
+          features: blueprint.coreFeatures?.length ?? 0,
+          tasks: tasks.length,
+        });
       } else {
-        blueprint = generateBlueprint(input);
-        tasks = generateTasks(input, blueprint);
+        blueprint = generateBlueprint(input) as Blueprint;
+        tasks = generateTasks(input, blueprint) as TaskTemplate[];
+        setGeneratedCounts({
+          features: blueprint.coreFeatures?.length ?? 0,
+          tasks: tasks.length,
+        });
       }
     } catch {
-      blueprint = generateBlueprint(input);
-      tasks = generateTasks(input, blueprint);
+      clearInterval(phaseInterval);
+      setBlueprintPhase("");
+      blueprint = generateBlueprint(input) as Blueprint;
+      tasks = generateTasks(input, blueprint) as TaskTemplate[];
+      setGeneratedCounts({
+        features: blueprint.coreFeatures?.length ?? 0,
+        tasks: tasks.length,
+      });
+      fullApiResponse = undefined;
     }
 
+    setGenerationStep("validating");
+    await new Promise((r) => setTimeout(r, 800));
+
+    setPreviewReady({ blueprint, tasks, input, rawResponse, fullApiResponse });
+    setGenerating(false);
+  }
+
+  async function handleCreateProject() {
+    const data = previewReady;
+    if (!data) return;
+    setPreviewReady(null);
+    setCreating(true);
+    setGenerating(true);
     setGenerationStep("creating_project");
+    setTaskProgress(undefined);
+
+    const { blueprint, tasks, input } = data;
+
     const { data: project, error } = await createProject({
       title: input.title,
       description: input.description,
-      type,
+      type: input.type,
       client_id: clientId || null,
       status: "active",
-      stack,
+      stack: input.stack,
       blueprint: blueprint as unknown as Record<string, unknown>,
       overall_score: blueprint.overallScore,
       user_flow: null,
@@ -130,6 +210,8 @@ function NewProjectForm() {
     if (error || !project) {
       toast.error(error?.message ?? "Failed to create project");
       setGenerating(false);
+      setCreating(false);
+      setPreviewReady(data);
       return;
     }
 
@@ -159,9 +241,38 @@ function NewProjectForm() {
     setTaskProgress(undefined);
     await new Promise((r) => setTimeout(r, 500));
     setGenerating(false);
+    setCreating(false);
     toast.success("Project created");
     router.push(`/projects/${project.id}`);
     router.refresh();
+  }
+
+  function handleGenerateAgain() {
+    setPreviewReady(null);
+    handleGenerate();
+  }
+
+  if (previewReady) {
+    return (
+      <main className="p-6 min-h-[60vh] flex flex-col justify-center">
+        <div className="mb-6">
+          <Link href="/projects" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]">
+            ← Back to projects
+          </Link>
+        </div>
+        <GenerationPreview
+          projectTitle={previewReady.input.title}
+          blueprint={previewReady.blueprint}
+          tasks={previewReady.tasks}
+          input={previewReady.input}
+          rawResponse={previewReady.rawResponse}
+          fullApiResponse={previewReady.fullApiResponse}
+          onConfirm={handleCreateProject}
+          onGenerateAgain={handleGenerateAgain}
+          isCreating={creating}
+        />
+      </main>
+    );
   }
 
   if (generating) {
@@ -171,6 +282,8 @@ function NewProjectForm() {
           currentStep={generationStep}
           taskProgress={taskProgress}
           projectTitle={title.trim() || undefined}
+          blueprintPhase={blueprintPhase || undefined}
+          generatedCounts={generatedCounts}
         />
       </main>
     );
@@ -179,7 +292,7 @@ function NewProjectForm() {
   return (
     <main className="p-6">
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/projects" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)]">
+        <Link href="/projects" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]">
           ← Back to projects
         </Link>
       </div>
@@ -238,7 +351,7 @@ function NewProjectForm() {
               Next
             </Button>
           ) : (
-            <Button onClick={handleGenerate}>[GENERATE]</Button>
+            <Button onClick={handleGenerate}>Generate</Button>
           )}
         </div>
       </WizardShell>

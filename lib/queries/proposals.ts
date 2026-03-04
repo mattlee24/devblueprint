@@ -1,5 +1,15 @@
 import { createClient } from "@/lib/supabase/client";
 
+export interface GeneratedProposalContent {
+  objectives?: string[];
+  deliverables?: string[];
+  timeline?: { phase: string; duration: string; description: string }[];
+  budget_estimates?: { item: string; estimate: string; notes?: string }[];
+  team_structure?: { role: string; responsibility: string }[];
+  success_metrics?: string[];
+  executive_summary?: string;
+}
+
 export interface ProposalRow {
   id: string;
   user_id: string;
@@ -14,6 +24,9 @@ export interface ProposalRow {
   hourly_rate_override: number | null;
   status: string;
   project_id: string | null;
+  generated_content: GeneratedProposalContent | null;
+  estimated_price: number | null;
+  currency: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,7 +36,7 @@ export interface ProposalInsert {
   client_id?: string | null;
   title: string;
   description?: string | null;
-  type: string;
+  type?: string;
   stack?: string[];
   target_audience?: string | null;
   goals?: string[];
@@ -31,6 +44,9 @@ export interface ProposalInsert {
   hourly_rate_override?: number | null;
   status?: string;
   project_id?: string | null;
+  generated_content?: GeneratedProposalContent | null;
+  estimated_price?: number | null;
+  currency?: string | null;
 }
 
 export interface ProposalFilters {

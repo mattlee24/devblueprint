@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   FolderKanban,
   UserPlus,
+  FileSignature,
   FileText,
   Clock,
   Sun,
@@ -115,6 +116,14 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       </button>
       <button
         type="button"
+        onClick={() => navigate("/proposals/new")}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+      >
+        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        New proposal
+      </button>
+      <button
+        type="button"
         onClick={() => navigate("/invoices/new")}
         className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
       >
@@ -177,6 +186,14 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       </button>
       <button
         type="button"
+        onClick={() => navigate("/proposals")}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+      >
+        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        Proposals
+      </button>
+      <button
+        type="button"
         onClick={() => navigate("/time-logs")}
         className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
       >
@@ -212,7 +229,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={openSearch}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent-blue)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
       >
         <Search className="w-3.5 h-3.5 shrink-0" />
         Search...

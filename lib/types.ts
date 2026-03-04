@@ -50,11 +50,48 @@ export interface Feature {
   effort: string;
   /** Optional detailed description (what it is, why it matters, how it fits the project). */
   description?: string;
+  /** User stories or use cases for this feature. */
+  userStories?: string[];
 }
 
 export interface Risk {
   level: "low" | "medium" | "high";
   description: string;
+  /** Mitigation strategy for this risk. */
+  mitigation?: string;
+}
+
+export interface Milestone {
+  name: string;
+  description: string;
+  target?: string;
+}
+
+export interface FeatureDependency {
+  feature: string;
+  dependsOn: string;
+}
+
+export interface SuggestedIntegration {
+  name: string;
+  purpose: string;
+}
+
+export interface Blueprint {
+  technicalRequirements: Requirement[];
+  feasibility: FeasibilityAnalysis;
+  coreFeatures: Feature[];
+  suggestedImprovements: string[];
+  riskFactors: Risk[];
+  /** Suggested project phases or milestones. */
+  milestones?: Milestone[];
+  /** Dependencies between features (e.g. "Auth" depends on "User model"). */
+  featureDependencies?: FeatureDependency[];
+  /** Suggested third-party tools or integrations. */
+  integrations?: SuggestedIntegration[];
+  scores: ScoreBreakdown;
+  overallScore: number;
+  summary: string;
 }
 
 export interface ScoreBreakdown {
@@ -64,16 +101,6 @@ export interface ScoreBreakdown {
   riskProfile: number;
 }
 
-export interface Blueprint {
-  technicalRequirements: Requirement[];
-  feasibility: FeasibilityAnalysis;
-  coreFeatures: Feature[];
-  suggestedImprovements: string[];
-  riskFactors: Risk[];
-  scores: ScoreBreakdown;
-  overallScore: number;
-  summary: string;
-}
 
 export interface TaskTemplate {
   title: string;

@@ -37,7 +37,7 @@ export function ScopeTab({ project, blueprint }: ScopeTabProps) {
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">Client</p>
             <Link
               href={`/clients/${client.id}`}
-              className="text-sm text-[var(--accent-blue)] hover:underline"
+              className="text-sm text-[var(--accent)] hover:underline"
             >
               {client.name} →
             </Link>

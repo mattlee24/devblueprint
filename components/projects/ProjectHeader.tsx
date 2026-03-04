@@ -27,24 +27,11 @@ export function ProjectHeader({
 }: ProjectHeaderProps) {
   const client = (project as unknown as { clients?: { name: string; id: string } })?.clients;
 
-  const bannerStyle: CSSProperties = project.banner_url
-    ? {
-        backgroundImage: `url(${project.banner_url})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : (() => {
-        const base = project.id ?? project.title;
-        let hash = 0;
-        for (let i = 0; i < base.length; i += 1) {
-          hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
-        }
-        const hue = hash % 360;
-        const hue2 = (hue + 60) % 360;
-        return {
-          backgroundImage: `linear-gradient(135deg, hsl(${hue},70%,24%), hsl(${hue2},70%,16%))`,
-        };
-      })();
+  const bannerStyle: CSSProperties = {
+    backgroundImage: `url(${project.banner_url || "/images/default-project-banner.svg"})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
 
   return (
     <header className="border-b border-[var(--border)] pb-6 mb-6">
@@ -56,8 +43,8 @@ export function ProjectHeader({
         <div>
           <h1 className="text-2xl font-semibold mb-2">{project.title}</h1>
           <div className="flex flex-wrap gap-2 items-center">
-            <Badge variant="default">[{project.type.toUpperCase().replace("_", " ")}]</Badge>
-            <Badge variant="default">[{project.status.toUpperCase()}]</Badge>
+            <Badge variant="default">{project.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
+            <Badge variant="default">{project.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
             {(project.stack as string[])?.map((s) => (
               <Badge key={s} variant="muted">
                 {s}
@@ -67,21 +54,16 @@ export function ProjectHeader({
           {client && (
             <Link
               href={`/clients/${client.id}`}
-              className="inline-flex items-center gap-2 mt-2 text-sm text-[var(--accent-blue)] hover:underline"
+              className="inline-flex items-center gap-2 mt-2 text-sm text-[var(--accent)] hover:underline"
             >
               <User className="w-4 h-4 shrink-0" />
               {client.name}
             </Link>
           )}
         </div>
-        {project.overall_score != null && (
-          <div className="text-2xl font-semibold text-[var(--accent-green)]">
-            {project.overall_score} / 10
-          </div>
-        )}
       </div>
       <p className="text-sm text-[var(--text-muted)] mt-2">
-        {"// "}{taskCount} TASKS · {doneCount} DONE · {hoursLogged.toFixed(1)}h LOGGED · CREATED{" "}
+        {taskCount} tasks · {doneCount} done · {hoursLogged.toFixed(1)}h logged · Created{" "}
         {formatDate(project.created_at)}
       </p>
       <div className="flex gap-2 mt-4 flex-wrap">

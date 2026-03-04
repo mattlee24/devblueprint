@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Link2 } from "lucide-react";
+import { ExternalLink, Pencil, Link2, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { deleteProposal } from "@/lib/queries/proposals";
+import { deleteClient } from "@/lib/queries/clients";
+import { deleteProject } from "@/lib/queries/projects";
+import { deleteInvoice } from "@/lib/queries/invoices";
 
 type ContextType = "client" | "project" | "invoice" | "proposal";
 
@@ -32,6 +37,8 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!state) return;
@@ -90,7 +97,36 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
   const editHref = routes.edit(state.id);
   const fullUrl = typeof window !== "undefined" ? `${window.location.origin}${openHref}` : openHref;
 
+  const listHref: Record<ContextType, string> = {
+    client: "/clients",
+    project: "/projects",
+    invoice: "/invoices",
+    proposal: "/proposals",
+  };
+
+  async function handleDeleteConfirm() {
+    if (!state) return;
+    setDeleteLoading(true);
+    const deleteFns = {
+      client: deleteClient,
+      project: deleteProject,
+      invoice: deleteInvoice,
+      proposal: deleteProposal,
+    };
+    const { error } = await deleteFns[state.type](state.id);
+    setDeleteLoading(false);
+    setDeleteOpen(false);
+    onClose();
+    if (error) {
+      toast.error(error.message ?? "Failed to delete");
+      return;
+    }
+    toast.success("Deleted");
+    router.push(listHref[state.type]);
+  }
+
   return (
+    <>
     <div
       ref={ref}
       className="fixed z-[100] min-w-[180px] py-1 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg"
@@ -131,7 +167,27 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
         <Link2 className="w-3.5 h-3.5 shrink-0" />
         Copy link
       </button>
+      <div className="border-t border-[var(--border)] my-1" />
+      <button
+        type="button"
+        onClick={() => setDeleteOpen(true)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent-red)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+      >
+        <Trash2 className="w-3.5 h-3.5 shrink-0" />
+        Delete
+      </button>
     </div>
+    <ConfirmDialog
+      open={deleteOpen}
+      onClose={() => setDeleteOpen(false)}
+      onConfirm={handleDeleteConfirm}
+      title="Delete?"
+      message="This cannot be undone."
+      confirmLabel="Delete"
+      variant="danger"
+      loading={deleteLoading}
+    />
+    </>
   );
 }
 

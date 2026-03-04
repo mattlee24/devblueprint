@@ -52,11 +52,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/dashboard" className="text-lg font-semibold text-[var(--accent-green)] truncate">
+          <Link href="/dashboard" className="text-lg font-semibold text-[var(--accent)] truncate">
             DevBlueprint
           </Link>
         </header>
-        <div className="flex-1 px-4 sm:px-6 lg:px-8">
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-[1600px] mx-auto w-full">
             {children}
           </div>

@@ -50,10 +50,10 @@ export function Sidebar() {
     <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] bg-[var(--bg-surface)] flex flex-col shrink-0">
       <div className="p-4 border-b border-[var(--border)]">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-[var(--accent-green)]">
+          <span className="text-lg font-semibold text-[var(--accent)]">
             DevBlueprint
           </span>
-          <span className="w-2 h-4 bg-[var(--accent-green)] animate-pulse" />
+          <span className="w-2 h-4 bg-[var(--accent)] animate-pulse" />
         </Link>
         <button
           type="button"
@@ -67,9 +67,6 @@ export function Sidebar() {
         </button>
       </div>
       <nav className="flex-1 p-2">
-        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider px-2 py-1 border-b border-[var(--border)] mb-2">
-          ──────────────────
-        </div>
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
@@ -78,7 +75,7 @@ export function Sidebar() {
               href={href}
               className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 ${
                 isActive
-                  ? "bg-[var(--bg-hover)] border-[var(--accent-green)] text-[var(--accent-green)]"
+                  ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
                   : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)]"
               }`}
             >
@@ -87,14 +84,12 @@ export function Sidebar() {
             </Link>
           );
         })}
-        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider px-2 py-1 border-b border-[var(--border)] mt-4 mb-2">
-          ──────────────────
-        </div>
+        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider px-2 py-1 border-b border-[var(--border)] mt-4 mb-2"/>
         <Link
           href="/settings"
           className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 ${
             pathname === "/settings"
-              ? "bg-[var(--bg-hover)] border-[var(--accent-green)] text-[var(--accent-green)]"
+              ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
               : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
           }`}
         >
@@ -119,17 +114,17 @@ export function Sidebar() {
           Sign Out
         </button>
       </nav>
-      <div className="p-3 border-t border-[var(--border)]">
+      <div className="p-3 border-t border-[var(--border)] flex items-center gap-2 min-w-0">
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border border-[var(--border)]"
+          className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-medium border border-[var(--border)]"
           style={{ backgroundColor: "var(--bg-elevated)" }}
           title={user?.email ?? ""}
         >
           {initials}
         </div>
-        <p className="text-[10px] text-[var(--text-muted)] mt-1 truncate" title={user?.email ?? ""}>
+        <span className="text-[11px] text-[var(--text-muted)] truncate min-w-0" title={user?.email ?? ""}>
           {user?.email ?? "—"}
-        </p>
+        </span>
       </div>
     </aside>
   );
