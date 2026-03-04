@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
+  --bg-base: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-elevated: #1a1a1a;
+  --bg-hover: #222222;
+  --border: #2a2a2a;
+  --border-active: #3a3a3a;
+  --accent-green: #00ff88;
+  --accent-blue: #0088ff;
+  --accent-amber: #ffaa00;
+  --accent-red: #ff4444;
+  --accent-purple: #aa66ff;
+  --text-primary: #e8e8e8;
+  --text-secondary: #888888;
+  --text-muted: #444444;
+  --radius-card: 4px;
+  --radius-badge: 2px;
+  --transition: 150ms ease;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-base: #f5f5f5;
+  --bg-surface: #ffffff;
+  --bg-elevated: #fafafa;
+  --bg-hover: #eeeeee;
+  --border: #e0e0e0;
+  --border-active: #b0b0b0;
+  --accent-green: #00aa55;
+  --accent-blue: #0066cc;
+  --accent-amber: #cc8800;
+  --accent-red: #cc3333;
+  --accent-purple: #7744bb;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Noise/grain overlay for depth */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+[data-theme="light"] body::before {
+  opacity: 0.015;
+}
+
+/* User flow (ReactFlow) – dark theme for readability */
+.user-flow-dark {
+  --react-flow-node-bg: var(--bg-elevated);
+  --react-flow-node-border: var(--border);
+  --react-flow-node-text: var(--text-primary);
+  --react-flow-edge: var(--border-active);
+  --react-flow-controls-bg: var(--bg-elevated);
+  --react-flow-controls-border: var(--border);
+  --react-flow-minimap-bg: var(--bg-surface);
+  --react-flow-minimap-mask: rgba(0, 0, 0, 0.7);
+}
+.user-flow-dark .react-flow__node {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.user-flow-dark .react-flow__node .react-flow__node-label,
+.user-flow-dark .react-flow__node .nodelabel {
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+}
+.user-flow-dark .react-flow__edge-path {
+  stroke: var(--border-active) !important;
+}
+.user-flow-dark .react-flow__controls {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+}
+.user-flow-dark .react-flow__controls-button {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+}
+.user-flow-dark .react-flow__controls-button:hover {
+  background: var(--bg-hover) !important;
+}
+.user-flow-dark .react-flow__minimap {
+  background: var(--bg-surface) !important;
+}
+.user-flow-dark .react-flow__attribution {
+  color: var(--text-muted) !important;
+}
+.user-flow-dark .react-flow__attribution a {
+  color: var(--accent-blue) !important;
+}
+
+@media print {
+  body::before,
+  aside,
+  nav,
+  button,
+  a[href^='/'],
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: #111;
+  }
+}
+
+/* Invoice print / PDF layout */
+@media print {
+  .invoice-print-only {
+    display: block !important;
+  }
+  .invoice-print-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+    color: #111;
+    font-family: system-ui, sans-serif;
+  }
+  .invoice-print-content table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .invoice-print-content th,
+  .invoice-print-content td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    color: #111;
+  }
+  .invoice-print-content .text-right {
+    text-align: right;
+  }
+}

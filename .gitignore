@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build / output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Environment & secrets (never commit real keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Debug & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Vercel
+.vercel
+
+# Supabase local (if you use local dev)
+.supabase/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+.cache/

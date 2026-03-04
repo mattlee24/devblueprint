@@ -1,0 +1,70 @@
+import Link from "next/link";
+import type { ClientRow } from "@/lib/queries/clients";
+import { Badge } from "@/components/ui/Badge";
+import { formatCurrency } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
+
+interface ClientCardProps {
+  client: ClientRow;
+  projectCount?: number;
+  hoursLogged?: number;
+  amountBilled?: number;
+  currency?: string;
+}
+
+export function ClientCard({
+  client,
+  projectCount = 0,
+  hoursLogged = 0,
+  amountBilled = 0,
+  currency = "GBP",
+}: ClientCardProps) {
+  const initials = client.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <Link
+      href={`/clients/${client.id}`}
+      data-context-menu="client"
+      data-context-id={client.id}
+    >
+      <article className="border border-[var(--border)] rounded-[var(--radius-card)] p-4 bg-[var(--bg-surface)] hover:border-[var(--border-active)] hover:shadow-[0_0_10px_rgba(0,255,136,0.1)] transition-[var(--transition)] group">
+        <div className="flex items-start gap-3">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium shrink-0 border-2 border-[var(--border)]"
+            style={{ backgroundColor: client.avatar_colour ?? "var(--bg-elevated)" }}
+          >
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold group-hover:text-[var(--accent-green)]">
+              {client.name}
+            </h3>
+            {client.company && (
+              <p className="text-sm text-[var(--text-secondary)]">{client.company}</p>
+            )}
+            {client.email && (
+              <p className="text-xs text-[var(--text-muted)] truncate">{client.email}</p>
+            )}
+            <div className="flex gap-2 mt-2">
+              <Badge variant="default">[{client.status.toUpperCase()}]</Badge>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2 text-xs text-[var(--text-muted)]">
+              <span>[{projectCount} PROJECTS]</span>
+              <span>[{hoursLogged.toFixed(1)}h LOGGED]</span>
+              <span>[{formatCurrency(amountBilled, currency)} BILLED]</span>
+            </div>
+          </div>
+        </div>
+        <p className="text-sm text-[var(--accent-blue)] mt-2 group-hover:underline inline-flex items-center gap-2">
+          <ArrowRight className="w-4 h-4 shrink-0" />
+          View
+        </p>
+      </article>
+    </Link>
+  );
+}
