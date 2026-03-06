@@ -1,159 +1,290 @@
-# DevBlueprint
+<p align="center">
+  <img src="https://img.shields.io/badge/DevBlueprint-0.1.0-6366f1?style=for-the-badge&labelColor=1e1b4b" alt="DevBlueprint" />
+</p>
 
-**Developer productivity and client management** — plan projects, track time, manage clients, and generate proposals from a single app.
-
-DevBlueprint is a full-stack SaaS for freelancers and small dev teams: create projects with AI-generated blueprints and task lists, log time, link work to clients, and turn proposals into invoices.
-
----
-
-## Features
-
-| Area | Description |
-|------|-------------|
-| **Dashboard** | Overview of active projects, clients, time this month, unbilled amount, and upcoming tasks. |
-| **Projects** | Create and edit projects (website, web app, mobile app, API, CLI, other). Optional **AI-generated blueprint** (core features, milestones, risks, technical requirements) and **Kanban task board** with drag-and-drop. |
-| **Clients** | Client directory with company, contact details, hourly rate, currency, and status (active/inactive/archived). |
-| **Proposals** | Pre-project proposals linked to clients; optional **AI-generated content** and estimated pricing. Convert agreed proposals into projects. |
-| **Time Logs** | Log hours per client/project, mark billable, attach to invoices. |
-| **Invoices** | Create invoices from time logs; track status (draft, sent, paid, overdue, cancelled). |
-| **Reports** | Reporting views for time and billing. |
-| **Auth** | Email/password sign up, login, forgot password, reset password. |
-| **Settings** | App settings and preferences. |
-| **Theme** | Light/dark mode with system preference support. |
-| **Search** | Command palette (⌘K) for quick navigation. |
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=next.js&logoColor=white" alt="Next.js 15" />
+  <img src="https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Supabase-Postgres-3ecf8e?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=black" alt="Tailwind CSS 4" />
+</p>
 
 ---
 
-## Tech Stack
+# <span style="color:#6366f1">DevBlueprint</span>
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **UI:** [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/)
-- **Backend / DB:** [Supabase](https://supabase.com/) (Postgres, Auth, Row Level Security)
-- **AI (optional):** [Google Gemini](https://ai.google.dev/) for project blueprints, task generation, and proposal content
-- **Other:** [@hello-pangea/dnd](https://github.com/hello-pangea/dnd) (Kanban), [@xyflow/react](https://xyflow.dev/) (flow diagrams), [Lucide](https://lucide.dev/) icons, [Sonner](https://sonner.emilkowal.ski/) toasts
+### Enterprise-grade developer productivity and client management platform
+
+**DevBlueprint** unifies project planning, time tracking, client relationships, and proposal-to-invoice workflows in a single, secure application. Built for freelancers, agencies, and engineering teams who need to move from idea to delivered work—and get paid—without switching tools.
 
 ---
 
-## Prerequisites
+## Table of contents
 
-- **Node.js** 18+ (recommend 20+)
-- **npm** (or yarn/pnpm)
-- **Supabase** account ([supabase.com](https://supabase.com))
+- [📋 Overview](#-overview)
+- [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
+- [🛠️ Technology stack](#️-technology-stack)
+- [📦 Data model](#-data-model)
+- [🤖 AI capabilities](#-ai-capabilities)
+- [🔒 Security & compliance](#-security--compliance)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
 
 ---
 
-## Getting Started
+## 📋 Overview
 
-### 1. Clone and install
+| | |
+|:---|:---|
+| **Purpose** | End-to-end workflow: **clients** → **proposals** → **projects** → **tasks** → **time** → **invoices** → **reports**. |
+| **Audience** | Freelance developers, small dev shops, and teams that need a single source of truth for work and billing. |
+| **Differentiator** | AI-assisted project blueprints and proposal content, Kanban task boards, shareable proposal links, and a modern, themeable UI. |
 
-```bash
-git clone https://github.com/your-username/devblueprint.git
-cd devblueprint
-npm install
+---
+
+## ✨ Features
+
+### 📊 Dashboard
+
+| Capability | Description |
+|------------|-------------|
+| **At-a-glance metrics** | Active projects, active clients, hours logged this month, and unbilled amount in your preferred currency. |
+| **Recent activity** | Recent projects and recent time logs for quick context. |
+| **Upcoming work** | Upcoming tasks across projects so you can prioritize. |
+
+---
+
+### 🗂️ Projects
+
+| Capability | Description |
+|------------|-------------|
+| **Project types** | Website, web application, mobile app, API, CLI, or other—with type-specific defaults. |
+| **AI-generated blueprints** | Optional generation of core features, milestones, risk factors, technical requirements, feature dependencies, and integrations from a short brief (powered by Google Gemini). |
+| **Kanban board** | Drag-and-drop task board with configurable columns (e.g. Backlog → Todo → In Progress → In Review → Done). |
+| **Task metadata** | Priority (P1–P3), category (dev, design, content, SEO, DevOps, testing, other), and effort (low/medium/high). |
+| **Project banner** | Optional banner image for visual identity. |
+| **Client linkage** | Associate projects with clients for reporting and billing. |
+
+---
+
+### 👥 Clients
+
+| Capability | Description |
+|------------|-------------|
+| **Contact & company** | Name, company, email, phone, website, address, and notes. |
+| **Billing defaults** | Hourly rate and currency (e.g. GBP, USD) for time and invoices. |
+| **Status** | Active, inactive, or archived. |
+| **Avatar colour** | Optional colour for quick visual identification. |
+
+---
+
+### 📄 Proposals
+
+| Capability | Description |
+|------------|-------------|
+| **Pre-project scope** | Title, description, type, tech stack, target audience, goals, and constraints. |
+| **AI-generated content** | Optional generation of proposal narrative and structure (Gemini). |
+| **Estimated price** | Optional AI or manual estimated price for the engagement. |
+| **Slides / structure** | Support for slide-based or structured proposal content. |
+| **Shareable links** | Public share via tokenised URL so clients can view without logging in. |
+| **Conversion to project** | Turn an agreed proposal into a project with one action. |
+| **Status** | Draft, sent, agreed, or declined. |
+
+---
+
+### ⏱️ Time logs
+
+| Capability | Description |
+|------------|-------------|
+| **Client & project** | Log time against a client and optionally a project. |
+| **Billable flag** | Mark entries as billable or non-billable. |
+| **Rate override** | Optional hourly rate and currency per entry. |
+| **Invoice linkage** | Attach time entries to an invoice for billing. |
+| **Date** | Log against a specific date for accurate reporting. |
+
+---
+
+### 🧾 Invoices
+
+| Capability | Description |
+|------------|-------------|
+| **Invoice number** | Unique invoice number per client/engagement. |
+| **Totals** | Subtotal, tax rate, tax amount, and total in your chosen currency. |
+| **Dates** | Issue date and due date. |
+| **Status** | Draft, sent, paid, overdue, or cancelled. |
+| **Time log attachment** | Pull in time log lines for amount calculation. |
+
+---
+
+### 📈 Reports
+
+| Capability | Description |
+|------------|-------------|
+| **Reporting views** | Time and billing insights across clients and projects. |
+
+---
+
+### 🔐 Authentication & account
+
+| Capability | Description |
+|------------|-------------|
+| **Email/password** | Sign up, login, forgot password, and reset password via Supabase Auth. |
+| **Session handling** | Secure, HTTP-only cookie-based sessions with Supabase SSR. |
+| **Account deletion** | Optional server-side account cleanup using the Supabase service role (when configured). |
+
+---
+
+### 🎨 User experience
+
+| Capability | Description |
+|------------|-------------|
+| **Theme** | Light and dark mode with optional system preference detection. |
+| **Command palette** | Global search and navigation (e.g. ⌘K). |
+| **Responsive layout** | Sidebar navigation and layouts that adapt to screen size. |
+| **Toasts** | Consistent notification feedback for actions (Sonner). |
+
+---
+
+## 🏗️ Architecture
+
+High-level flow from client and proposal through to invoicing:
+
+```mermaid
+flowchart LR
+  subgraph intake["Intake"]
+    C[Clients]
+    P[Proposals]
+  end
+  subgraph delivery["Delivery"]
+    PR[Projects]
+    T[Tasks]
+    TL[Time Logs]
+  end
+  subgraph billing["Billing"]
+    I[Invoices]
+    R[Reports]
+  end
+  C --> P
+  P -->|"Agreed"| PR
+  C --> PR
+  PR --> T
+  PR --> TL
+  C --> TL
+  TL --> I
+  C --> I
+  I --> R
+  TL --> R
 ```
 
-### 2. Supabase project
+Application and data layer:
 
-1. Create a project in the [Supabase Dashboard](https://supabase.com/dashboard).
-2. In **SQL Editor**, run the migrations in `supabase/migrations/` in order (`001_initial_schema.sql` through the latest).
-3. Copy **Project URL** and **anon (public) key** from **Settings → API**.
-
-### 3. Environment variables
-
-Copy the example env file and fill in your values:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env`:
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | No | Only if you need server-side admin (e.g. account deletion) |
-| `GEMINI_API_KEY` | No | [Google AI Studio](https://aistudio.google.com/apikey) key for AI blueprints/tasks/proposals (app works without it) |
-| `GEMINI_MODEL` | No | Override model (e.g. `gemini-1.5-flash`) if needed |
-| `SUPABASE_PROJECT_ID` | No | For `npm run db:types` (TypeScript types from DB) |
-
-Never commit `.env`; it is listed in `.gitignore`.
-
-### 4. Run the app
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000). Sign up or log in and start using the app.
-
----
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Next.js dev server |
-| `npm run build` | Production build |
-| `npm run start` | Run production server |
-| `npm run lint` | Run ESLint |
-| `npm run db:types` | Generate TypeScript types from Supabase (requires `SUPABASE_PROJECT_ID`) |
-
----
-
-## Project structure
-
-```
-devblueprint/
-├── app/
-│   ├── (app)/          # Main app routes (dashboard, projects, clients, etc.)
-│   ├── (auth)/         # Login, register, forgot/reset password
-│   ├── api/            # API routes (e.g. projects/generate, proposals/generate)
-│   └── layout.tsx      # Root layout, fonts, theme
-├── components/         # React components (UI, layout, dashboard, etc.)
-├── lib/                # Supabase client, queries, types, utils, blueprint engine
-├── public/             # Static assets
-└── supabase/
-    └── migrations/     # SQL migrations (run in order in Supabase SQL Editor)
+```mermaid
+flowchart TB
+  subgraph client["Client"]
+    UI[Next.js App Router]
+    RSC[React Server Components]
+  end
+  subgraph api["API layer"]
+    Route[Route handlers]
+    Gen[AI generation endpoints]
+  end
+  subgraph backend["Backend"]
+    SB[(Supabase)]
+    PG[(Postgres)]
+    Auth[Supabase Auth]
+  end
+  subgraph external["External"]
+    Gemini[Google Gemini API]
+  end
+  UI --> RSC
+  UI --> Route
+  Route --> SB
+  Gen --> Gemini
+  Gen --> SB
+  SB --> PG
+  SB --> Auth
 ```
 
 ---
 
-## Database
+## 🛠️ Technology stack
 
-Schema is managed via **Supabase migrations** in `supabase/migrations/`. Main entities:
-
-- **clients** — Contact and billing info, hourly rate, currency
-- **projects** — Title, type, status, optional `blueprint` (JSON), linked to client
-- **tasks** — Kanban tasks per project (status, priority, category, effort)
-- **proposals** — Pre-project proposals, optional generated content and estimated price
-- **time_logs** — Hours per client/project, billable, optional link to invoice
-- **invoices** — Invoice header and totals, link to client and time logs
-
-Row Level Security (RLS) ensures users only see and edit their own data. Run migrations in numerical order after creating your Supabase project.
-
----
-
-## AI features (optional)
-
-With `GEMINI_API_KEY` set:
-
-- **Project blueprint & tasks** — From project title, description, type, and stack, the app can generate a blueprint (features, milestones, risks, technical requirements) and a list of Kanban tasks.
-- **Proposal content** — Generate proposal text and estimated pricing from proposal details.
-
-Without the key, the app still works; blueprint/proposal generation is disabled or falls back to rule-based behaviour where implemented.
+| Layer | Technology | Notes |
+|-------|------------|--------|
+| **Framework** | Next.js 15 | App Router, server components, route handlers. |
+| **UI** | React 19 | Latest React with compatible patterns. |
+| **Language** | TypeScript 5.7 | Strict typing across app and lib. |
+| **Styling** | Tailwind CSS 4 | Utility-first, design tokens, themeable. |
+| **Backend** | Supabase | Postgres, Auth, Row Level Security, real-time optional. |
+| **AI (optional)** | Google Gemini | Blueprint generation, task suggestions, proposal content. |
+| **Drag and drop** | @hello-pangea/dnd | Accessible Kanban boards. |
+| **Diagrams** | @xyflow/react | Flow/architecture diagrams. |
+| **Icons** | Lucide React | Consistent icon set. |
+| **Notifications** | Sonner | Toast notifications. |
 
 ---
 
-## Contributing
+## 📦 Data model
 
-1. Fork the repo.
-2. Create a branch from `main` for your change.
-3. Make your edits and run `npm run lint` (and tests if added).
-4. Open a pull request with a short description of the change.
+Core entities and relationships:
+
+| Entity | Purpose |
+|--------|---------|
+| **clients** | Contact details, company, billing defaults (hourly rate, currency), status. |
+| **projects** | Title, type, status, optional blueprint (JSON), optional client link, banner. |
+| **tasks** | Kanban tasks per project: title, status, priority, category, effort, position. |
+| **proposals** | Pre-project scope, optional generated content, estimated price, slides, share token, link to client and optional project. |
+| **time_logs** | Hours, description, client/project, billable flag, rate, currency, optional invoice. |
+| **invoices** | Invoice number, client, status, dates, subtotal, tax, total, currency. |
+
+Row Level Security (RLS) is enabled on all tables so that users can only access their own rows. Schema is versioned via Supabase migrations in `supabase/migrations/`.
 
 ---
 
-## License
+## 🤖 AI capabilities
 
-MIT (or your chosen license — update this section as needed.)
+When a **Gemini API key** is configured, DevBlueprint can:
+
+| Feature | Input | Output |
+|--------|--------|--------|
+| **Project blueprint** | Title, description, type, tech stack, goals, constraints, target audience | Structured blueprint: core features (12+), milestones (4–8), risk factors (5–12), technical requirements (15–30), feature dependencies, integrations. |
+| **Task list** | Same as above (or derived from blueprint) | Kanban-ready tasks (25–55) with status, priority, category, effort. |
+| **Proposal content** | Proposal title, description, type, stack, goals, constraints | Narrative and structured proposal content. |
+| **Proposal pricing** | Proposal context | Estimated price or price range. |
+
+Without an API key, the app runs with AI features disabled or with rule-based fallbacks where implemented. No secrets are exposed to the client; generation runs server-side only.
+
+---
+
+## 🔒 Security & compliance
+
+| Area | Approach |
+|------|----------|
+| **Authentication** | Supabase Auth (email/password). Passwords are not stored in application code. |
+| **Authorization** | Postgres RLS so each user sees only their own clients, projects, tasks, proposals, time logs, and invoices. |
+| **Secrets** | API keys and service role keys live in environment variables only; `.env` is gitignored. |
+| **Server-side AI** | Gemini is called from route handlers; keys never sent to the browser. |
+| **Session** | Supabase SSR client with secure, HTTP-only cookies. |
+
+---
+
+## 🤝 Contributing
+
+1. **Fork** the repository.
+2. **Create a branch** from `main` for your change.
+3. **Implement** your change and run the project linter.
+4. **Open a pull request** with a clear description and scope.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <span style="color:#6366f1">DevBlueprint</span> — plan, deliver, and get paid from one place.
+</p>

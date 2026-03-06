@@ -57,7 +57,7 @@ export function GeneratedProposalView({
     <div className="space-y-8 max-w-3xl">
       {/* Executive summary */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Executive summary
         </h2>
         {editable && onContentChange ? (
@@ -77,14 +77,14 @@ export function GeneratedProposalView({
 
       {/* Objectives */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Objectives
         </h2>
         {editable && onContentChange ? (
           <ul className="space-y-2">
             {(content.objectives ?? []).map((o, i) => (
               <li key={i} className="flex gap-2 items-start">
-                <span className="text-[var(--accent-green)] shrink-0 mt-1.5">•</span>
+                <span className="text-[var(--accent)] shrink-0 mt-1.5">•</span>
                 <input
                   value={o}
                   onChange={(e) => setListItem("objectives", i, e.target.value)}
@@ -115,7 +115,7 @@ export function GeneratedProposalView({
           <ul className="space-y-2">
             {(content.objectives ?? []).map((o, i) => (
               <li key={i} className="flex gap-2 text-[var(--text-secondary)]">
-                <span className="text-[var(--accent-green)] shrink-0">•</span>
+                <span className="text-[var(--accent)] shrink-0">•</span>
                 <span>{o}</span>
               </li>
             ))}
@@ -125,14 +125,14 @@ export function GeneratedProposalView({
 
       {/* Deliverables */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Deliverables
         </h2>
         {editable && onContentChange ? (
           <ul className="space-y-2">
             {(content.deliverables ?? []).map((d, i) => (
               <li key={i} className="flex gap-2 items-start">
-                <span className="text-[var(--accent-green)] shrink-0 mt-1.5">•</span>
+                <span className="text-[var(--accent)] shrink-0 mt-1.5">•</span>
                 <input
                   value={d}
                   onChange={(e) => setListItem("deliverables", i, e.target.value)}
@@ -163,7 +163,7 @@ export function GeneratedProposalView({
           <ul className="space-y-2">
             {(content.deliverables ?? []).map((d, i) => (
               <li key={i} className="flex gap-2 text-[var(--text-secondary)]">
-                <span className="text-[var(--accent-green)] shrink-0">•</span>
+                <span className="text-[var(--accent)] shrink-0">•</span>
                 <span>{d}</span>
               </li>
             ))}
@@ -173,7 +173,7 @@ export function GeneratedProposalView({
 
       {/* Timeline */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Timeline
         </h2>
         {editable && onContentChange ? (
@@ -252,7 +252,7 @@ export function GeneratedProposalView({
 
       {/* Budget estimates */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Budget estimates
         </h2>
         {editable && onContentChange ? (
@@ -343,7 +343,7 @@ export function GeneratedProposalView({
 
       {/* Team structure */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Team structure
         </h2>
         {editable && onContentChange ? (
@@ -415,14 +415,14 @@ export function GeneratedProposalView({
 
       {/* Success metrics */}
       <section className="border border-[var(--border)] rounded-xl p-5 bg-[var(--bg-surface)]">
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-3">
           Success metrics
         </h2>
         {editable && onContentChange ? (
           <ul className="space-y-2">
             {(content.success_metrics ?? []).map((m, i) => (
               <li key={i} className="flex gap-2 items-start">
-                <span className="text-[var(--accent-green)] shrink-0 mt-1.5">•</span>
+                <span className="text-[var(--accent)] shrink-0 mt-1.5">•</span>
                 <input
                   value={m}
                   onChange={(e) => setListItem("success_metrics", i, e.target.value)}
@@ -453,7 +453,7 @@ export function GeneratedProposalView({
           <ul className="space-y-2">
             {(content.success_metrics ?? []).map((m, i) => (
               <li key={i} className="flex gap-2 text-[var(--text-secondary)]">
-                <span className="text-[var(--accent-green)] shrink-0">•</span>
+                <span className="text-[var(--accent)] shrink-0">•</span>
                 <span>{m}</span>
               </li>
             ))}

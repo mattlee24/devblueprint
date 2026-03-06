@@ -33,18 +33,19 @@ export function ProjectCard({
       href={`/projects/${project.id}`}
       data-context-menu="project"
       data-context-id={project.id}
+      className="cursor-pointer"
     >
-      <article className="border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] hover:border-[var(--border-active)] hover:shadow-[0_0_10px_rgba(0,255,136,0.1)] transition-[var(--transition)] group overflow-hidden">
+      <article className="border border-[var(--border)] rounded-[var(--radius-card)] card-gradient card-hover transition-[var(--transition)] group overflow-hidden">
         <div
           className="h-[150px] w-full border-b border-[var(--border)] bg-[var(--bg-elevated)]"
           style={bannerStyle}
         />
-        <div className="flex items-center gap-2 mb-2 px-4 pt-5">
-          <div className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--accent-green)] shrink-0 -mt-6">
+        <div className="flex items-center justify-center gap-2 mb-2 px-4 pt-5">
+          <div className="p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--accent)] shrink-0">
             <FolderKanban className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-semibold group-hover:text-[var(--accent-green)] truncate">
+            <h3 className="text-lg font-semibold group-hover:text-[var(--accent)] truncate">
               {project.title}
             </h3>
             {clientName && (

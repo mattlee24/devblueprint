@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           aria-label="Close menu"
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-20 bg-black/50 lg:hidden cursor-pointer"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -47,12 +47,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+            className="p-2 rounded border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] cursor-pointer"
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/dashboard" className="text-lg font-semibold text-[var(--accent)] truncate">
+          <Link href="/dashboard" className="text-lg font-semibold text-[var(--accent)] truncate cursor-pointer">
             DevBlueprint
           </Link>
         </header>

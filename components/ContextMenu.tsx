@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Link2, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Link2, Trash2, FileText, FileSignature, Clock, Copy } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { deleteProposal } from "@/lib/queries/proposals";
+import { getProposal, createProposal, deleteProposal } from "@/lib/queries/proposals";
 import { deleteClient } from "@/lib/queries/clients";
 import { deleteProject } from "@/lib/queries/projects";
 import { deleteInvoice } from "@/lib/queries/invoices";
@@ -39,6 +39,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [duplicateLoading, setDuplicateLoading] = useState(false);
 
   useEffect(() => {
     if (!state) return;
@@ -138,7 +139,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
           router.push(openHref);
           onClose();
         }}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <ExternalLink className="w-3.5 h-3.5 shrink-0" />
         Open
@@ -149,7 +150,7 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
           router.push(editHref);
           onClose();
         }}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Pencil className="w-3.5 h-3.5 shrink-0" />
         Edit
@@ -162,16 +163,91 @@ export function ContextMenu({ state, onClose }: ContextMenuProps) {
             onClose();
           });
         }}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Link2 className="w-3.5 h-3.5 shrink-0" />
         Copy link
       </button>
+      {state.type === "client" && (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              router.push(`/invoices/new?client=${state.id}`);
+              onClose();
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+            New invoice for this client
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              router.push(`/proposals/new?client=${state.id}`);
+              onClose();
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+          >
+            <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+            New proposal for this client
+          </button>
+        </>
+      )}
+      {state.type === "project" && (
+        <button
+          type="button"
+          onClick={() => {
+            router.push(`/time-logs?projectId=${state.id}`);
+            onClose();
+          }}
+          className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        >
+          <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+          Log time for this project
+        </button>
+      )}
+      {state.type === "proposal" && (
+        <button
+          type="button"
+          onClick={async () => {
+            setDuplicateLoading(true);
+            const { data: orig } = await getProposal(state.id);
+            if (orig) {
+              const { data: copy, error } = await createProposal({
+                title: `Copy of ${orig.title}`,
+                description: orig.description ?? undefined,
+                client_id: orig.client_id,
+                status: "draft",
+                slides: orig.slides ?? undefined,
+                generated_content: orig.generated_content ?? undefined,
+                estimated_price: orig.estimated_price ?? undefined,
+                currency: orig.currency ?? undefined,
+              });
+              setDuplicateLoading(false);
+              onClose();
+              if (error) toast.error(error.message ?? "Failed to duplicate");
+              else if (copy) {
+                toast.success("Proposal duplicated");
+                router.push(`/proposals/${copy.id}`);
+              }
+            } else {
+              setDuplicateLoading(false);
+              toast.error("Proposal not found");
+            }
+          }}
+          disabled={duplicateLoading}
+          className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <Copy className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+          {duplicateLoading ? "Duplicating…" : "Duplicate proposal"}
+        </button>
+      )}
       <div className="border-t border-[var(--border)] my-1" />
       <button
         type="button"
         onClick={() => setDeleteOpen(true)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent-red)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent-red)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Trash2 className="w-3.5 h-3.5 shrink-0" />
         Delete

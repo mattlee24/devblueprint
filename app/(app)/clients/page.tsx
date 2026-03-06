@@ -109,11 +109,11 @@ export default function ClientsPage() {
             onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 text-sm rounded border transition-[var(--transition)] ${
               statusFilter === s
-                ? "border-[var(--accent-green)] text-[var(--accent-green)]"
+                ? "border-[var(--accent)] text-[var(--accent)]"
                 : "border-[var(--border)] text-[var(--text-secondary)]"
             }`}
           >
-            [{s.toUpperCase()}]
+            {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
           </button>
         ))}
       </div>

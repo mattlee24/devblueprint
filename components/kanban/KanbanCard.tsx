@@ -35,7 +35,7 @@ export function KanbanCard({ task, onOpen }: KanbanCardProps) {
             </p>
           )}
           <div className="flex flex-wrap gap-1.5 mt-2">
-            <Badge variant={priorityVariant}>{task.priority.toUpperCase()}</Badge>
+            <Badge variant={priorityVariant}>{task.priority.replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
             <Badge variant="muted">{task.category}</Badge>
             <Badge variant="muted">{task.effort}</Badge>
           </div>

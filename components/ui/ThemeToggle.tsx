@@ -15,7 +15,7 @@ export function ThemeToggle({ className = "", showLabel = true }: ThemeTogglePro
     <button
       type="button"
       onClick={toggleTheme}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] ${className}`}
+      className={`inline-flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] cursor-pointer ${className}`}
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       {theme === "dark" ? (

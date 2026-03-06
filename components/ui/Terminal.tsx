@@ -26,7 +26,7 @@ export function Terminal({ title = "terminal", children, className = "" }: Termi
 export function TerminalSectionHeader({ children }: { children: ReactNode }) {
   return (
     <h2 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
-      <span className="text-[var(--accent-green)]">{">"}</span>
+      <span className="text-[var(--accent)]">{">"}</span>
       <span>{children}</span>
       <span className="flex-1 border-b border-[var(--border)]" />
     </h2>

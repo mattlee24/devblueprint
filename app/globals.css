@@ -1,59 +1,101 @@
 @import "tailwindcss";
 
-/* Refined neutral palette + single accent (deep slate). No neon, no techy glows. */
+/* Refined palette with semantic accents and clear primary. */
 :root,
 [data-theme="dark"] {
   --bg-base: #0f1419;
   --bg-surface: #1a1f26;
   --bg-elevated: #232a33;
   --bg-hover: #2d3640;
+  --bg-active: #374151;
   --border: #374151;
   --border-active: #4b5563;
-  --accent: #475569;
+  --accent: #3b82f6;
   --accent-foreground: #f8fafc;
-  --accent-green: #4ade80;
-  --accent-blue: #64748b;
-  --accent-amber: #d4a574;
+  --accent-success: #22c55e;
+  --accent-info: #0ea5e9;
+  --accent-warning: #f59e0b;
+  --accent-green: #22c55e;
+  --accent-blue: #3b82f6;
+  --accent-amber: #f59e0b;
   --accent-red: #dc2626;
-  --accent-purple: #7c6ea8;
+  --accent-purple: #8b5cf6;
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --radius-card: 12px;
   --radius-badge: 8px;
   --transition: 150ms ease;
+  /* Accent and surface gradients for key UI elements */
+  --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-surface: linear-gradient(180deg, #1a1f26 0%, #232a33 100%);
+  /* Base and surface gradients for page backgrounds / shells */
+  --bg-base-gradient: radial-gradient(circle at top, #111827 0%, #020617 55%);
+  --bg-surface-gradient: linear-gradient(180deg, #111827 0%, #020617 80%);
 }
 
-/* Light theme: warm whites, light greys, same accent */
+/* Light theme: warm whites, light greys, semantic accents */
 [data-theme="light"] {
   --bg-base: #f8fafc;
   --bg-surface: #ffffff;
   --bg-elevated: #f1f5f9;
   --bg-hover: #e2e8f0;
+  --bg-active: #cbd5e1;
   --border: #e2e8f0;
   --border-active: #cbd5e1;
-  --accent: #334155;
+  --accent: #2563eb;
   --accent-foreground: #ffffff;
+  --accent-success: #16a34a;
+  --accent-info: #0284c7;
+  --accent-warning: #d97706;
   --accent-green: #16a34a;
-  --accent-blue: #475569;
-  --accent-amber: #b45309;
+  --accent-blue: #2563eb;
+  --accent-amber: #d97706;
   --accent-red: #b91c1c;
-  --accent-purple: #6d28d9;
+  --accent-purple: #7c3aed;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
+  /* Accent and surface gradients for key UI elements */
+  --gradient-accent: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  /* Base and surface gradients for page backgrounds / shells */
+  --bg-base-gradient: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 90%);
+  --bg-surface-gradient: linear-gradient(180deg, #ffffff 0%, #f3f4f6 85%);
 }
 
 body {
-  background-color: var(--bg-base);
+  background: var(--bg-base-gradient, var(--bg-base));
   color: var(--text-primary);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0.01em;
 }
 
-/* Headings use display font */
+/* Subtle card/panel gradient */
+.card-gradient {
+  background: var(--gradient-surface);
+}
+
+/* Standardised hover/active for clickable surfaces */
+.hover-active-surface:hover {
+  background: var(--bg-hover);
+}
+.hover-active-surface:active {
+  background: var(--bg-active);
+}
+.card-hover:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.15);
+}
+.card-hover:active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Headings use display font; non-clickable typography uses default cursor */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  cursor: default;
 }
 
 /* User flow (ReactFlow) – dark theme for readability */
@@ -112,10 +154,16 @@ h1, h2, h3, h4, h5, h6 {
   .no-print {
     display: none !important;
   }
+  .print-only {
+    display: inline !important;
+  }
   body {
     background: white;
     color: #111;
   }
+}
+.print-only {
+  display: none;
 }
 
 /* Invoice print / PDF layout */

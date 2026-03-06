@@ -72,7 +72,7 @@ export default function ReportsPage() {
   return (
     <main className="p-6">
       <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <BarChart3 className="w-7 h-7 shrink-0 text-[var(--accent-green)]" />
+        <BarChart3 className="w-7 h-7 shrink-0 text-[var(--accent)]" />
         Reports
       </h1>
 
@@ -114,7 +114,7 @@ export default function ReportsPage() {
             <TerminalSectionHeader>
               <span className="flex items-center gap-2">
                 <Clock className="w-4 h-4 shrink-0" />
-                TIME REPORT — {formatDate(from)} to {formatDate(to)}
+                Time report — {formatDate(from)} to {formatDate(to)}
               </span>
             </TerminalSectionHeader>
             <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
@@ -130,9 +130,9 @@ export default function ReportsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-2">CLIENT</th>
-                  <th className="text-right py-2">HOURS</th>
-                  <th className="text-right py-2">VALUE</th>
+                  <th className="text-left py-2">Client</th>
+                  <th className="text-right py-2">Hours</th>
+                  <th className="text-right py-2">Value</th>
                 </tr>
               </thead>
               <tbody>
@@ -164,13 +164,13 @@ export default function ReportsPage() {
             <TerminalSectionHeader>
               <span className="flex items-center gap-2">
                 <Banknote className="w-4 h-4 shrink-0" />
-                REVENUE SUMMARY — Invoices issued {formatDate(from)} to {formatDate(to)}
+                Revenue summary — Invoices issued {formatDate(from)} to {formatDate(to)}
               </span>
             </TerminalSectionHeader>
             <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
               <div className="border border-[var(--border)] rounded p-3">
                 <p className="text-xs text-[var(--text-muted)]">Paid (this period)</p>
-                <p className="text-xl font-semibold text-[var(--accent-green)]">{formatCurrency(paidInRange, "GBP")}</p>
+                <p className="text-xl font-semibold text-[var(--accent)]">{formatCurrency(paidInRange, "GBP")}</p>
               </div>
               <div className="border border-[var(--border)] rounded p-3">
                 <p className="text-xs text-[var(--text-muted)]">Outstanding</p>

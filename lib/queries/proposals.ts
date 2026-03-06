@@ -1,5 +1,87 @@
 import { createClient } from "@/lib/supabase/client";
 
+/** Block type for slide content (PowerPoint-style deck). */
+export type ProposalSlideBlockType =
+  | "heading"
+  | "paragraph"
+  | "bullets"
+  | "numbered"
+  | "image";
+
+export interface ProposalSlideBlock {
+  id: string;
+  type: ProposalSlideBlockType;
+  content: string;
+  /** Heading level 1–3 for type "heading" */
+  level?: number;
+}
+
+/** Normalized slide for the deck (no canvas fields). */
+export interface ProposalSlide {
+  id: string;
+  order: number;
+  title: string;
+  blocks: ProposalSlideBlock[];
+}
+
+/** Raw slide as stored in DB (may be legacy body/elements or new blocks). */
+export interface RawProposalSlide {
+  id: string;
+  order?: number;
+  title?: string;
+  body?: string;
+  blocks?: ProposalSlideBlock[];
+  elements?: unknown[];
+}
+
+/** Convert a raw slide from DB into normalized ProposalSlide with blocks. */
+export function normalizeSlide(raw: RawProposalSlide, index: number): ProposalSlide {
+  if (Array.isArray(raw.blocks) && raw.blocks.length >= 0) {
+    return {
+      id: raw.id,
+      order: raw.order ?? index,
+      title: typeof raw.title === "string" ? raw.title : "Slide",
+      blocks: raw.blocks.map((b) => ({
+        id: typeof b.id === "string" ? b.id : `block-${index}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        type: ["heading", "paragraph", "bullets", "numbered", "image"].includes(b.type) ? b.type : "paragraph",
+        content: typeof b.content === "string" ? b.content : "",
+        level: typeof b.level === "number" ? b.level : undefined,
+      })),
+    };
+  }
+  let fallbackContent = "";
+  if (typeof raw.body === "string" && raw.body.trim()) {
+    fallbackContent = raw.body.trim();
+  } else if (Array.isArray(raw.elements) && raw.elements.length > 0) {
+    const first = raw.elements[0] as { type?: string; content?: string };
+    if (first && typeof first.content === "string") fallbackContent = first.content;
+  }
+  return {
+    id: raw.id,
+    order: raw.order ?? index,
+    title: typeof raw.title === "string" ? raw.title : "Slide",
+    blocks: fallbackContent
+      ? [{ id: `block-${raw.id}-0`, type: "paragraph" as const, content: fallbackContent }]
+      : [],
+  };
+}
+
+/** Normalize full slides array from DB (handles legacy and new shape). */
+export function normalizeSlides(rawSlides: RawProposalSlide[] | null | undefined): ProposalSlide[] {
+  if (!Array.isArray(rawSlides) || rawSlides.length === 0) return [];
+  return rawSlides.map((raw, i) => normalizeSlide(raw, i));
+}
+
+export interface ProjectCreationPayload {
+  title?: string;
+  description?: string;
+  type?: string;
+  client_id?: string | null;
+  goals?: string[];
+  constraints?: string;
+  targetAudience?: string;
+}
+
 export interface GeneratedProposalContent {
   objectives?: string[];
   deliverables?: string[];
@@ -8,6 +90,7 @@ export interface GeneratedProposalContent {
   team_structure?: { role: string; responsibility: string }[];
   success_metrics?: string[];
   executive_summary?: string;
+  projectCreationPayload?: ProjectCreationPayload;
 }
 
 export interface ProposalRow {
@@ -27,6 +110,9 @@ export interface ProposalRow {
   generated_content: GeneratedProposalContent | null;
   estimated_price: number | null;
   currency: string | null;
+  slides?: ProposalSlide[] | null;
+  share_token: string | null;
+  share_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -47,6 +133,9 @@ export interface ProposalInsert {
   generated_content?: GeneratedProposalContent | null;
   estimated_price?: number | null;
   currency?: string | null;
+  slides?: ProposalSlide[];
+  share_token?: string | null;
+  share_enabled?: boolean;
 }
 
 export interface ProposalFilters {
@@ -69,7 +158,15 @@ export async function getProposals(
     query = query.eq("status", filters.status);
   }
   const { data, error } = await query;
-  return { data: data as ProposalRow[] | null, error: error as Error | null };
+  const rows = data as ProposalRow[] | null;
+  if (Array.isArray(rows)) {
+    for (const row of rows) {
+      if (Array.isArray((row as { slides?: RawProposalSlide[] }).slides)) {
+        row.slides = normalizeSlides((row as { slides: RawProposalSlide[] }).slides);
+      }
+    }
+  }
+  return { data: rows, error: error as Error | null };
 }
 
 export async function getProposal(
@@ -81,6 +178,9 @@ export async function getProposal(
     .select("*, clients(id, name, email, avatar_colour, hourly_rate, currency)")
     .eq("id", id)
     .single();
+  if (data && Array.isArray((data as { slides?: RawProposalSlide[] }).slides)) {
+    (data as ProposalRow).slides = normalizeSlides((data as { slides: RawProposalSlide[] }).slides);
+  }
   return { data: data as ProposalRow | null, error: error as Error | null };
 }
 

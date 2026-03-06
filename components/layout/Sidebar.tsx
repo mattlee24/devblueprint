@@ -47,9 +47,11 @@ export function Sidebar() {
     : "?";
 
   return (
-    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] bg-[var(--bg-surface)] flex flex-col shrink-0">
+    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden">
+      <div className="absolute left-0 top-0 w-1 h-full opacity-90" style={{ background: "var(--gradient-accent)" }} aria-hidden />
+      <div className="flex-1 flex flex-col bg-[var(--bg-surface)] relative z-10">
       <div className="p-4 border-b border-[var(--border)]">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
           <span className="text-lg font-semibold text-[var(--accent)]">
             DevBlueprint
           </span>
@@ -58,7 +60,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
-          className="mt-2 flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] transition-[var(--transition)]"
+          className="mt-2 flex items-center gap-2 w-full px-2 py-1 rounded text-sm text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
           title="Search (⌘K)"
         >
           <Search className="w-3.5 h-3.5 shrink-0" />
@@ -66,17 +68,17 @@ export function Sidebar() {
           <kbd className="ml-auto text-[10px] opacity-70">⌘K</kbd>
         </button>
       </div>
-      <nav className="flex-1 p-2">
+      <nav className="flex-1 p-2 flex flex-col gap-1">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
                 isActive
                   ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] active:bg-[var(--bg-active)]"
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -84,37 +86,39 @@ export function Sidebar() {
             </Link>
           );
         })}
-        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider px-2 py-1 border-b border-[var(--border)] mt-4 mb-2"/>
-        <Link
-          href="/settings"
-          className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 ${
-            pathname === "/settings"
-              ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
-              : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
-          }`}
-        >
-          <Settings className="w-4 h-4 shrink-0" />
-          Settings
-        </Link>
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] w-full"
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {theme === "dark" ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
-          {theme === "dark" ? "Light mode" : "Dark mode"}
-        </button>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-card)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] w-full transition-[var(--transition)] border-l-2 border-transparent"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          Sign Out
-        </button>
+        <div className="text-[10px] text-[var(--text-muted)] px-2 py-1 border-b border-[var(--border)] mt-4 mb-3" />
+        <div className="flex flex-col gap-1">
+          <Link
+            href="/settings"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
+              pathname === "/settings"
+                ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
+                : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
+            }`}
+          >
+            <Settings className="w-4 h-4 shrink-0" />
+            Settings
+          </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] active:bg-[var(--bg-active)] w-full text-left cursor-pointer"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] w-full transition-[var(--transition)] border-l-2 border-transparent text-left cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            Sign Out
+          </button>
+        </div>
       </nav>
-      <div className="p-3 border-t border-[var(--border)] flex items-center gap-2 min-w-0">
+      <div className="p-4 border-t border-[var(--border)] flex items-center gap-3 min-w-0">
         <div
           className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-medium border border-[var(--border)]"
           style={{ backgroundColor: "var(--bg-elevated)" }}
@@ -125,6 +129,7 @@ export function Sidebar() {
         <span className="text-[11px] text-[var(--text-muted)] truncate min-w-0" title={user?.email ?? ""}>
           {user?.email ?? "—"}
         </span>
+      </div>
       </div>
     </aside>
   );

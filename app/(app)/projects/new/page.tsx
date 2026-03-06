@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { WizardShell } from "@/components/wizard/WizardShell";
 import { StepIdentity } from "@/components/wizard/StepIdentity";
 import { StepStack } from "@/components/wizard/StepStack";
-import { StepGoals } from "@/components/wizard/StepGoals";
 import { TerminalLoader, type GenerationStep } from "@/components/wizard/TerminalLoader";
 import { GenerationPreview } from "@/components/wizard/GenerationPreview";
 import { Button } from "@/components/ui/Button";
@@ -67,7 +66,16 @@ function NewProjectForm() {
       setTitle(p.title);
       setDescription(p.description ?? "");
       setClientId(p.client_id ?? "");
-      // Type, stack, goals, etc. are only set when formally creating a project — not from proposal
+      const payload = (p.generated_content as { projectCreationPayload?: Record<string, unknown> } | null)?.projectCreationPayload;
+      if (payload && typeof payload === "object") {
+        if (typeof payload.title === "string") setTitle(payload.title);
+        if (typeof payload.description === "string") setDescription(payload.description);
+        if (typeof payload.type === "string" && ["website", "web_application", "mobile_app", "api", "cli", "other"].includes(payload.type)) setType(payload.type as ProjectType);
+        if (payload.client_id != null) setClientId(String(payload.client_id));
+        if (Array.isArray(payload.goals)) setGoals(payload.goals.map(String));
+        if (typeof payload.constraints === "string") setConstraints(payload.constraints);
+        if (typeof payload.targetAudience === "string") setTargetAudience(payload.targetAudience);
+      }
     });
   }, [fromProposalId]);
 
@@ -77,8 +85,13 @@ function NewProjectForm() {
     );
   }
 
-  const canNext =
-    step === 0
+  const fromProposal = !!fromProposalId;
+  const steps = fromProposal ? ["STACK", "GENERATE"] : ["IDENTITY", "STACK", "GENERATE"];
+  const canNext = fromProposal
+    ? step === 0
+      ? stack.length > 0
+      : true
+    : step === 0
       ? title.trim().length > 0
       : step === 1
         ? stack.length > 0
@@ -202,7 +215,6 @@ function NewProjectForm() {
       status: "active",
       stack: input.stack,
       blueprint: blueprint as unknown as Record<string, unknown>,
-      overall_score: blueprint.overallScore,
       user_flow: null,
       board_config: { columnOrder: ["todo", "in_progress", "in_review", "done"] },
     });
@@ -289,6 +301,7 @@ function NewProjectForm() {
     );
   }
 
+  const generateStepIndex = steps.length - 1;
   return (
     <main className="p-6">
       <div className="mb-6 flex items-center justify-between">
@@ -296,8 +309,8 @@ function NewProjectForm() {
           ← Back to projects
         </Link>
       </div>
-      <WizardShell step={step}>
-        {step === 0 && (
+      <WizardShell step={step} steps={steps}>
+        {!fromProposal && step === 0 && (
           <StepIdentity
             title={title}
             description={description}
@@ -310,24 +323,10 @@ function NewProjectForm() {
             clients={clients}
           />
         )}
-        {step === 1 && (
+        {(fromProposal && step === 0) || (!fromProposal && step === 1) ? (
           <StepStack type={type} selected={stack} onToggle={toggleStack} />
-        )}
-        {step === 2 && (
-          <StepGoals
-            targetAudience={targetAudience}
-            goals={goals}
-            constraints={constraints}
-            isClientProject={isClientProject}
-            hourlyRateOverride={hourlyRateOverride}
-            onTargetAudienceChange={setTargetAudience}
-            onGoalsChange={setGoals}
-            onConstraintsChange={setConstraints}
-            onIsClientProjectChange={setIsClientProject}
-            onHourlyRateOverrideChange={setHourlyRateOverride}
-          />
-        )}
-        {step === 3 && (
+        ) : null}
+        {step === generateStepIndex && (
           <div className="space-y-4">
             <p className="text-[var(--text-secondary)]">
               Ready to generate detailed blueprint and task board for:
@@ -346,7 +345,7 @@ function NewProjectForm() {
           >
             Back
           </Button>
-          {step < 3 ? (
+          {step < generateStepIndex ? (
             <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext}>
               Next
             </Button>

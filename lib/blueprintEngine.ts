@@ -328,13 +328,9 @@ export function generateBlueprint(input: ProjectInput): Blueprint {
   const feasibility = computeFeasibility(input, complexity);
   const suggestedImprovements = getSuggestedImprovements(input);
   const riskFactors = getRiskFactors(input, feasibility);
-  const scores = computeScoreBreakdown(input, feasibility, coreFeatures.length);
-  const overallScore = Math.round(
-    (scores.clarityOfScope + scores.technicalFeasibility + scores.featureCompleteness + scores.riskProfile) * 2.5
-  ) / 10;
   const summary =
-    `Overall score ${overallScore.toFixed(1)}/10. ${feasibility.summary} ` +
-    `Key features identified: ${coreFeatures.map((f) => f.name).join(", ") || "core layout"}.`;
+    `Key features identified: ${coreFeatures.map((f) => f.name).join(", ") || "core layout"}. ` +
+    (feasibility.summary ?? "Project is well-scoped with clear milestones.");
 
   const milestones = getDefaultMilestones(input.type);
   const featureDependencies: FeatureDependency[] = coreFeatures.length >= 2
@@ -344,15 +340,12 @@ export function generateBlueprint(input: ProjectInput): Blueprint {
 
   return {
     technicalRequirements,
-    feasibility,
     coreFeatures,
     suggestedImprovements,
     riskFactors,
     milestones,
     featureDependencies,
     integrations,
-    scores,
-    overallScore: Math.min(10, Math.max(0, overallScore)),
     summary,
   };
 }

@@ -14,6 +14,8 @@ import {
   Clock,
   Sun,
   Moon,
+  Link2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getClients } from "@/lib/queries/clients";
@@ -182,13 +184,56 @@ export function CommandPalette() {
         setOpen(false);
       },
     };
+    const copyDashboardAction: PaletteItem = {
+      kind: "action",
+      label: "Copy dashboard link",
+      icon: Link2,
+      onSelect: () => {
+        const url = typeof window !== "undefined" ? `${window.location.origin}/dashboard` : "/dashboard";
+        void navigator.clipboard.writeText(url).then(() => {
+          toast.success("Dashboard link copied");
+          setOpen(false);
+        });
+      },
+    };
+    const copyPageAction: PaletteItem = {
+      kind: "action",
+      label: "Copy link to this page",
+      icon: Link2,
+      onSelect: () => {
+        const url = typeof window !== "undefined" ? window.location.href : "";
+        void navigator.clipboard.writeText(url).then(() => {
+          toast.success("Link copied to clipboard");
+          setOpen(false);
+        });
+      },
+    };
+    const refreshAction: PaletteItem = {
+      kind: "action",
+      label: "Refresh data",
+      icon: RefreshCw,
+      onSelect: () => {
+        fetchData();
+        toast.success("Data refreshed");
+        setOpen(false);
+      },
+    };
     const themeKeywords = ["theme", "light", "dark", "mode", "toggle"];
     const themeMatches = !term || matchTerm(themeAction.label, term) || themeKeywords.some((k) => term.includes(k));
+    const copyDashboardMatches = !term || matchTerm("Copy dashboard link", term) || (term.includes("copy") && term.includes("dashboard"));
+    const copyPageMatches = !term || matchTerm("Copy link to this page", term) || (term.includes("copy") && term.includes("link"));
+    const refreshMatches = !term || matchTerm("Refresh data", term) || term.includes("refresh");
 
     const baseActions: PaletteItem[] = QUICK_ACTIONS.filter((a) => matchTerm(a.label, term) || matchKeywords(a.keywords, term)).map(
       (a) => ({ kind: "action" as const, label: a.label, href: a.href, onSelect: a.onSelect, icon: a.icon })
     );
-    const actions: PaletteItem[] = themeMatches ? [...baseActions, themeAction] : baseActions;
+    const extraActions: PaletteItem[] = [
+      ...(themeMatches ? [themeAction] : []),
+      ...(copyDashboardMatches ? [copyDashboardAction] : []),
+      ...(copyPageMatches ? [copyPageAction] : []),
+      ...(refreshMatches ? [refreshAction] : []),
+    ];
+    const actions: PaletteItem[] = [...baseActions, ...extraActions];
     const results: PaletteItem[] = searchResults.map((r) => ({ kind: "result" as const, result: r }));
     const nav: PaletteItem[] = NAV_ITEMS.filter((n) => matchTerm(n.label, term) || matchKeywords(n.keywords, term)).map(
       (n) => ({ kind: "nav" as const, label: n.label, href: n.href, keys: n.keys })
@@ -305,17 +350,17 @@ export function CommandPalette() {
                     return (
                       <div key={i}>
                         {i === 0 && item.kind === "action" && (
-                          <p className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                          <p className="px-3 pt-2 pb-1 text-[10px] text-[var(--text-muted)]">
                             Quick actions
                           </p>
                         )}
                         {i === firstResultIdx && resultCount > 0 && (
-                          <p className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
+                          <p className="px-3 pt-3 pb-1 text-[10px] text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
                             Search results
                           </p>
                         )}
                         {i === firstNavIdx && (
-                          <p className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
+                          <p className="px-3 pt-3 pb-1 text-[10px] text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
                             Go to
                           </p>
                         )}
@@ -325,11 +370,11 @@ export function CommandPalette() {
                               href={item.href}
                               data-index={i}
                               onClick={() => setOpen(false)}
-                              className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] ${
-                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)]"
+                              className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
+                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
                               }`}
                             >
-                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent-green)]" />
+                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent)]" />
                               <span className="text-sm font-medium">{item.label}</span>
                             </Link>
                           ) : (
@@ -337,11 +382,11 @@ export function CommandPalette() {
                               type="button"
                               data-index={i}
                               onClick={() => item.onSelect?.()}
-                              className={`flex items-center gap-3 px-3 py-2 w-full text-left transition-[var(--transition)] ${
-                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)]"
+                              className={`flex items-center gap-3 px-3 py-2 w-full text-left transition-[var(--transition)] cursor-pointer ${
+                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
                               }`}
                             >
-                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent-green)]" />
+                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent)]" />
                               <span className="text-sm font-medium">{item.label}</span>
                             </button>
                           ))}
@@ -367,8 +412,8 @@ export function CommandPalette() {
                             }
                             data-index={i}
                             onClick={() => setOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] ${
-                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)]"
+                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
+                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
                             }`}
                           >
                             <ResultIcon className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
@@ -387,8 +432,8 @@ export function CommandPalette() {
                             href={item.href}
                             data-index={i}
                             onClick={() => setOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] ${
-                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)]"
+                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
+                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
                             }`}
                           >
                             <kbd className="w-12 text-[10px] text-[var(--text-muted)] font-mono">{item.keys}</kbd>

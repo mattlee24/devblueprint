@@ -70,7 +70,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <main className="p-6">
-        <p className="text-[var(--accent-red)]">{"> ERROR: "}{error} Retry?</p>
+        <p className="text-[var(--accent-red)]">Something went wrong. {error} Retry?</p>
       </main>
     );
   }
@@ -78,15 +78,15 @@ export default function DashboardPage() {
   return (
     <main className="p-6">
       <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <FolderKanban className="w-7 h-7 shrink-0 text-[var(--accent-green)]" />
+        <FolderKanban className="w-7 h-7 shrink-0 text-[var(--accent)]" />
         Dashboard
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Active Projects" value={activeProjects.length} icon={FolderKanban} />
-        <StatCard label="Active Clients" value={activeClients.length} icon={Users} />
-        <StatCard label="Hours This Month" value={formatHoursShort(hoursThisMonth)} icon={Clock} />
+        <StatCard label="Active projects" value={activeProjects.length} icon={FolderKanban} />
+        <StatCard label="Active clients" value={activeClients.length} icon={Users} />
+        <StatCard label="Hours this month" value={formatHoursShort(hoursThisMonth)} icon={Clock} />
         <StatCard
-          label="Unbilled Amount"
+          label="Unbilled amount"
           value={formatCurrency(unbilledAmount, currency)}
           icon={Banknote}
         />
@@ -100,7 +100,7 @@ export default function DashboardPage() {
           <TerminalSectionHeader>
             <span className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 shrink-0" />
-              CLIENT ACTIVITY
+              Client activity
             </span>
           </TerminalSectionHeader>
           {activeClients.length === 0 ? (
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                       <p className="text-sm truncate">{c.name}</p>
                       <div className="h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden mt-1">
                         <div
-                          className="h-full bg-[var(--accent-green)]"
+                          className="h-full bg-[var(--accent)]"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <TerminalSectionHeader>
             <span className="flex items-center gap-2">
               <Calendar className="w-4 h-4 shrink-0" />
-              UPCOMING
+              Upcoming
             </span>
           </TerminalSectionHeader>
           {upcomingTasks.length === 0 ? (
@@ -153,10 +153,10 @@ export default function DashboardPage() {
                     href={`/projects/${task.project_id}`}
                     data-context-menu="project"
                     data-context-id={task.project_id}
-                    className="flex items-start gap-2 py-2 px-2 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] group"
+                    className="flex items-start gap-2 py-2 px-2 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] group cursor-pointer"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--text-primary)] truncate group-hover:text-[var(--accent-green)]">
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate group-hover:text-[var(--accent)]">
                         {task.title}
                       </p>
                       <p className="text-xs text-[var(--text-muted)] truncate">
@@ -171,7 +171,7 @@ export default function DashboardPage() {
           {upcomingTasks.length > 10 && (
             <Link
               href="/projects"
-              className="inline-flex items-center gap-2 mt-2 text-xs text-[var(--accent)] hover:underline"
+              className="inline-flex items-center gap-2 mt-2 text-xs text-[var(--accent)] hover:underline cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5 shrink-0" />
               View all projects

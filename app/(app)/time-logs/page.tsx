@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { getTimeLogs } from "@/lib/queries/timeLogs";
 import { getClients } from "@/lib/queries/clients";
@@ -19,7 +20,9 @@ import { TimeLogForm, type TimeLogFormData } from "@/components/timeLogs/TimeLog
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 
-export default function TimeLogsPage() {
+function TimeLogsContent() {
+  const searchParams = useSearchParams();
+  const projectIdFromUrl = searchParams.get("projectId") ?? "";
   const [logs, setLogs] = useState<TimeLogRow[]>([]);
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
@@ -27,11 +30,15 @@ export default function TimeLogsPage() {
   const [editingLog, setEditingLog] = useState<TimeLogRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [clientFilter, setClientFilter] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState(projectIdFromUrl);
   const [billableFilter, setBillableFilter] = useState<"all" | "billable" | "non">("all");
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  useEffect(() => {
+    if (projectIdFromUrl) setProjectFilter(projectIdFromUrl);
+  }, [projectIdFromUrl]);
 
   useEffect(() => {
     async function load() {
@@ -229,14 +236,14 @@ export default function TimeLogsPage() {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--border)]">
-            <th className="text-left py-2">DATE</th>
-            <th className="text-left py-2">CLIENT</th>
-            <th className="text-left py-2">PROJECT</th>
-            <th className="text-left py-2">DESCRIPTION</th>
-            <th className="text-right py-2">HOURS</th>
-            <th className="text-left py-2">BILLABLE</th>
-            <th className="text-right py-2">AMOUNT</th>
-            <th className="text-right py-2">ACTIONS</th>
+            <th className="text-left py-2">Date</th>
+            <th className="text-left py-2">Client</th>
+            <th className="text-left py-2">Project</th>
+            <th className="text-left py-2">Description</th>
+            <th className="text-right py-2">Hours</th>
+            <th className="text-left py-2">Billable</th>
+            <th className="text-right py-2">Amount</th>
+            <th className="text-right py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -287,7 +294,7 @@ export default function TimeLogsPage() {
       )}
       {filtered.length > 0 && (
       <div className="sticky bottom-0 mt-4 py-3 px-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-sm">
-        {"// "}TOTAL: {formatHoursShort(totalHours)} · BILLABLE: {formatHoursShort(billableHours)} · NON-BILLABLE: {formatHoursShort(totalHours - billableHours)} · TOTAL VALUE: {formatCurrency(totalValue, "GBP")}
+        Total: {formatHoursShort(totalHours)} · Billable: {formatHoursShort(billableHours)} · Non-billable: {formatHoursShort(totalHours - billableHours)} · Total value: {formatCurrency(totalValue, "GBP")}
       </div>
       )}
 
@@ -312,5 +319,13 @@ export default function TimeLogsPage() {
         />
       </Drawer>
     </main>
+  );
+}
+
+export default function TimeLogsPage() {
+  return (
+    <Suspense fallback={<main className="p-6"><div className="animate-pulse text-[var(--text-muted)]">Loading...</div></main>}>
+      <TimeLogsContent />
+    </Suspense>
   );
 }

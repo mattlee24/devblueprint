@@ -95,47 +95,47 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       className="fixed z-[100] min-w-[220px] py-1 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg"
       style={{ left: position.x, top: position.y }}
     >
-      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border)]">
+      <p className="px-3 py-1.5 text-[10px] text-[var(--text-muted)] border-b border-[var(--border)]">
         Quick actions
       </p>
       <button
         type="button"
         onClick={() => navigate("/projects/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
-        <FolderKanban className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        <FolderKanban className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         New project
       </button>
       <button
         type="button"
         onClick={() => navigate("/clients/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
-        <UserPlus className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        <UserPlus className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         New client
       </button>
       <button
         type="button"
         onClick={() => navigate("/proposals/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
-        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         New proposal
       </button>
       <button
         type="button"
         onClick={() => navigate("/invoices/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
-        <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         New invoice
       </button>
       <button
         type="button"
         onClick={() => navigate("/time-logs")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
-        <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--accent-green)]" />
+        <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         Log time
       </button>
 
@@ -146,7 +146,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
           toggleTheme();
           onClose();
         }}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         {theme === "dark" ? (
           <Sun className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
@@ -157,13 +157,13 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       </button>
 
       <div className="border-t border-[var(--border)] my-1" />
-      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+      <p className="px-3 py-1.5 text-[10px] text-[var(--text-muted)]">
         Go to
       </p>
       <button
         type="button"
         onClick={() => navigate("/dashboard")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <LayoutDashboard className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Dashboard
@@ -171,7 +171,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/projects")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <FolderKanban className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Projects
@@ -179,7 +179,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/clients")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Users className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Clients
@@ -187,7 +187,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/proposals")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Proposals
@@ -195,7 +195,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/time-logs")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Time logs
@@ -203,7 +203,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/invoices")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Invoices
@@ -211,7 +211,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/reports")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <BarChart3 className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Reports
@@ -219,7 +219,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={() => navigate("/settings")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Settings className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
         Settings
@@ -229,7 +229,7 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       <button
         type="button"
         onClick={openSearch}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
       >
         <Search className="w-3.5 h-3.5 shrink-0" />
         Search...

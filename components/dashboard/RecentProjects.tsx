@@ -32,7 +32,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                 href={`/projects/${p.id}`}
                 data-context-menu="project"
                 data-context-id={p.id}
-                className="flex items-center justify-between gap-2 py-2 px-2 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] group"
+                className="flex items-center justify-between gap-2 py-2 px-2 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] group cursor-pointer"
               >
                 <div className="min-w-0">
                   <p className="font-medium truncate group-hover:text-[var(--accent-green)]">

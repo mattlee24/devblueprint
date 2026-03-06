@@ -210,7 +210,7 @@ export function KanbanBoard({
                               setEditingColumnId(col.id);
                               setEditingLabel(col.label);
                             }}
-                            className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)]"
+                            className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] cursor-pointer"
                             title="Edit column name"
                           >
                             <Pencil className="w-3.5 h-3.5" />

@@ -137,26 +137,6 @@ Return a single JSON object only. You must include at least 12 items in coreFeat
       technicalRequirements: Array.isArray(rawBlueprint.technicalRequirements)
         ? (rawBlueprint.technicalRequirements as { text: string }[]).map((r) => ({ text: typeof r?.text === "string" ? r.text : String(r) }))
         : [],
-      feasibility: {
-        technicalComplexity: typeof rawBlueprint.feasibility === "object" && rawBlueprint.feasibility !== null
-          ? Math.min(10, Math.max(0, Number((rawBlueprint.feasibility as Record<string, unknown>).technicalComplexity) || 5))
-          : 5,
-        resourceRequirements: typeof rawBlueprint.feasibility === "object" && rawBlueprint.feasibility !== null
-          ? Math.min(10, Math.max(0, Number((rawBlueprint.feasibility as Record<string, unknown>).resourceRequirements) || 5))
-          : 5,
-        timeToMarket: typeof rawBlueprint.feasibility === "object" && rawBlueprint.feasibility !== null
-          ? Math.min(10, Math.max(0, Number((rawBlueprint.feasibility as Record<string, unknown>).timeToMarket) || 5))
-          : 5,
-        scalabilityPotential: typeof rawBlueprint.feasibility === "object" && rawBlueprint.feasibility !== null
-          ? Math.min(10, Math.max(0, Number((rawBlueprint.feasibility as Record<string, unknown>).scalabilityPotential) || 5))
-          : 5,
-        overallVerdict: ["low", "medium", "high"].includes((rawBlueprint.feasibility as Record<string, unknown>)?.overallVerdict as string)
-          ? (rawBlueprint.feasibility as Record<string, unknown>).overallVerdict as "low" | "medium" | "high"
-          : "medium",
-        summary: typeof (rawBlueprint.feasibility as Record<string, unknown>)?.summary === "string"
-          ? (rawBlueprint.feasibility as Record<string, unknown>).summary as string
-          : "Project feasibility assessed.",
-      },
       coreFeatures: Array.isArray(rawBlueprint.coreFeatures)
         ? (rawBlueprint.coreFeatures as Array<{ name?: string; type?: string; effort?: string; description?: string; userStories?: string[] }>).map((f) => ({
             name: typeof f?.name === "string" ? f.name : "Feature",
@@ -193,13 +173,6 @@ Return a single JSON object only. You must include at least 12 items in coreFeat
       suggestedImprovements: Array.isArray(rawBlueprint.suggestedImprovements)
         ? (rawBlueprint.suggestedImprovements as unknown[]).map((s) => String(s))
         : [],
-      scores: {
-        clarityOfScope: Math.min(10, Math.max(0, Number((rawBlueprint.scores as Record<string, unknown>)?.clarityOfScope) || 6)),
-        technicalFeasibility: Math.min(10, Math.max(0, Number((rawBlueprint.scores as Record<string, unknown>)?.technicalFeasibility) || 6)),
-        featureCompleteness: Math.min(10, Math.max(0, Number((rawBlueprint.scores as Record<string, unknown>)?.featureCompleteness) || 6)),
-        riskProfile: Math.min(10, Math.max(0, Number((rawBlueprint.scores as Record<string, unknown>)?.riskProfile) || 6)),
-      },
-      overallScore: Math.min(10, Math.max(0, Number(rawBlueprint.overallScore) || 6)),
       summary: typeof rawBlueprint.summary === "string" ? rawBlueprint.summary : "Blueprint generated.",
     };
 

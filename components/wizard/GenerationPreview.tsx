@@ -60,19 +60,19 @@ export function GenerationPreview({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className={cardClass}>
           <p className="text-2xl font-bold text-[var(--accent)]">{featureCount}</p>
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Features</p>
+          <p className="text-xs text-[var(--text-muted)]">Features</p>
         </div>
         <div className={cardClass}>
           <p className="text-2xl font-bold text-[var(--accent)]">{taskCount}</p>
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Tasks</p>
+          <p className="text-xs text-[var(--text-muted)]">Tasks</p>
         </div>
         <div className={cardClass}>
           <p className="text-2xl font-bold text-[var(--accent)]">{milestoneCount}</p>
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Milestones</p>
+          <p className="text-xs text-[var(--text-muted)]">Milestones</p>
         </div>
         <div className={cardClass}>
           <p className="text-2xl font-bold text-[var(--accent)]">{riskCount}</p>
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Risks</p>
+          <p className="text-xs text-[var(--text-muted)]">Risks</p>
         </div>
       </div>
 

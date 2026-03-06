@@ -107,10 +107,10 @@ export default function InvoicesPage() {
             type="button"
             onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 text-sm rounded border ${
-              statusFilter === s ? "border-[var(--accent-green)] text-[var(--accent-green)]" : "border-[var(--border)]"
+              statusFilter === s ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)]"
             }`}
           >
-            [{s.toUpperCase()}]
+            {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
           </button>
         ))}
       </div>
@@ -148,13 +148,13 @@ export default function InvoicesPage() {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--border)]">
-            <th className="text-left py-2">INVOICE #</th>
-            <th className="text-left py-2">CLIENT</th>
-            <th className="text-left py-2">ISSUED</th>
-            <th className="text-left py-2">DUE</th>
-            <th className="text-right py-2">AMOUNT</th>
-            <th className="text-left py-2">STATUS</th>
-            <th className="text-right py-2">ACTIONS</th>
+            <th className="text-left py-2">Invoice #</th>
+            <th className="text-left py-2">Client</th>
+            <th className="text-left py-2">Issued</th>
+            <th className="text-left py-2">Due</th>
+            <th className="text-right py-2">Amount</th>
+            <th className="text-left py-2">Status</th>
+            <th className="text-right py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -182,7 +182,7 @@ export default function InvoicesPage() {
                       : "muted"
                   }
                 >
-                  [{inv.status.toUpperCase()}]
+                  {inv.status.replace(/\b\w/g, (c) => c.toUpperCase())}
                 </Badge>
               </td>
               <td className="text-right py-2">

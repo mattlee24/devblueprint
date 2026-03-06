@@ -27,7 +27,7 @@ export function Drawer({ open, onClose, title, children, width = "md" }: DrawerP
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/60 z-40 transition-[var(--transition)]"
+        className="fixed inset-0 bg-black/60 z-40 transition-[var(--transition)] cursor-pointer"
         onClick={onClose}
         aria-hidden
       />
@@ -42,7 +42,7 @@ export function Drawer({ open, onClose, title, children, width = "md" }: DrawerP
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+              className="p-1 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] cursor-pointer"
               aria-label="Close"
             >
               <X className="w-5 h-5" />

@@ -1,15 +1,34 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { ProposalSlide, ProposalSlideBlock } from "@/lib/queries/proposals";
 
-export interface GeneratedProposalContent {
-  objectives: string[];
-  deliverables: string[];
-  timeline: { phase: string; duration: string; description: string }[];
-  budget_estimates: { item: string; estimate: string; notes?: string }[];
-  team_structure: { role: string; responsibility: string }[];
-  success_metrics: string[];
-  executive_summary?: string;
+const SLIDE_TITLES = [
+  "[Project] Proposal",
+  "Project overview",
+  "Your investment",
+  "Optional add-ons",
+  "Terms & conditions 1",
+  "Terms & conditions 2",
+  "Terms & conditions 3",
+  "Acceptance",
+  "Thank you",
+];
+
+const MIN_SLIDES = 9;
+
+function toBlocks(raw: { type?: string; content?: string }[] | string | undefined): ProposalSlideBlock[] {
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.map((b, i) => ({
+      id: `block-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 9)}`,
+      type: ["heading", "paragraph", "bullets", "numbered", "image"].includes(b.type as string) ? (b.type as ProposalSlideBlock["type"]) : "paragraph",
+      content: typeof b.content === "string" ? b.content : "",
+    }));
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [{ id: `block-${Date.now()}-0`, type: "paragraph", content: raw.trim() }];
+  }
+  return [];
 }
 
 export async function POST(request: Request) {
@@ -30,14 +49,14 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { title: string; description: string };
+  let body: { title: string; description: string; clientId?: string | null };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { title, description } = body;
+  const { title, description, clientId } = body;
   if (!title?.trim() || !description?.trim()) {
     return NextResponse.json(
       { error: "Missing required fields: title, description" },
@@ -49,34 +68,33 @@ export async function POST(request: Request) {
   const modelId = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const model = genAI.getGenerativeModel({
     model: modelId,
-    systemInstruction: `You are an expert project consultant. Given only a project title and description, you produce a fully detailed, professional project proposal document that could serve as a project kickoff document. The proposal must be polished and client-ready.
+    systemInstruction: `You are an expert project consultant. Given a project title and description, you produce a proposal with at least 9 slides. Each slide has a title and a "blocks" array. Each block has "type" (one of: "heading", "paragraph", "bullets") and "content" (string). For "bullets", content is newline-separated bullet points. Slide titles in order:
+1. "[Project] Proposal" — one short paragraph block (e.g. "Proposal for [Project Name]")
+2. "Project overview" — 2-3 paragraph blocks summarizing scope, goals, and approach
+3. "Your investment" — paragraph and/or bullets: pricing summary, payment structure, total estimate in GBP
+4. "Optional add-ons" — bullets: 3-6 optional extras with brief descriptions and ballpark costs
+5. "Terms & conditions 1" — paragraph/bullets: payment terms (invoices, due dates, deposit, late payment)
+6. "Terms & conditions 2" — paragraph/bullets: IP and confidentiality
+7. "Terms & conditions 3" — paragraph/bullets: change orders and scope
+8. "Acceptance" — paragraph: how to accept (sign, email, next steps)
+9. "Thank you" — one short paragraph: closing (thank you, contact)
 
-Generate a comprehensive proposal including:
-1. **Objectives** (4-8 clear, measurable project objectives)
-2. **Deliverables** (6-12 concrete deliverables with brief descriptions)
-3. **Timeline** (4-8 phases with duration and description, e.g. Discovery, Design, Development, QA, Launch)
-4. **Budget estimates** (4-8 line items: e.g. Discovery & planning, Design, Development, QA, Project management, Contingency — with estimates in days or ranges and optional notes)
-5. **Team structure** (3-6 roles with responsibilities, e.g. Project Lead, Designer, Developer, QA)
-6. **Success metrics** (4-8 measurable outcomes)
-7. **Executive summary** (2-4 sentences summarizing the proposal)
-8. **estimated_total** (a single number: the total project cost in GBP based on your budget_estimates; e.g. 12500 or 25000. No currency symbol, just the number)
+Also output projectCreationPayload: { title, description, type (website|web_application|mobile_app|api|cli|other), goals (array), constraints, targetAudience }. Use clientId only if provided.
 
-Be specific to the project described. Use professional language. Do not mention tech stack, tools, or implementation details—those are out of scope for this proposal.
-
-Respond with a single JSON object of this exact shape (no markdown, no code fence):
+Respond with a single JSON object (no markdown, no code fence):
 {
-  "objectives": ["string"],
-  "deliverables": ["string"],
-  "timeline": [{"phase": "string", "duration": "string", "description": "string"}],
-  "budget_estimates": [{"item": "string", "estimate": "string", "notes": "string or null"}],
-  "team_structure": [{"role": "string", "responsibility": "string"}],
-  "success_metrics": ["string"],
-  "executive_summary": "string",
+  "slides": [
+    { "title": "[Project] Proposal", "blocks": [{"type": "paragraph", "content": "string"}] },
+    ... (at least 9 items, titles as above; each slide has "blocks" array of {"type": "heading"|\"paragraph\"|\"bullets\", "content": "string"})
+  ],
+  "projectCreationPayload": { "title": "string", "description": "string", "type": "string", "goals": ["string"], "constraints": "string", "targetAudience": "string" },
   "estimated_total": number
-}`,
+}
+estimated_total is the total project cost in GBP (number only). You may also use "body" as a string per slide instead of "blocks"; we will convert it to one paragraph block.`,
     generationConfig: {
       responseMimeType: "application/json",
       temperature: 0.4,
+      maxOutputTokens: 8192,
     },
   });
 
@@ -84,8 +102,9 @@ Respond with a single JSON object of this exact shape (no markdown, no code fenc
 
 Project description:
 ${description}
+${clientId ? `\nClient ID (include in projectCreationPayload if relevant): ${clientId}` : ""}
 
-Output the single JSON object only.`;
+Output the single JSON object with slides (at least 9 items, each with title and blocks array), projectCreationPayload, and estimated_total.`;
 
   try {
     const result = await model.generateContent(userPrompt);
@@ -96,29 +115,59 @@ Output the single JSON object only.`;
     let content = response.text();
     const jsonMatch = content.match(/^```(?:json)?\s*([\s\S]*?)```$/m);
     if (jsonMatch) content = jsonMatch[1].trim();
-    const parsed = JSON.parse(content) as Record<string, unknown>;
-    const generated: GeneratedProposalContent = {
-      objectives: Array.isArray(parsed.objectives) ? (parsed.objectives as string[]) : [],
-      deliverables: Array.isArray(parsed.deliverables) ? (parsed.deliverables as string[]) : [],
-      timeline: Array.isArray(parsed.timeline)
-        ? (parsed.timeline as { phase: string; duration: string; description: string }[])
-        : [],
-      budget_estimates: Array.isArray(parsed.budget_estimates)
-        ? (parsed.budget_estimates as { item: string; estimate: string; notes?: string }[])
-        : [],
-      team_structure: Array.isArray(parsed.team_structure)
-        ? (parsed.team_structure as { role: string; responsibility: string }[])
-        : [],
-      success_metrics: Array.isArray(parsed.success_metrics) ? (parsed.success_metrics as string[]) : [],
-      executive_summary: typeof parsed.executive_summary === "string" ? parsed.executive_summary : undefined,
+    const parsed = JSON.parse(content) as {
+      slides?: { title?: string; body?: string; blocks?: { type?: string; content?: string }[] }[];
+      projectCreationPayload?: Record<string, unknown>;
+      estimated_total?: number;
     };
+
+    const rawSlides = Array.isArray(parsed.slides) ? parsed.slides : [];
+    const ts = Date.now();
+    const slides: ProposalSlide[] = [];
+    for (let i = 0; i < Math.max(MIN_SLIDES, rawSlides.length); i++) {
+      const raw = rawSlides[i];
+      const defaultTitle = SLIDE_TITLES[i] ?? `Slide ${i + 1}`;
+      const blocks = toBlocks(raw?.blocks ?? raw?.body);
+      slides.push({
+        id: `slide-${i}-${ts}`,
+        order: i,
+        title: typeof raw?.title === "string" ? raw.title : defaultTitle,
+        blocks,
+      });
+    }
+
+    const payload = parsed.projectCreationPayload;
+    const projectCreationPayload =
+      payload && typeof payload === "object"
+        ? {
+            title: typeof payload.title === "string" ? payload.title : title,
+            description: typeof payload.description === "string" ? payload.description : description,
+            type: typeof payload.type === "string" ? payload.type : "website",
+            client_id: clientId ?? payload.client_id ?? null,
+            goals: Array.isArray(payload.goals) ? payload.goals.map(String) : [],
+            constraints: typeof payload.constraints === "string" ? payload.constraints : "",
+            targetAudience: typeof payload.targetAudience === "string" ? payload.targetAudience : "",
+          }
+        : {
+            title,
+            description,
+            type: "website" as const,
+            client_id: clientId ?? null,
+            goals: [] as string[],
+            constraints: "",
+            targetAudience: "",
+          };
 
     const estimated_total =
       typeof parsed.estimated_total === "number" && Number.isFinite(parsed.estimated_total)
         ? parsed.estimated_total
         : undefined;
 
-    return NextResponse.json({ generated, estimated_total });
+    return NextResponse.json({
+      slides,
+      projectCreationPayload,
+      estimated_total,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "AI request failed";
     return NextResponse.json({ error: message }, { status: 500 });

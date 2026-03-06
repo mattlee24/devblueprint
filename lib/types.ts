@@ -79,7 +79,8 @@ export interface SuggestedIntegration {
 
 export interface Blueprint {
   technicalRequirements: Requirement[];
-  feasibility: FeasibilityAnalysis;
+  /** @deprecated Not displayed; kept for backward compatibility. */
+  feasibility?: FeasibilityAnalysis;
   coreFeatures: Feature[];
   suggestedImprovements: string[];
   riskFactors: Risk[];
@@ -89,8 +90,10 @@ export interface Blueprint {
   featureDependencies?: FeatureDependency[];
   /** Suggested third-party tools or integrations. */
   integrations?: SuggestedIntegration[];
-  scores: ScoreBreakdown;
-  overallScore: number;
+  /** @deprecated Not displayed; kept for backward compatibility. */
+  scores?: ScoreBreakdown;
+  /** @deprecated Not displayed; kept for backward compatibility. */
+  overallScore?: number;
   summary: string;
 }
 

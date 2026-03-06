@@ -94,10 +94,10 @@ export default function ProposalsPage() {
             type="button"
             onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 text-sm rounded border ${
-              statusFilter === s ? "border-[var(--accent-green)] text-[var(--accent-green)]" : "border-[var(--border)]"
+              statusFilter === s ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)]"
             }`}
           >
-            [{s.toUpperCase()}]
+            {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
           </button>
         ))}
       </div>
@@ -140,7 +140,7 @@ export default function ProposalsPage() {
                     </p>
                   </div>
                   <Badge variant={p.status === "agreed" ? "success" : p.status === "declined" ? "danger" : "default"}>
-                    [{p.status.toUpperCase()}]
+                    {p.status.replace(/\b\w/g, (c) => c.toUpperCase())}
                   </Badge>
                 </div>
               </Link>

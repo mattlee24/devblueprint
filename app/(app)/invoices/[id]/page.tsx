@@ -6,6 +6,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { getInvoice, getInvoiceItems, updateInvoice, createInvoiceItem, updateInvoiceItem, deleteInvoiceItem, deleteInvoice } from "@/lib/queries/invoices";
 import type { InvoiceRow, InvoiceItemRow } from "@/lib/queries/invoices";
+import { getProfile } from "@/lib/queries/profiles";
+import type { ProfileRow } from "@/lib/queries/profiles";
 import { getTimeLogs, updateTimeLog } from "@/lib/queries/timeLogs";
 import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +23,7 @@ export default function InvoiceDetailPage() {
   const id = params.id as string;
   const [invoice, setInvoice] = useState<InvoiceRow | null>(null);
   const [items, setItems] = useState<InvoiceItemRow[]>([]);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [timeLogsAvailable, setTimeLogsAvailable] = useState<TimeLogRow[]>([]);
   const [selectedLogIds, setSelectedLogIds] = useState<Set<string>>(new Set());
   const [addingLogs, setAddingLogs] = useState(false);
@@ -30,12 +33,14 @@ export default function InvoiceDetailPage() {
 
   useEffect(() => {
     async function load() {
-      const [iRes, itemsRes] = await Promise.all([
+      const [iRes, itemsRes, profileRes] = await Promise.all([
         getInvoice(id),
         getInvoiceItems(id),
+        getProfile(),
       ]);
       setInvoice(iRes.data ?? null);
       setItems(itemsRes.data ?? []);
+      setProfile(profileRes.data ?? null);
       setLoading(false);
     }
     load();
@@ -176,33 +181,53 @@ export default function InvoiceDetailPage() {
         ]}
         className="mb-4 no-print"
       />
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 no-print">
         <h1 className="text-2xl font-semibold">Invoice {invoice.invoice_number}</h1>
         <Badge
           variant={
             invoice.status === "paid" ? "success" : invoice.status === "overdue" ? "danger" : "default"
           }
         >
-          [{invoice.status.toUpperCase()}]
+          {invoice.status.replace(/\b\w/g, (c) => c.toUpperCase())}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="border border-[var(--border)] rounded p-4">
-          <p className="text-xs text-[var(--text-muted)] uppercase mb-2">Bill to</p>
-          <p className="font-medium">{client && "name" in client ? String(client.name) : "—"}</p>
+      {/* Print layout: From (company) + Bill to (client) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="border border-[var(--border)] rounded-[var(--radius-card)] p-5 bg-[var(--bg-surface)] print:border print:border-gray-300 print:bg-white">
+          <p className="text-xs font-medium text-[var(--text-muted)] mb-2 print:text-gray-500">From</p>
+          {profile?.logo_path ? (
+            <img src={profile.logo_path} alt="" className="h-10 object-contain mb-3 print:h-12" />
+          ) : null}
+          <p className="font-semibold text-[var(--text-primary)] print:text-black">{profile?.business_name ?? "Your Company"}</p>
+          {profile?.business_address ? (
+            <p className="text-sm text-[var(--text-secondary)] whitespace-pre-line mt-1 print:text-gray-700">{profile.business_address}</p>
+          ) : null}
+          {profile?.business_email ? <p className="text-sm mt-1 print:text-gray-700">{profile.business_email}</p> : null}
+          {profile?.business_phone ? <p className="text-sm print:text-gray-700">{profile.business_phone}</p> : null}
+          {profile?.tax_number ? <p className="text-sm mt-1 print:text-gray-600">VAT / Tax: {profile.tax_number}</p> : null}
+        </div>
+        <div className="border border-[var(--border)] rounded-[var(--radius-card)] p-5 bg-[var(--bg-surface)] print:border print:border-gray-300 print:bg-white">
+          <p className="text-xs font-medium text-[var(--text-muted)] mb-2 print:text-gray-500">Bill to</p>
+          <p className="font-semibold text-[var(--text-primary)] print:text-black">{client && "name" in client ? String(client.name) : "—"}</p>
           {client && "address" in client && client.address ? (
-            <p className="text-sm text-[var(--text-secondary)] whitespace-pre-line mt-1">
-              {String(client.address)}
-            </p>
+            <p className="text-sm text-[var(--text-secondary)] whitespace-pre-line mt-1 print:text-gray-700">{String(client.address)}</p>
           ) : null}
           {client && "email" in client && client.email ? (
-            <p className="text-sm mt-1">{String(client.email)}</p>
+            <p className="text-sm mt-1 print:text-gray-700">{String(client.email)}</p>
           ) : null}
         </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      {/* Invoice meta */}
+      <div className="flex flex-wrap gap-6 mb-6 text-sm">
+        <div><span className="text-[var(--text-muted)] print:text-gray-500">Invoice number</span><span className="ml-2 font-medium print:text-black">{invoice.invoice_number}</span></div>
+        <div><span className="text-[var(--text-muted)] print:text-gray-500">Issue date</span><span className="ml-2 font-medium print:text-black">{formatDate(invoice.issue_date)}</span></div>
+        <div><span className="text-[var(--text-muted)] print:text-gray-500">Due date</span><span className="ml-2 font-medium print:text-black">{invoice.due_date ? formatDate(invoice.due_date) : "—"}</span></div>
+        <div><span className="text-[var(--text-muted)] print:text-gray-500">Status</span><span className="ml-2 font-medium print:text-black">{invoice.status.replace(/\b\w/g, (c) => c.toUpperCase())}</span></div>
+      </div>
+
+      <div className="flex gap-2 mb-4 no-print">
         <Input
           label="Invoice #"
           value={invoice.invoice_number}
@@ -233,7 +258,7 @@ export default function InvoiceDetailPage() {
       </div>
 
       {timeLogsAvailable.length > 0 && (
-        <div className="mb-6 p-4 border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-elevated)]">
+        <div className="mb-6 p-4 border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-elevated)] no-print">
           <h2 className="text-sm font-medium mb-2">Add from time logs (billable, not yet on an invoice)</h2>
           <ul className="space-y-2 mb-3 max-h-48 overflow-y-auto">
             {timeLogsAvailable.map((log) => (
@@ -261,18 +286,18 @@ export default function InvoiceDetailPage() {
       )}
 
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-2 no-print">
           <h2 className="text-sm font-medium">Line items</h2>
           <Button variant="secondary" onClick={addLine}>+ Add row</Button>
         </div>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm invoice-line-items">
           <thead>
-            <tr className="border-b border-[var(--border)]">
-              <th className="text-left py-2">Description</th>
-              <th className="text-right py-2 w-24">Qty</th>
-              <th className="text-right py-2 w-28">Unit price</th>
-              <th className="text-right py-2 w-28">Total</th>
-              <th className="w-10" />
+            <tr className="border-b-2 border-[var(--border)] print:border-gray-400">
+              <th className="text-left py-3 font-semibold print:text-black">Description</th>
+              <th className="text-right py-3 w-24 font-semibold print:text-black">Qty</th>
+              <th className="text-right py-3 w-28 font-semibold print:text-black">Unit price</th>
+              <th className="text-right py-3 w-28 font-semibold print:text-black">Total</th>
+              <th className="w-10 no-print" />
             </tr>
           </thead>
           <tbody>
@@ -304,7 +329,7 @@ export default function InvoiceDetailPage() {
                 <td className="text-right py-2">
                   {formatCurrency(item.quantity * item.unit_price, invoice.currency)}
                 </td>
-                <td className="py-2">
+                <td className="py-2 no-print">
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
@@ -319,13 +344,13 @@ export default function InvoiceDetailPage() {
         </table>
       </div>
 
-      <div className="max-w-xs ml-auto space-y-1 text-sm">
+      <div className="max-w-xs ml-auto space-y-2 text-sm border border-[var(--border)] rounded-[var(--radius-card)] p-4 print:border-gray-300">
         <div className="flex justify-between">
-          <span className="text-[var(--text-muted)]">Subtotal</span>
-          <span>{formatCurrency(subtotal, invoice.currency)}</span>
+          <span className="text-[var(--text-muted)] print:text-gray-600">Subtotal</span>
+          <span className="print:text-black">{formatCurrency(subtotal, invoice.currency)}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-[var(--text-muted)]">Tax (%)</span>
+          <span className="text-[var(--text-muted)] print:text-gray-600">Tax (%)</span>
           <input
             type="number"
             value={invoice.tax_rate}
@@ -333,23 +358,26 @@ export default function InvoiceDetailPage() {
               const res = await updateInvoice(invoice.id, { tax_rate: parseFloat(e.target.value) || 0 });
               if (res.data) setInvoice(res.data);
             }}
-            className="w-16 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-right"
+            className="w-16 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-right no-print"
           />
+          <span className="print-only print:text-black">{invoice.tax_rate}%</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[var(--text-muted)]">Tax amount</span>
-          <span>{formatCurrency(taxAmount, invoice.currency)}</span>
+          <span className="text-[var(--text-muted)] print:text-gray-600">Tax amount</span>
+          <span className="print:text-black">{formatCurrency(taxAmount, invoice.currency)}</span>
         </div>
-        <div className="flex justify-between font-semibold pt-2 border-t border-[var(--border)]">
+        <div className="flex justify-between font-semibold pt-2 border-t border-[var(--border)] print:border-gray-300 print:text-black">
           <span>Total</span>
           <span>{formatCurrency(total, invoice.currency)}</span>
         </div>
       </div>
 
-      <div className="flex gap-2 mt-8 flex-wrap">
-        <Button onClick={() => updateStatus("sent")}>[MARK AS SENT]</Button>
-        <Button variant="secondary" onClick={() => updateStatus("paid")}>[MARK AS PAID]</Button>
-        <Button variant="secondary" onClick={() => updateStatus("overdue")}>[MARK AS OVERDUE]</Button>
+      <p className="text-sm text-[var(--text-muted)] mt-8 print:text-gray-600 print:mt-12">Thank you for your business.</p>
+
+      <div className="flex gap-2 mt-8 flex-wrap no-print">
+        <Button onClick={() => updateStatus("sent")}>Mark as sent</Button>
+        <Button variant="secondary" onClick={() => updateStatus("paid")}>Mark as paid</Button>
+        <Button variant="secondary" onClick={() => updateStatus("overdue")}>Mark as overdue</Button>
         <Button variant="ghost" onClick={() => window.print()} className="no-print">Download PDF</Button>
         {client && "email" in client && client.email ? (
           <a
@@ -360,7 +388,7 @@ export default function InvoiceDetailPage() {
           </a>
         ) : null}
         <Button variant="danger" onClick={() => setDeleteConfirmOpen(true)} className="no-print ml-auto">
-          [DELETE INVOICE]
+          Delete invoice
         </Button>
       </div>
 

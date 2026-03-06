@@ -71,7 +71,7 @@ export function WelcomeFlow({ onComplete }: WelcomeFlowProps) {
       <div className="w-full max-w-lg rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg overflow-hidden">
         {/* Step progress: "Step 2 of 5" + progress bar */}
         <div className="px-8 pt-6 pb-4 border-b border-[var(--border)]">
-          <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
+          <p className="text-xs font-medium text-[var(--text-muted)] mb-2">
             Step {step + 1} of {totalSteps}
           </p>
           <div className="h-1.5 w-full rounded-full bg-[var(--bg-elevated)] overflow-hidden">

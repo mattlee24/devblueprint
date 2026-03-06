@@ -19,96 +19,38 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
 
   const {
     technicalRequirements,
-    feasibility,
     coreFeatures,
     suggestedImprovements,
     riskFactors,
     milestones,
     featureDependencies,
     integrations,
-    scores,
-    overallScore,
     summary,
   } = blueprint;
 
   return (
     <div className="space-y-8">
-      {/* Summary and score block */}
-      <div className={`${cardClass} text-center`}>
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide mb-1">Overall score</p>
-        <p className="text-4xl font-semibold text-[var(--accent)] mb-3">{overallScore.toFixed(1)} / 10</p>
-        <p className="text-sm text-[var(--text-secondary)] max-w-2xl mx-auto mb-4">{summary}</p>
-        {feasibility && (
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <span>
-              <span className="text-[var(--text-muted)]">Complexity </span>
-              <span className="font-medium">{feasibility.technicalComplexity}/10</span>
-            </span>
-            <span>
-              <span className="text-[var(--text-muted)]">Resources </span>
-              <span className="font-medium">{feasibility.resourceRequirements}/10</span>
-            </span>
-            <span>
-              <span className="text-[var(--text-muted)]">Time to market </span>
-              <span className="font-medium">{feasibility.timeToMarket}/10</span>
-            </span>
-            <span>
-              <span className="text-[var(--text-muted)]">Scalability </span>
-              <span className="font-medium">{feasibility.scalabilityPotential}/10</span>
-            </span>
-            <Badge variant="default" className="mt-2">
-              {feasibility.overallVerdict.replace(/\b\w/g, (c) => c.toUpperCase())} feasibility
-            </Badge>
-          </div>
-        )}
+      {/* Summary only */}
+      <div className={cardClass}>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-2xl">{summary}</p>
       </div>
 
-      {/* Two-column: Technical requirements + Feasibility detail */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className={cardClass}>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">1.</span> Technical requirements
-          </h3>
-          <ul className="list-disc list-inside space-y-1.5 text-sm text-[var(--text-secondary)]">
-            {technicalRequirements.map((r, i) => (
-              <li key={i}>{r.text}</li>
-            ))}
-          </ul>
-        </div>
-        <div className={cardClass}>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">2.</span> Score breakdown
-          </h3>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-[var(--text-muted)] text-xs">Clarity of scope</p>
-              <p className="font-medium text-[var(--accent)]">{scores.clarityOfScope}/10</p>
-            </div>
-            <div>
-              <p className="text-[var(--text-muted)] text-xs">Technical feasibility</p>
-              <p className="font-medium text-[var(--accent)]">{scores.technicalFeasibility}/10</p>
-            </div>
-            <div>
-              <p className="text-[var(--text-muted)] text-xs">Feature completeness</p>
-              <p className="font-medium text-[var(--accent)]">{scores.featureCompleteness}/10</p>
-            </div>
-            <div>
-              <p className="text-[var(--text-muted)] text-xs">Risk profile</p>
-              <p className="font-medium text-[var(--accent)]">{scores.riskProfile}/10</p>
-            </div>
-          </div>
-          {feasibility?.summary && (
-            <p className="text-sm text-[var(--text-secondary)] mt-3 pt-3 border-t border-[var(--border)]">
-              {feasibility.summary}
-            </p>
-          )}
-        </div>
+      {/* Technical requirements */}
+      <div className={cardClass}>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+          <span className="text-[var(--accent)]">1.</span> Technical requirements
+        </h3>
+        <ul className="list-disc list-inside space-y-1.5 text-sm text-[var(--text-secondary)]">
+          {technicalRequirements.map((r, i) => (
+            <li key={i}>{r.text}</li>
+          ))}
+        </ul>
       </div>
 
       {/* Full width: Core features */}
       <div className={cardClass}>
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-          <span className="text-[var(--accent)]">3.</span> Core features
+          <span className="text-[var(--accent)]">2.</span> Core features
         </h3>
         <ul className="space-y-4 text-sm">
           {coreFeatures.map((f, i) => (
@@ -138,7 +80,7 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
       {milestones && milestones.length > 0 && (
         <div className={cardClass}>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">4.</span> Milestones & phases
+            <span className="text-[var(--accent)]">3.</span> Milestones & phases
           </h3>
           <ul className="space-y-3 text-sm">
             {milestones.map((m, i) => (
@@ -155,7 +97,7 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className={cardClass}>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">5.</span> Suggested improvements
+            <span className="text-[var(--accent)]">4.</span> Suggested improvements
           </h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-[var(--text-secondary)]">
             {suggestedImprovements.map((s, i) => (
@@ -166,7 +108,7 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
 
         <div className={cardClass}>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">6.</span> Risk factors & mitigation
+            <span className="text-[var(--accent)]">5.</span> Risk factors & mitigation
           </h3>
           <ul className="space-y-3 text-sm">
             {riskFactors.map((r, i) => (
@@ -191,7 +133,7 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
       {(featureDependencies?.length ?? 0) > 0 && (
         <div className={cardClass}>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">7.</span> Feature dependencies
+            <span className="text-[var(--accent)]">6.</span> Feature dependencies
           </h3>
           <ul className="space-y-1.5 text-sm text-[var(--text-secondary)]">
             {featureDependencies!.map((d, i) => (
@@ -208,7 +150,7 @@ export function BlueprintTab({ blueprint }: BlueprintTabProps) {
       {(integrations?.length ?? 0) > 0 && (
         <div className={cardClass}>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-            <span className="text-[var(--accent)]">8.</span> Suggested integrations
+            <span className="text-[var(--accent)]">7.</span> Suggested integrations
           </h3>
           <ul className="space-y-2 text-sm">
             {integrations!.map((int, i) => (

@@ -31,8 +31,9 @@ export function ClientCard({
       href={`/clients/${client.id}`}
       data-context-menu="client"
       data-context-id={client.id}
+      className="cursor-pointer"
     >
-      <article className="border border-[var(--border)] rounded-[var(--radius-card)] p-4 bg-[var(--bg-surface)] hover:border-[var(--border-active)] hover:shadow-[0_0_10px_rgba(0,255,136,0.1)] transition-[var(--transition)] group">
+      <article className="border border-[var(--border)] rounded-[var(--radius-card)] p-4 card-gradient card-hover transition-[var(--transition)] group">
         <div className="flex items-start gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium shrink-0 border-2 border-[var(--border)]"
@@ -41,7 +42,7 @@ export function ClientCard({
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold group-hover:text-[var(--accent-green)]">
+            <h3 className="font-semibold group-hover:text-[var(--accent)]">
               {client.name}
             </h3>
             {client.company && (
@@ -54,9 +55,9 @@ export function ClientCard({
               <Badge variant="default">{client.status.replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
             </div>
             <div className="flex flex-wrap gap-2 mt-2 text-xs text-[var(--text-muted)]">
-              <span>[{projectCount} PROJECTS]</span>
-              <span>[{hoursLogged.toFixed(1)}h LOGGED]</span>
-              <span>[{formatCurrency(amountBilled, currency)} BILLED]</span>
+              <span>{projectCount} projects</span>
+              <span>{hoursLogged.toFixed(1)}h logged</span>
+              <span>{formatCurrency(amountBilled, currency)} billed</span>
             </div>
           </div>
         </div>

@@ -120,7 +120,7 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-semibold mb-6">Settings</h1>
 
       <section className="mb-8">
-        <TerminalSectionHeader>PROFILE</TerminalSectionHeader>
+        <TerminalSectionHeader>Profile</TerminalSectionHeader>
         <div className="space-y-4 mt-4">
           <Input
             label="Display name"
@@ -134,8 +134,16 @@ export default function SettingsPage() {
       </section>
 
       <section className="mb-8">
-        <TerminalSectionHeader>BUSINESS INFO (for invoices)</TerminalSectionHeader>
+        <TerminalSectionHeader>Business info (for invoices)</TerminalSectionHeader>
         <div className="space-y-4 mt-4">
+          <Input
+            label="Company logo (URL)"
+            type="url"
+            placeholder="https://…"
+            value={profile.logo_path ?? ""}
+            onChange={(e) => setProfile((p) => ({ ...p, logo_path: e.target.value || null }))}
+          />
+          <p className="text-xs text-[var(--text-muted)]">Public image URL for your logo. Shown on invoices. Leave empty for no logo.</p>
           <Input
             label="Business name"
             value={profile.business_name ?? ""}
@@ -169,7 +177,7 @@ export default function SettingsPage() {
       </section>
 
       <section className="mb-8">
-        <TerminalSectionHeader>DEFAULTS</TerminalSectionHeader>
+        <TerminalSectionHeader>Defaults</TerminalSectionHeader>
         <div className="space-y-4 mt-4">
           <Input
             label="Default currency"
@@ -196,7 +204,7 @@ export default function SettingsPage() {
       </div>
 
       <section className="mt-12 pt-8 border-t border-[var(--border)]">
-        <TerminalSectionHeader>DEMO DATA</TerminalSectionHeader>
+        <TerminalSectionHeader>Demo data</TerminalSectionHeader>
         <p className="text-sm text-[var(--text-muted)] mt-2 mb-4">
           Add sample data to your account. &quot;Seed all&quot; creates clients, projects, tasks, time logs, and invoices.
         </p>
@@ -217,14 +225,14 @@ export default function SettingsPage() {
           </Button>
         </div>
         {(seedAllMessage || seedMessage) && (
-          <p className="text-sm mt-2 text-[var(--accent-green)] max-w-xl">
+          <p className="text-sm mt-2 text-[var(--accent)] max-w-xl">
             {seedAllMessage ?? seedMessage}
           </p>
         )}
       </section>
 
       <section className="mt-12 pt-8 border-t border-[var(--border)]">
-        <TerminalSectionHeader>DANGER ZONE</TerminalSectionHeader>
+        <TerminalSectionHeader>Danger zone</TerminalSectionHeader>
         <p className="text-sm text-[var(--text-muted)] mt-2 mb-4">
           Delete your account and all data. This cannot be undone.
         </p>

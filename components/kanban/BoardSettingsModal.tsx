@@ -150,7 +150,7 @@ export function BoardSettingsModal({
                     <button
                       type="button"
                       onClick={() => { setEditingCatIdx(i); setEditCatLabel(c.label); }}
-                      className="p-1 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)]"
+                      className="p-1 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] cursor-pointer"
                       aria-label="Edit"
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -158,7 +158,7 @@ export function BoardSettingsModal({
                     <button
                       type="button"
                       onClick={() => removeCategory(i)}
-                      className="p-1 rounded text-[var(--accent-red)] hover:bg-[var(--bg-hover)]"
+                      className="p-1 rounded text-[var(--accent-red)] hover:bg-[var(--bg-hover)] cursor-pointer"
                       aria-label="Remove"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -210,7 +210,7 @@ export function BoardSettingsModal({
                     <button
                       type="button"
                       onClick={() => { setEditingPriIdx(i); setEditPriLabel(p.label); }}
-                      className="p-1 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)]"
+                      className="p-1 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] cursor-pointer"
                       aria-label="Edit"
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -218,7 +218,7 @@ export function BoardSettingsModal({
                     <button
                       type="button"
                       onClick={() => removePriority(i)}
-                      className="p-1 rounded text-[var(--accent-red)] hover:bg-[var(--bg-hover)]"
+                      className="p-1 rounded text-[var(--accent-red)] hover:bg-[var(--bg-hover)] cursor-pointer"
                       aria-label="Remove"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -39,10 +39,10 @@ export function Tabs({ tabs, defaultTab = tabs[0]?.id ?? "", className = "" }: T
               key={tab.id}
               type="button"
               onClick={() => setActiveId(tab.id)}
-              className={`px-4 py-2 text-sm font-medium transition-[var(--transition)] border-b-2 -mb-px ${
+              className={`px-4 py-2 text-sm font-medium transition-[var(--transition)] border-b-2 -mb-px cursor-pointer ${
                 activeId === tab.id
-                  ? "border-[var(--accent-green)] text-[var(--accent-green)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "border-[var(--accent)] text-[var(--accent)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)]"
               }`}
             >
               {tab.label}

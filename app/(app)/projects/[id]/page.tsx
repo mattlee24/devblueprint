@@ -176,7 +176,7 @@ export default function ProjectDetailPage() {
   if (error || !project) {
     return (
       <main className="p-6">
-        <p className="text-[var(--accent-red)]">{"> ERROR: "}{error ?? "Project not found"}</p>
+        <p className="text-[var(--accent-red)]">Something went wrong. {error ?? "Project not found"}</p>
       </main>
     );
   }
@@ -224,7 +224,7 @@ export default function ProjectDetailPage() {
             <p className="text-sm text-[var(--text-secondary)]">
               Total: <span className="font-medium text-[var(--text-primary)]">{formatHoursShort(hoursLogged)}</span>
               {" · "}
-              Billable: <span className="font-medium text-[var(--accent-green)]">{formatCurrency(billableAmount, currency)}</span>
+              Billable: <span className="font-medium text-[var(--accent)]">{formatCurrency(billableAmount, currency)}</span>
             </p>
           </div>
           {timeLogs.length === 0 ? (
@@ -247,7 +247,7 @@ export default function ProjectDetailPage() {
                     <td className="py-3 px-4 text-[var(--text-primary)]">{log.description}</td>
                     <td className="text-right py-3 px-4">{log.hours}</td>
                     <td className="py-3 px-4">
-                      <span className={log.billable ? "text-[var(--accent-green)]" : "text-[var(--text-muted)]"}>
+                      <span className={log.billable ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}>
                         {log.billable ? "Billable" : "Non-billable"}
                       </span>
                     </td>
@@ -273,34 +273,34 @@ export default function ProjectDetailPage() {
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 flex items-center gap-4">
               <ProgressRing value={doneCount} max={tasks.length || 1} />
               <div>
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Tasks complete</p>
+                <p className="text-xs text-[var(--text-muted)]">Tasks complete</p>
                 <p className="text-2xl font-bold text-[var(--text-primary)]">
                   {doneCount} <span className="text-[var(--text-muted)] font-normal">/ {tasks.length}</span>
                 </p>
               </div>
             </div>
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Open tasks</p>
+              <p className="text-xs text-[var(--text-muted)]">Open tasks</p>
               <p className="text-2xl font-bold text-[var(--text-primary)]">{tasks.length - doneCount}</p>
             </div>
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Hours logged</p>
-              <p className="text-2xl font-bold text-[var(--accent-green)]">{formatHoursShort(hoursLogged)}</p>
+              <p className="text-xs text-[var(--text-muted)]">Hours logged</p>
+              <p className="text-2xl font-bold text-[var(--accent)]">{formatHoursShort(hoursLogged)}</p>
             </div>
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Billable amount</p>
-              <p className="text-2xl font-bold text-[var(--accent-green)]">{formatCurrency(billableAmount, currency)}</p>
+              <p className="text-xs text-[var(--text-muted)]">Billable amount</p>
+              <p className="text-2xl font-bold text-[var(--accent)]">{formatCurrency(billableAmount, currency)}</p>
             </div>
           </div>
           {project.description && (
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">Project description</p>
+              <p className="text-xs text-[var(--text-muted)] mb-2">Project description</p>
               <p className="text-sm text-[var(--text-secondary)] whitespace-pre-line">{project.description}</p>
             </div>
           )}
           {(project.stack as string[])?.length > 0 && (
             <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-2">Stack</p>
+              <p className="text-xs text-[var(--text-muted)] mb-2">Stack</p>
               <div className="flex flex-wrap gap-2">
                 {(project.stack as string[]).map((s) => (
                   <span

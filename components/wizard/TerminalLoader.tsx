@@ -109,7 +109,7 @@ export function TerminalLoader({
           </span>
         </div>
         <div className="p-6 font-mono text-sm min-h-[320px] flex flex-col justify-center">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-4">
+          <p className="text-xs text-[var(--text-muted)] mb-4">
             What&apos;s happening
           </p>
           <div className="space-y-3">

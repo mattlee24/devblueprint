@@ -16,7 +16,7 @@ export function RecentTimeLogs({ logs }: RecentTimeLogsProps) {
       <TerminalSectionHeader>
         <span className="flex items-center gap-2">
           <Clock className="w-4 h-4 shrink-0" />
-          RECENT TIME LOGS
+          Recent time logs
         </span>
       </TerminalSectionHeader>
       {list.length === 0 ? (
@@ -43,7 +43,7 @@ export function RecentTimeLogs({ logs }: RecentTimeLogsProps) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge variant={log.billable ? "success" : "muted"}>
-                  {log.billable ? "[BILLABLE]" : "[NON-BILLABLE]"}
+                  {log.billable ? "Billable" : "Non-billable"}
                 </Badge>
                 <span className="text-[var(--accent-green)]">{formatHoursShort(log.hours)}</span>
                 {log.hourly_rate != null && log.billable && (

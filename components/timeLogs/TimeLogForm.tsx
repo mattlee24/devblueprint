@@ -144,7 +144,7 @@ export function TimeLogForm({
         onChange={(e) => setHourlyRate(e.target.value)}
       />
       <div className="flex gap-2">
-        <Button type="submit">{isEdit ? "Save changes" : "[SAVE ENTRY]"}</Button>
+        <Button type="submit">{isEdit ? "Save changes" : "Save entry"}</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>

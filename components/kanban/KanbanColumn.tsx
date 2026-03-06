@@ -18,7 +18,7 @@ export function KanbanColumn({
 }: KanbanColumnProps) {
   return (
     <div className="min-w-[240px] w-60 flex-shrink-0 border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] p-3">
-      <h3 className="text-xs font-medium text-[var(--text-muted)] mb-3 uppercase">
+      <h3 className="text-xs font-medium text-[var(--text-muted)] mb-3">
         {title}
       </h3>
       <div className="space-y-2">
