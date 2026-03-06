@@ -51,7 +51,7 @@ export async function getProjects(): Promise<{ data: ProjectRow[] | null; error:
   const supabase = createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("*, clients(name)")
+    .select("*, clients(id, name, avatar_colour)")
     .order("created_at", { ascending: false });
   return { data: data as ProjectRow[] | null, error: error as Error | null };
 }

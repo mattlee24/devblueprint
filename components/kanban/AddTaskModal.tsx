@@ -42,7 +42,7 @@ interface AddTaskModalProps {
   open: boolean;
   onClose: () => void;
   defaultStatus: TaskStatus;
-  onCreate: (task: { title: string; description?: string | null; status: TaskStatus; priority: TaskPriority; category: TaskCategory; effort: TaskEffort }) => Promise<void>;
+  onCreate: (task: { title: string; description?: string | null; status: TaskStatus; priority: TaskPriority; category: TaskCategory; effort: TaskEffort; due_date?: string | null }) => Promise<void>;
   categoryOptions?: { value: string; label: string }[];
   priorityOptions?: { value: string; label: string }[];
 }
@@ -60,6 +60,7 @@ export function AddTaskModal({
   const [priority, setPriority] = useState<TaskPriority>("p2");
   const [category, setCategory] = useState<TaskCategory>("dev");
   const [effort, setEffort] = useState<TaskEffort>("medium");
+  const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function handleCreate() {
@@ -73,9 +74,11 @@ export function AddTaskModal({
       priority,
       category,
       effort,
+      due_date: dueDate.trim() || null,
     });
     setTitle("");
     setDescription("");
+    setDueDate("");
     setSaving(false);
     onClose();
   }
@@ -99,7 +102,7 @@ export function AddTaskModal({
             className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none"
           />
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Select
             label="Priority"
             options={priorityOptions}
@@ -118,6 +121,15 @@ export function AddTaskModal({
             value={effort}
             onChange={(e) => setEffort(e.target.value as TaskEffort)}
           />
+          <div>
+            <label className="block text-sm text-[var(--text-secondary)] mb-1">Due date (optional)</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none text-sm"
+            />
+          </div>
         </div>
         <div className="flex gap-2 pt-2">
           <Button onClick={handleCreate} disabled={!title.trim() || saving}>

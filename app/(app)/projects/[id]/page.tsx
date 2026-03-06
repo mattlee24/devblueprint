@@ -100,6 +100,7 @@ export default function ProjectDetailPage() {
       priority: (task.priority as TaskRow["priority"]) ?? "p2",
       category: (task.category as TaskRow["category"]) ?? "dev",
       effort: (task.effort as TaskRow["effort"]) ?? "medium",
+      due_date: task.due_date ?? null,
       position: task.position ?? 0,
     });
     if (res.error) {

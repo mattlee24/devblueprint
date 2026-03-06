@@ -11,6 +11,7 @@ export interface TaskRow {
   category: string;
   effort: string;
   position: number;
+  due_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -25,6 +26,7 @@ export interface TaskInsert {
   category?: string;
   effort?: string;
   position?: number;
+  due_date?: string | null;
 }
 
 export type TaskWithProject = TaskRow & { projects?: { id: string; title: string } | null };
@@ -40,6 +42,18 @@ export async function getTasksByProject(
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
   return { data: data as TaskRow[] | null, error: error as Error | null };
+}
+
+export async function getTask(
+  id: string
+): Promise<{ data: TaskRow | null; error: Error | null }> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return { data: data as TaskRow | null, error: error as Error | null };
 }
 
 /** Tasks not yet done (todo, in_progress, in_review) for the current user, with project info. */

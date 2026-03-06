@@ -114,6 +114,7 @@ export function KanbanBoard({
     priority: string;
     category: string;
     effort: string;
+    due_date?: string | null;
   }) {
     const maxPos = Math.max(0, ...byStatus(payload.status).map((t) => t.position), -1);
     await onTaskCreate({
@@ -123,6 +124,7 @@ export function KanbanBoard({
       priority: payload.priority as TaskRow["priority"],
       category: payload.category as TaskRow["category"],
       effort: payload.effort as TaskRow["effort"],
+      due_date: payload.due_date ?? null,
       position: maxPos + 1,
     });
     setAddTaskColumn(null);
