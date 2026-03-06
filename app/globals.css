@@ -20,15 +20,24 @@
   --accent-amber: #f59e0b;
   --accent-red: #dc2626;
   --accent-purple: #8b5cf6;
+  --accent-teal: #14b8a6;
+  --accent-rose: #f43f5e;
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --radius-card: 12px;
   --radius-badge: 8px;
+  /* Spacing: use p-4/p-6 for cards, gap-2/gap-4 for stacks, mb-4/mb-6 for sections */
   --transition: 150ms ease;
+  --border-subtle: #2d3640;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 8px 24px rgba(59, 130, 246, 0.12);
   /* Accent and surface gradients for key UI elements */
   --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --gradient-surface: linear-gradient(180deg, #1a1f26 0%, #232a33 100%);
+  --gradient-card: linear-gradient(145deg, #1e2530 0%, #1a1f26 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+  --gradient-sidebar: linear-gradient(180deg, #1a1f26 0%, #0f1419 100%);
   /* Base and surface gradients for page backgrounds / shells */
   --bg-base-gradient: radial-gradient(circle at top, #111827 0%, #020617 55%);
   --bg-surface-gradient: linear-gradient(180deg, #111827 0%, #020617 80%);
@@ -53,12 +62,20 @@
   --accent-amber: #d97706;
   --accent-red: #b91c1c;
   --accent-purple: #7c3aed;
+  --accent-teal: #0d9488;
+  --accent-rose: #e11d48;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
+  --border-subtle: #e2e8f0;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(37, 99, 235, 0.1);
   /* Accent and surface gradients for key UI elements */
   --gradient-accent: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%);
+  --gradient-sidebar: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   /* Base and surface gradients for page backgrounds / shells */
   --bg-base-gradient: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 90%);
   --bg-surface-gradient: linear-gradient(180deg, #ffffff 0%, #f3f4f6 85%);

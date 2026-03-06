@@ -10,9 +10,11 @@ interface ModalProps {
   children: ReactNode;
   /** Optional class for the content box (e.g. max-w-2xl w-full to widen). */
   contentClassName?: string;
+  /** Optional class for the inner content wrapper (e.g. flex-1 min-h-0 for scrollable panel). */
+  contentInnerClassName?: string;
 }
 
-export function Modal({ open, onClose, title, children, contentClassName }: ModalProps) {
+export function Modal({ open, onClose, title, children, contentClassName, contentInnerClassName }: ModalProps) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -40,7 +42,7 @@ export function Modal({ open, onClose, title, children, contentClassName }: Moda
           className={`w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-[var(--radius-card)] shadow-lg ${contentClassName ?? "max-w-md"}`}
           onClick={(e) => e.stopPropagation()}
         >
-          {title && (
+          {title ? (
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
               <h2 className="text-lg font-medium">{title}</h2>
               <button
@@ -52,8 +54,19 @@ export function Modal({ open, onClose, title, children, contentClassName }: Moda
                 <X className="w-5 h-5" />
               </button>
             </div>
+          ) : (
+            <div className="flex items-center justify-end px-4 py-2 border-b border-[var(--border)]">
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded hover:bg-[var(--bg-hover)] transition-[var(--transition)] cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           )}
-          <div className="p-4">{children}</div>
+          <div className={contentInnerClassName ?? "p-4"}>{children}</div>
         </div>
       </div>
     </>

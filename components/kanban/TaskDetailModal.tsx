@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import type { TaskRow } from "@/lib/queries/tasks";
-import type { TaskCommentRow } from "@/lib/queries/taskComments";
+import type { TaskCommentWithAuthor } from "@/lib/queries/taskComments";
 import { getCommentsByTask, createTaskComment, deleteTaskComment } from "@/lib/queries/taskComments";
+import { getAttachmentsByTask, type TaskAttachmentRow } from "@/lib/queries/taskAttachments";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { TaskAttachments } from "./TaskAttachments";
+import { ThreadedComments } from "./ThreadedComments";
 import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { Trash2, MessageSquare, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: "backlog", label: "Backlog" },
@@ -22,9 +26,9 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
 ];
 
 const PRIORITY_OPTIONS: { value: TaskPriority; label: string }[] = [
-  { value: "p1", label: "P1 – High" },
-  { value: "p2", label: "P2 – Medium" },
-  { value: "p3", label: "P3 – Low" },
+  { value: "p1", label: "P1" },
+  { value: "p2", label: "P2" },
+  { value: "p3", label: "P3" },
 ];
 
 const CATEGORY_OPTIONS: { value: TaskCategory; label: string }[] = [
@@ -70,14 +74,18 @@ export function TaskDetailModal({
   const [effort, setEffort] = useState<TaskEffort>("medium");
   const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
-  const [comments, setComments] = useState<TaskCommentRow[]>([]);
-  const [commentBody, setCommentBody] = useState("");
-  const [commentLoading, setCommentLoading] = useState(false);
+  const [comments, setComments] = useState<TaskCommentWithAuthor[]>([]);
+  const [attachments, setAttachments] = useState<TaskAttachmentRow[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const loadComments = useCallback(async (taskId: string) => {
     const { data } = await getCommentsByTask(taskId);
     setComments(data ?? []);
+  }, []);
+
+  const loadAttachments = useCallback(async (taskId: string) => {
+    const { data } = await getAttachmentsByTask(taskId);
+    setAttachments(data ?? []);
   }, []);
 
   useEffect(() => {
@@ -90,7 +98,7 @@ export function TaskDetailModal({
   useEffect(() => {
     if (task) {
       setTitle(task.title);
-      setDescription(task.description ?? "");
+      setDescription(task.description?.trim() && task.description !== "<p></p>" ? task.description : "<p></p>");
       setStatus(task.status as TaskStatus);
       setPriority(task.priority as TaskPriority);
       setCategory(task.category as TaskCategory);
@@ -102,18 +110,20 @@ export function TaskDetailModal({
   useEffect(() => {
     if (open && task?.id) {
       loadComments(task.id);
+      loadAttachments(task.id);
     } else {
       setComments([]);
-      setCommentBody("");
+      setAttachments([]);
     }
-  }, [open, task?.id, loadComments]);
+  }, [open, task?.id, loadComments, loadAttachments]);
 
   async function handleSave() {
     if (!task) return;
     setSaving(true);
+    const desc = description?.trim();
     await onSave({
       title: title.trim() || task.title,
-      description: description.trim() || null,
+      description: desc && desc !== "<p></p>" ? desc : null,
       status,
       priority,
       category,
@@ -129,14 +139,16 @@ export function TaskDetailModal({
     onClose();
   }
 
-  async function handleAddComment() {
-    if (!task || !commentBody.trim()) return;
-    setCommentLoading(true);
-    const { data, error } = await createTaskComment(task.id, commentBody.trim());
-    setCommentLoading(false);
-    if (error) return;
-    setCommentBody("");
-    if (data) setComments((prev) => [...prev, data]);
+  async function handleAddComment(body: string) {
+    if (!task) return;
+    await createTaskComment(task.id, body);
+    loadComments(task.id);
+  }
+
+  async function handleAddReply(parentId: string, body: string) {
+    if (!task) return;
+    await createTaskComment(task.id, body, parentId);
+    loadComments(task.id);
   }
 
   async function handleDeleteComment(id: string) {
@@ -147,139 +159,105 @@ export function TaskDetailModal({
   if (!task) return null;
 
   return (
-    <Modal open={open} onClose={onClose} title="Task details" contentClassName="max-w-2xl w-full">
-      <div className="max-h-[70vh] overflow-y-auto space-y-5 -m-4 p-4">
-        {/* Header: title + meta */}
-        <div className="space-y-3">
-          <Input
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Task title"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              label="Status"
-              options={STATUS_OPTIONS}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as TaskStatus)}
-            />
-            <Select
-              label="Priority"
-              options={priorityOptions}
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as TaskPriority)}
-            />
-            <Select
-              label="Category"
-              options={categoryOptions}
-              value={category}
-              onChange={(e) => setCategory(e.target.value as TaskCategory)}
-            />
-            <Select
-              label="Effort"
-              options={EFFORT_OPTIONS}
-              value={effort}
-              onChange={(e) => setEffort(e.target.value as TaskEffort)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-[var(--text-secondary)] mb-1">Due date</label>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Task details"
+      contentClassName="max-w-5xl w-[95vw] max-h-[90vh] flex flex-col"
+      contentInnerClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-0"
+    >
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
+        {/* Left column: task content */}
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden border-r border-[var(--border)]">
+          <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
             <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none text-sm"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task title"
+              className="w-full text-xl font-semibold bg-transparent border-0 border-b border-transparent focus:border-[var(--border-active)] focus:outline-none pb-1 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+            />
+            {/* Compact controls strip */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                label=""
+                options={STATUS_OPTIONS}
+                value={status}
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                className="w-32"
+              />
+              <Select
+                label=""
+                options={priorityOptions}
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                className="w-24"
+              />
+              <Select
+                label=""
+                options={categoryOptions}
+                value={category}
+                onChange={(e) => setCategory(e.target.value as TaskCategory)}
+                className="w-28"
+              />
+              <Select
+                label=""
+                options={EFFORT_OPTIONS}
+                value={effort}
+                onChange={(e) => setEffort(e.target.value as TaskEffort)}
+                className="w-24"
+              />
+              <div className="flex items-center gap-1">
+                <label className="text-xs text-[var(--text-muted)]">Due</label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="px-2 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-sm text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--text-secondary)] mb-1">Description</label>
+              <RichTextEditor value={description} onChange={setDescription} minHeight="200px" />
+            </div>
+            <TaskAttachments
+              taskId={task.id}
+              attachments={attachments}
+              onAttachmentsChange={setAttachments}
             />
           </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-sm text-[var(--text-secondary)] mb-1">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Optional description"
-            rows={5}
-            className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none resize-y min-h-[100px]"
-          />
-        </div>
-
-        {/* Comments */}
-        <div>
-          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[var(--text-muted)]" />
-            Comments ({comments.length})
-          </h3>
-          <div className="space-y-2 max-h-[200px] overflow-y-auto border border-[var(--border)] rounded-lg p-3 bg-[var(--bg-elevated)]/50">
-            {comments.length === 0 ? (
-              <p className="text-sm text-[var(--text-muted)]">No comments yet.</p>
-            ) : (
-              comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="text-sm py-2 px-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)]"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-medium text-[var(--text-primary)]">
-                      {currentUserId === c.user_id ? "You" : "Comment"}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-[var(--text-muted)]">{formatDate(c.created_at)}</span>
-                      {currentUserId === c.user_id && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteComment(c.id)}
-                          className="p-0.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] cursor-pointer"
-                          aria-label="Delete comment"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-[var(--text-secondary)] whitespace-pre-wrap">{c.body}</p>
-                </div>
-              ))
-            )}
+          <div className="p-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2 bg-[var(--bg-elevated)]/50">
+            <div className="text-xs text-[var(--text-muted)] flex gap-4">
+              <span>Created {formatDate(task.created_at)}</span>
+              <span>Updated {formatDate(task.updated_at)}</span>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
+                {saving ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="secondary" onClick={onClose} className="cursor-pointer">
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDelete} className="cursor-pointer">
+                <Trash2 className="w-4 h-4 shrink-0" />
+                Delete task
+              </Button>
+            </div>
           </div>
-          <div className="mt-2 flex gap-2">
-            <textarea
-              value={commentBody}
-              onChange={(e) => setCommentBody(e.target.value)}
-              placeholder="Add a comment..."
-              rows={2}
-              className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none resize-none text-sm"
+        </div>
+        {/* Right column: comments */}
+        <div className="w-full lg:w-[380px] flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] bg-[var(--bg-elevated)]/30">
+          <div className="p-4 flex-1 min-h-0 overflow-hidden flex flex-col">
+            <ThreadedComments
+              taskId={task.id}
+              comments={comments}
+              currentUserId={currentUserId}
+              onAddComment={handleAddComment}
+              onAddReply={handleAddReply}
+              onDeleteComment={handleDeleteComment}
             />
-            <Button
-              onClick={handleAddComment}
-              disabled={!commentBody.trim() || commentLoading}
-              className="shrink-0 self-end cursor-pointer"
-            >
-              {commentLoading ? "Posting…" : "Post"}
-            </Button>
           </div>
-        </div>
-
-        {/* Metadata footer */}
-        <div className="pt-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex gap-4">
-          <span>Created {formatDate(task.created_at)}</span>
-          <span>Updated {formatDate(task.updated_at)}</span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-            {saving ? "Saving…" : "Save"}
-          </Button>
-          <Button variant="secondary" onClick={onClose} className="cursor-pointer">
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete} className="ml-auto cursor-pointer">
-            <Trash2 className="w-4 h-4 shrink-0" />
-            Delete task
-          </Button>
         </div>
       </div>
     </Modal>
