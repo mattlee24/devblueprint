@@ -13,7 +13,7 @@ import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import { ProjectHeader } from "@/components/projects/ProjectHeader";
 import { BlueprintTab } from "@/components/blueprint/BlueprintTab";
 import { ScopeTab } from "@/components/projects/ScopeTab";
-import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { TaskBoardSection } from "@/components/kanban/TaskBoardSection";
 import { Tabs } from "@/components/ui/Tabs";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -206,9 +206,10 @@ export default function ProjectDetailPage() {
       id: "tasks",
       label: "Task Board",
       content: (
-        <KanbanBoard
+        <TaskBoardSection
+          projectId={id}
+          project={project}
           tasks={tasks}
-          boardConfig={project.board_config ?? null}
           onTaskUpdate={handleTaskUpdate}
           onTaskDelete={handleTaskDelete}
           onTaskCreate={handleTaskCreate}

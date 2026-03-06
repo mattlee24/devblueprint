@@ -34,7 +34,7 @@ export function Modal({ open, onClose, title, children, contentClassName, conten
         aria-hidden
       />
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-8"
         role="dialog"
         aria-modal="true"
       >

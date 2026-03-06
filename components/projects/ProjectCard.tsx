@@ -37,7 +37,7 @@ export function ProjectCard({
       data-context-id={project.id}
       className="cursor-pointer block"
     >
-      <article className="border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] hover:shadow-md hover:border-[var(--border-active)] transition-all duration-200 group overflow-hidden border-l-2 border-l-[var(--accent)]/60">
+      <article className="card-hover border border-[var(--border)] rounded-[var(--radius-card)] group overflow-hidden border-l-4 border-l-[var(--accent)] shadow-soft" style={{ background: "var(--gradient-card)" }}>
         {/* Banner with bottom overlay gradient */}
         <div className="relative h-[150px] w-full border-b border-[var(--border)] bg-[var(--bg-elevated)]">
           <div className="absolute inset-0" style={bannerStyle} />

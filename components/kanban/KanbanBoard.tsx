@@ -44,6 +44,8 @@ interface KanbanBoardProps {
   onTaskDelete: (taskId: string) => Promise<void>;
   onTaskCreate: (task: Partial<TaskRow> & { title: string }) => Promise<void>;
   onBoardConfigChange?: (config: BoardConfig) => void;
+  /** When provided, task detail is handled by parent; card click calls this instead of opening internal modal. */
+  onOpenTask?: (task: TaskRow) => void;
 }
 
 export function KanbanBoard({
@@ -53,10 +55,12 @@ export function KanbanBoard({
   onTaskDelete,
   onTaskCreate,
   onBoardConfigChange,
+  onOpenTask,
 }: KanbanBoardProps) {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [detailTask, setDetailTask] = useState<TaskRow | null>(null);
+  const openTask = onOpenTask ?? ((task: TaskRow) => setDetailTask(task));
   const [addTaskColumn, setAddTaskColumn] = useState<string | null>(null);
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
@@ -232,7 +236,7 @@ export function KanbanBoard({
                           >
                             <KanbanCard
                               task={task}
-                              onOpen={() => setDetailTask(task)}
+                              onOpen={() => openTask(task)}
                             />
                           </div>
                         )}
@@ -255,19 +259,21 @@ export function KanbanBoard({
         </div>
       </DragDropContext>
 
-      <TaskDetailModal
-        task={detailTask}
-        open={!!detailTask}
-        onClose={() => setDetailTask(null)}
-        onSave={async (updates) => {
-          if (detailTask) await onTaskUpdate(detailTask.id, updates);
-        }}
-        onDelete={() => {
-          if (detailTask) onTaskDelete(detailTask.id);
-        }}
-        categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
-        priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
-      />
+      {!onOpenTask && (
+        <TaskDetailModal
+          task={detailTask}
+          open={!!detailTask}
+          onClose={() => setDetailTask(null)}
+          onSave={async (updates) => {
+            if (detailTask) await onTaskUpdate(detailTask.id, updates);
+          }}
+          onDelete={() => {
+            if (detailTask) onTaskDelete(detailTask.id);
+          }}
+          categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
+          priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+        />
+      )}
 
       {addTaskColumn && (
         <AddTaskModal

@@ -19,15 +19,15 @@ import { Modal } from "@/components/ui/Modal";
 import { toast } from "sonner";
 
 const WIDGET_CATALOG: { type: string; widgetKey?: string; label: string; w: number; h: number }[] = [
-  { type: "stat", widgetKey: "active-projects", label: "Active projects", w: 3, h: 1 },
-  { type: "stat", widgetKey: "active-clients", label: "Active clients", w: 3, h: 1 },
-  { type: "stat", widgetKey: "hours-month", label: "Hours this month", w: 3, h: 1 },
-  { type: "stat", widgetKey: "unbilled", label: "Unbilled amount", w: 3, h: 1 },
-  { type: "recent-projects", label: "Recent projects", w: 6, h: 2 },
-  { type: "recent-time-logs", label: "Recent time logs", w: 6, h: 2 },
-  { type: "upcoming-tasks", label: "Upcoming tasks", w: 6, h: 2 },
-  { type: "client-activity", label: "Client activity", w: 6, h: 2 },
-  { type: "note", label: "Note", w: 4, h: 2 },
+  { type: "stat", widgetKey: "active-projects", label: "Active projects", w: 6, h: 2 },
+  { type: "stat", widgetKey: "active-clients", label: "Active clients", w: 6, h: 2 },
+  { type: "stat", widgetKey: "hours-month", label: "Hours this month", w: 6, h: 2 },
+  { type: "stat", widgetKey: "unbilled", label: "Unbilled amount", w: 6, h: 2 },
+  { type: "recent-projects", label: "Recent projects", w: 12, h: 4 },
+  { type: "recent-time-logs", label: "Recent time logs", w: 12, h: 4 },
+  { type: "upcoming-tasks", label: "Upcoming tasks", w: 12, h: 4 },
+  { type: "client-activity", label: "Client activity", w: 12, h: 4 },
+  { type: "note", label: "Note", w: 8, h: 4 },
 ];
 
 export default function DashboardPage() {
@@ -172,14 +172,16 @@ export default function DashboardPage() {
   return (
     <main className="p-6">
       <div
-        className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] shadow-[var(--shadow-card)]"
+        className="rounded-[var(--radius-card)] p-8 mb-6 border border-[var(--border-subtle)] shadow-card card-hover"
         style={{ background: "var(--gradient-hero)" }}
       >
-        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-          <FolderKanban className="w-7 h-7 shrink-0 text-[var(--accent)]" />
+        <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="w-12 h-12 rounded-xl flex items-center justify-center bg-[var(--accent)]/20 text-[var(--accent)]">
+            <FolderKanban className="w-6 h-6" />
+          </span>
           Dashboard
         </h1>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-[var(--text-secondary)]">
           Your workspace at a glance. Customize widgets and rearrange your layout.
         </p>
       </div>

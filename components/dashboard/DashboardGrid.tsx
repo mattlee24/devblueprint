@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useEffect, useRef } from "react";
-import GridLayout, { type Layout } from "react-grid-layout";
+import GridLayout, { type Layout, noCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import type { DashboardLayoutItem } from "@/lib/queries/dashboardLayouts";
 import type { ClientRow } from "@/lib/queries/clients";
@@ -93,7 +93,7 @@ export function DashboardGrid({
 
   const renderWidget = (item: DashboardLayoutItem) => {
     const wrap = (content: React.ReactNode) => (
-      <div className="h-full flex flex-col overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] rounded-[var(--radius-card)]">
+      <div className={`h-full flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] ${!isCustomizing ? "card-hover shadow-soft bg-[var(--bg-surface)]" : "bg-[var(--bg-surface)]"}`} style={!isCustomizing ? { background: "var(--gradient-card)" } : undefined}>
         {isCustomizing && onRemoveWidget && (
           <div className="flex justify-end p-1 border-b border-[var(--border)]">
             <button
@@ -242,7 +242,8 @@ export function DashboardGrid({
       layout={rglLayout}
       onLayoutChange={handleLayoutChange}
       width={width}
-      gridConfig={{ cols: 12, rowHeight: 80 }}
+      gridConfig={{ cols: 24, rowHeight: 40 }}
+      compactor={noCompactor}
       dragConfig={{ enabled: isCustomizing, handle: isCustomizing ? undefined : ".no-drag" }}
       resizeConfig={{ enabled: isCustomizing }}
     >

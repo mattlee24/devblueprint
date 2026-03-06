@@ -83,13 +83,18 @@ export default function ClientsPage() {
 
   return (
     <main className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <Users className="w-7 h-7 shrink-0 text-[var(--accent-green)]" />
-          Clients
-        </h1>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-teal)]/20 text-[var(--accent-teal)]">
+              <Users className="w-6 h-6" />
+            </span>
+            Clients
+          </h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">Your clients and their projects.</p>
+        </div>
         <Link href="/clients/new">
-          <Button>
+          <Button className="cursor-pointer">
             <UserPlus className="w-4 h-4 shrink-0" />
             New client
           </Button>

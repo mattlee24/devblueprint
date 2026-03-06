@@ -10,12 +10,13 @@ import type { TaskRow } from "@/lib/queries/tasks";
 import type { TaskCommentWithAuthor } from "@/lib/queries/taskComments";
 import { getCommentsByTask, createTaskComment, deleteTaskComment } from "@/lib/queries/taskComments";
 import { getAttachmentsByTask, type TaskAttachmentRow } from "@/lib/queries/taskAttachments";
+import { getSubtasksByTask, createSubtask, updateSubtask, deleteSubtask, type SubtaskRow } from "@/lib/queries/subtasks";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { TaskAttachments } from "./TaskAttachments";
 import { ThreadedComments } from "./ThreadedComments";
 import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, Plus, CheckSquare, Square } from "lucide-react";
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: "backlog", label: "Backlog" },
@@ -76,7 +77,9 @@ export function TaskDetailModal({
   const [saving, setSaving] = useState(false);
   const [comments, setComments] = useState<TaskCommentWithAuthor[]>([]);
   const [attachments, setAttachments] = useState<TaskAttachmentRow[]>([]);
+  const [subtasks, setSubtasks] = useState<SubtaskRow[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
   const loadComments = useCallback(async (taskId: string) => {
     const { data } = await getCommentsByTask(taskId);
@@ -86,6 +89,11 @@ export function TaskDetailModal({
   const loadAttachments = useCallback(async (taskId: string) => {
     const { data } = await getAttachmentsByTask(taskId);
     setAttachments(data ?? []);
+  }, []);
+
+  const loadSubtasks = useCallback(async (taskId: string) => {
+    const { data } = await getSubtasksByTask(taskId);
+    setSubtasks(data ?? []);
   }, []);
 
   useEffect(() => {
@@ -111,11 +119,14 @@ export function TaskDetailModal({
     if (open && task?.id) {
       loadComments(task.id);
       loadAttachments(task.id);
+      loadSubtasks(task.id);
     } else {
       setComments([]);
       setAttachments([]);
+      setSubtasks([]);
+      setNewSubtaskTitle("");
     }
-  }, [open, task?.id, loadComments, loadAttachments]);
+  }, [open, task?.id, loadComments, loadAttachments, loadSubtasks]);
 
   async function handleSave() {
     if (!task) return;
@@ -156,6 +167,45 @@ export function TaskDetailModal({
     setComments((prev) => prev.filter((c) => c.id !== id));
   }
 
+  async function handleSubtaskToggle(subtask: SubtaskRow) {
+    await updateSubtask(subtask.id, { completed: !subtask.completed });
+    setSubtasks((prev) =>
+      prev.map((s) => (s.id === subtask.id ? { ...s, completed: !s.completed } : s))
+    );
+  }
+
+  async function handleSubtaskTitleBlur(subtask: SubtaskRow, title: string) {
+    const t = title.trim();
+    if (t === subtask.title) return;
+    if (!t) {
+      await deleteSubtask(subtask.id);
+      setSubtasks((prev) => prev.filter((s) => s.id !== subtask.id));
+      return;
+    }
+    await updateSubtask(subtask.id, { title: t });
+    setSubtasks((prev) =>
+      prev.map((s) => (s.id === subtask.id ? { ...s, title: t } : s))
+    );
+  }
+
+  async function handleSubtaskDelete(id: string) {
+    await deleteSubtask(id);
+    setSubtasks((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  async function handleAddSubtask() {
+    const title = newSubtaskTitle.trim();
+    if (!task || !title) return;
+    const { data } = await createSubtask(task.id, {
+      title,
+      position: subtasks.length,
+    });
+    if (data) {
+      setSubtasks((prev) => [...prev, data]);
+      setNewSubtaskTitle("");
+    }
+  }
+
   if (!task) return null;
 
   return (
@@ -163,7 +213,7 @@ export function TaskDetailModal({
       open={open}
       onClose={onClose}
       title="Task details"
-      contentClassName="max-w-5xl w-[95vw] max-h-[90vh] flex flex-col"
+      contentClassName="max-w-7xl w-[92vw] max-h-[94vh] flex flex-col"
       contentInnerClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-0"
     >
       <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
@@ -220,6 +270,75 @@ export function TaskDetailModal({
             <div>
               <label className="block text-sm text-[var(--text-secondary)] mb-1">Description</label>
               <RichTextEditor value={description} onChange={setDescription} minHeight="200px" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <label className="text-sm text-[var(--text-secondary)]">Subtasks</label>
+                <span className="text-xs text-[var(--text-muted)]">
+                  {subtasks.filter((s) => s.completed).length}/{subtasks.length}
+                </span>
+              </div>
+              <ul className="space-y-2">
+                {subtasks.map((subtask) => (
+                  <li
+                    key={subtask.id}
+                    className="flex items-center gap-2 group py-1 rounded hover:bg-[var(--bg-hover)]/50"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSubtaskToggle(subtask)}
+                      className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--accent)] cursor-pointer shrink-0"
+                      aria-label={subtask.completed ? "Mark incomplete" : "Mark complete"}
+                    >
+                      {subtask.completed ? (
+                        <CheckSquare className="w-5 h-5 text-[var(--accent)]" />
+                      ) : (
+                        <Square className="w-5 h-5" />
+                      )}
+                    </button>
+                    <input
+                      type="text"
+                      defaultValue={subtask.title}
+                      onBlur={(e) => handleSubtaskTitleBlur(subtask, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      className={`flex-1 min-w-0 bg-transparent border-0 border-b border-transparent focus:border-[var(--border-active)] focus:outline-none py-1 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] ${subtask.completed ? "line-through text-[var(--text-muted)]" : ""}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSubtaskDelete(subtask.id)}
+                      className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[var(--bg-active)] text-[var(--text-muted)] cursor-pointer shrink-0"
+                      aria-label="Delete subtask"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddSubtask();
+                  }}
+                  placeholder="Add a subtask…"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleAddSubtask}
+                  disabled={!newSubtaskTitle.trim()}
+                  className="cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </Button>
+              </div>
             </div>
             <TaskAttachments
               taskId={task.id}

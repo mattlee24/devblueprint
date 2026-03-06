@@ -22,6 +22,10 @@
   --accent-purple: #8b5cf6;
   --accent-teal: #14b8a6;
   --accent-rose: #f43f5e;
+  --accent-coral: #fb7185;
+  --accent-mint: #34d399;
+  --accent-gold: #fbbf24;
+  --accent-lavender: #a78bfa;
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
@@ -29,15 +33,26 @@
   --radius-badge: 8px;
   /* Spacing: use p-4/p-6 for cards, gap-2/gap-4 for stacks, mb-4/mb-6 for sections */
   --transition: 150ms ease;
+  --transition-slow: 250ms ease;
   --border-subtle: #2d3640;
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.15);
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.25);
   --shadow-card-hover: 0 8px 24px rgba(59, 130, 246, 0.12);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.35);
+  /* Typography scale (use with text-display, text-heading, text-body, text-caption) */
+  --text-display: 2rem;
+  --text-heading: 1.25rem;
+  --text-body: 1rem;
+  --text-caption: 0.875rem;
   /* Accent and surface gradients for key UI elements */
   --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --gradient-surface: linear-gradient(180deg, #1a1f26 0%, #232a33 100%);
   --gradient-card: linear-gradient(145deg, #1e2530 0%, #1a1f26 100%);
   --gradient-hero: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
   --gradient-sidebar: linear-gradient(180deg, #1a1f26 0%, #0f1419 100%);
+  --gradient-warm: linear-gradient(135deg, rgba(251, 113, 133, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+  --gradient-cool: linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(14, 165, 233, 0.1) 100%);
+  --gradient-success: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(20, 184, 166, 0.15) 100%);
   /* Base and surface gradients for page backgrounds / shells */
   --bg-base-gradient: radial-gradient(circle at top, #111827 0%, #020617 55%);
   --bg-surface-gradient: linear-gradient(180deg, #111827 0%, #020617 80%);
@@ -64,18 +79,32 @@
   --accent-purple: #7c3aed;
   --accent-teal: #0d9488;
   --accent-rose: #e11d48;
+  --accent-coral: #f43f5e;
+  --accent-mint: #10b981;
+  --accent-gold: #f59e0b;
+  --accent-lavender: #8b5cf6;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --border-subtle: #e2e8f0;
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-card-hover: 0 8px 24px rgba(37, 99, 235, 0.1);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --transition-slow: 250ms ease;
+  --text-display: 2rem;
+  --text-heading: 1.25rem;
+  --text-body: 1rem;
+  --text-caption: 0.875rem;
   /* Accent and surface gradients for key UI elements */
   --gradient-accent: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   --gradient-hero: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%);
   --gradient-sidebar: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-warm: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(245, 158, 11, 0.06) 100%);
+  --gradient-cool: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(2, 132, 199, 0.06) 100%);
+  --gradient-success: linear-gradient(135deg, rgba(22, 163, 74, 0.12) 0%, rgba(13, 148, 136, 0.1) 100%);
   /* Base and surface gradients for page backgrounds / shells */
   --bg-base-gradient: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 90%);
   --bg-surface-gradient: linear-gradient(180deg, #ffffff 0%, #f3f4f6 85%);
@@ -100,14 +129,22 @@ body {
 .hover-active-surface:active {
   background: var(--bg-active);
 }
+.card-hover {
+  transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+}
 .card-hover:hover {
   border-color: var(--border-active);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
 }
 .card-hover:active {
   border-color: var(--border-active);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-card);
+  transform: translateY(0);
 }
+.shadow-soft { box-shadow: var(--shadow-soft); }
+.shadow-card { box-shadow: var(--shadow-card); }
+.shadow-elevated { box-shadow: var(--shadow-elevated); }
 
 /* Headings use display font; non-clickable typography uses default cursor */
 h1, h2, h3, h4, h5, h6 {

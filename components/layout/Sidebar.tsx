@@ -47,9 +47,9 @@ export function Sidebar() {
     : "?";
 
   return (
-    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden">
-      <div className="absolute left-0 top-0 w-1 h-full opacity-90" style={{ background: "var(--gradient-accent)" }} aria-hidden />
-      <div className="flex-1 flex flex-col bg-[var(--bg-surface)] relative z-10">
+    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden bg-[var(--bg-surface)]" style={{ background: "var(--gradient-sidebar)" }}>
+      <div className="absolute left-0 top-0 w-1 h-full opacity-80" style={{ background: "var(--gradient-accent)" }} aria-hidden />
+      <div className="flex-1 flex flex-col relative z-10">
       <div className="p-4 border-b border-[var(--border)]">
         <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
           <span className="text-lg font-semibold text-[var(--accent)]">
@@ -75,13 +75,15 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
                 isActive
                   ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] active:bg-[var(--bg-active)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)]"
               }`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-[var(--accent)]/15" : "bg-[var(--bg-elevated)]"}`}>
+                <Icon className="w-4 h-4" />
+              </span>
               {label}
             </Link>
           );
@@ -90,19 +92,21 @@ export function Sidebar() {
         <div className="flex flex-col gap-1">
           <Link
             href="/settings"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
               pathname === "/settings"
                 ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
-                : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
+                : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)]"
             }`}
           >
-            <Settings className="w-4 h-4 shrink-0" />
+            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${pathname === "/settings" ? "bg-[var(--accent)]/15" : "bg-[var(--bg-elevated)]"}`}>
+              <Settings className="w-4 h-4" />
+            </span>
             Settings
           </Link>
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm transition-[var(--transition)] border-l-2 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] active:bg-[var(--bg-active)] w-full text-left cursor-pointer"
+            className="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] w-full text-left cursor-pointer"
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
             {theme === "dark" ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
@@ -111,9 +115,11 @@ export function Sidebar() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-card)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] w-full transition-[var(--transition)] border-l-2 border-transparent text-left cursor-pointer"
+            className="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] w-full transition-[var(--transition)] border-l-2 border-transparent text-left cursor-pointer"
           >
-            <LogOut className="w-4 h-4 shrink-0" />
+            <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[var(--bg-elevated)]">
+              <LogOut className="w-4 h-4" />
+            </span>
             Sign Out
           </button>
         </div>
