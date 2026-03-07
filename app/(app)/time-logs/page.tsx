@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/Select";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TimeLogForm, type TimeLogFormData } from "@/components/timeLogs/TimeLogForm";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
@@ -138,12 +139,14 @@ function TimeLogsContent() {
 
   return (
     <main className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <Clock className="w-7 h-7 shrink-0 text-[var(--accent-green)]" />
+      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex items-center justify-between" style={{ background: "var(--page-time-logs)" }}>
+        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-amber)]/20 text-[var(--accent-amber)]">
+            <Clock className="w-6 h-6" />
+          </span>
           Time Logs
         </h1>
-        <Button onClick={() => setDrawerOpen(true)}>
+        <Button onClick={() => setDrawerOpen(true)} className="cursor-pointer">
           <Plus className="w-4 h-4 shrink-0" />
           Log time
         </Button>
@@ -155,19 +158,19 @@ function TimeLogsContent() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Input
-          type="date"
+        <DatePicker
           value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          className="max-w-[140px]"
-          title="From date"
+          onChange={setDateFrom}
+          placeholder="From date"
+          className="max-w-[160px]"
+          aria-label="From date"
         />
-        <Input
-          type="date"
+        <DatePicker
           value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          className="max-w-[140px]"
-          title="To date"
+          onChange={setDateTo}
+          placeholder="To date"
+          className="max-w-[160px]"
+          aria-label="To date"
         />
         <Select
           value={clientFilter}

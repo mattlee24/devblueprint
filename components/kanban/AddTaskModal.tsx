@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/types";
 import { Plus } from "lucide-react";
 
@@ -30,14 +31,6 @@ const EFFORT_OPTIONS = [
   { value: "high", label: "High" },
 ];
 
-const STATUS_LABELS: Record<string, string> = {
-  backlog: "Backlog",
-  todo: "To do",
-  in_progress: "In progress",
-  in_review: "In review",
-  done: "Done",
-};
-
 interface AddTaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -45,6 +38,7 @@ interface AddTaskModalProps {
   onCreate: (task: { title: string; description?: string | null; status: TaskStatus; priority: TaskPriority; category: TaskCategory; effort: TaskEffort; due_date?: string | null }) => Promise<void>;
   categoryOptions?: { value: string; label: string }[];
   priorityOptions?: { value: string; label: string }[];
+  statusOptions?: { value: string; label: string }[];
 }
 
 export function AddTaskModal({
@@ -54,7 +48,9 @@ export function AddTaskModal({
   onCreate,
   categoryOptions = CATEGORY_OPTIONS,
   priorityOptions = PRIORITY_OPTIONS,
+  statusOptions,
 }: AddTaskModalProps) {
+  const statusLabel = statusOptions?.find((o) => o.value === defaultStatus)?.label ?? defaultStatus;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("p2");
@@ -84,7 +80,7 @@ export function AddTaskModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={`New task · ${STATUS_LABELS[defaultStatus] ?? defaultStatus}`}>
+    <Modal open={open} onClose={onClose} title={`New task · ${statusLabel}`}>
       <div className="space-y-4">
         <Input
           label="Title"
@@ -121,15 +117,13 @@ export function AddTaskModal({
             value={effort}
             onChange={(e) => setEffort(e.target.value as TaskEffort)}
           />
-          <div>
-            <label className="block text-sm text-[var(--text-secondary)] mb-1">Due date (optional)</label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none text-sm"
-            />
-          </div>
+          <DatePicker
+            label="Due date (optional)"
+            value={dueDate}
+            onChange={setDueDate}
+            placeholder="No date"
+            className="w-full"
+          />
         </div>
         <div className="flex gap-2 pt-2">
           <Button onClick={handleCreate} disabled={!title.trim() || saving}>

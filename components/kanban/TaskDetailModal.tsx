@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { TaskRow } from "@/lib/queries/tasks";
 import type { TaskCommentWithAuthor } from "@/lib/queries/taskComments";
 import { getCommentsByTask, createTaskComment, deleteTaskComment } from "@/lib/queries/taskComments";
@@ -18,8 +19,7 @@ import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/t
 import { formatDate } from "@/lib/utils";
 import { Trash2, X, Plus, CheckSquare, Square } from "lucide-react";
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-  { value: "backlog", label: "Backlog" },
+const FALLBACK_STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "todo", label: "To do" },
   { value: "in_progress", label: "In progress" },
   { value: "in_review", label: "In review" },
@@ -56,6 +56,7 @@ interface TaskDetailModalProps {
   onDelete: () => void;
   categoryOptions?: { value: string; label: string }[];
   priorityOptions?: { value: string; label: string }[];
+  statusOptions?: { value: string; label: string }[];
 }
 
 export function TaskDetailModal({
@@ -66,10 +67,11 @@ export function TaskDetailModal({
   onDelete,
   categoryOptions = CATEGORY_OPTIONS,
   priorityOptions = PRIORITY_OPTIONS,
+  statusOptions = FALLBACK_STATUS_OPTIONS,
 }: TaskDetailModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<TaskStatus>("backlog");
+  const [status, setStatus] = useState<TaskStatus>(statusOptions[0]?.value ?? "todo");
   const [priority, setPriority] = useState<TaskPriority>("p2");
   const [category, setCategory] = useState<TaskCategory>("dev");
   const [effort, setEffort] = useState<TaskEffort>("medium");
@@ -78,6 +80,8 @@ export function TaskDetailModal({
   const [comments, setComments] = useState<TaskCommentWithAuthor[]>([]);
   const [attachments, setAttachments] = useState<TaskAttachmentRow[]>([]);
   const [subtasks, setSubtasks] = useState<SubtaskRow[]>([]);
+  const [highlightedSubtaskId, setHighlightedSubtaskId] = useState<string | null>(null);
+  const subtasksSectionRef = useRef<HTMLDivElement>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
@@ -107,13 +111,14 @@ export function TaskDetailModal({
     if (task) {
       setTitle(task.title);
       setDescription(task.description?.trim() && task.description !== "<p></p>" ? task.description : "<p></p>");
-      setStatus(task.status as TaskStatus);
+      const taskStatus = task.status as string;
+      setStatus(statusOptions.some((o) => o.value === taskStatus) ? taskStatus : (statusOptions[0]?.value ?? "todo"));
       setPriority(task.priority as TaskPriority);
       setCategory(task.category as TaskCategory);
       setEffort(task.effort as TaskEffort);
       setDueDate(task.due_date ?? "");
     }
-  }, [task]);
+  }, [task, statusOptions]);
 
   useEffect(() => {
     if (open && task?.id) {
@@ -227,43 +232,55 @@ export function TaskDetailModal({
               placeholder="Task title"
               className="w-full text-xl font-semibold bg-transparent border-0 border-b border-transparent focus:border-[var(--border-active)] focus:outline-none pb-1 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
-            {/* Compact controls strip */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Select
-                label=""
-                options={STATUS_OPTIONS}
-                value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="w-32"
-              />
-              <Select
-                label=""
-                options={priorityOptions}
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="w-24"
-              />
-              <Select
-                label=""
-                options={categoryOptions}
-                value={category}
-                onChange={(e) => setCategory(e.target.value as TaskCategory)}
-                className="w-28"
-              />
-              <Select
-                label=""
-                options={EFFORT_OPTIONS}
-                value={effort}
-                onChange={(e) => setEffort(e.target.value as TaskEffort)}
-                className="w-24"
-              />
-              <div className="flex items-center gap-1">
-                <label className="text-xs text-[var(--text-muted)]">Due</label>
-                <input
-                  type="date"
+            {/* Compact controls: 2x2 / 3x3 responsive grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] mb-1">Status</label>
+                <Select
+                  label=""
+                  options={statusOptions}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                  className="w-full min-w-0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] mb-1">Priority</label>
+                <Select
+                  label=""
+                  options={priorityOptions}
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                  className="w-full min-w-0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] mb-1">Category</label>
+                <Select
+                  label=""
+                  options={categoryOptions}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as TaskCategory)}
+                  className="w-full min-w-0"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--text-muted)] mb-1">Effort</label>
+                <Select
+                  label=""
+                  options={EFFORT_OPTIONS}
+                  value={effort}
+                  onChange={(e) => setEffort(e.target.value as TaskEffort)}
+                  className="w-full min-w-0"
+                />
+              </div>
+              <div>
+                <DatePicker
+                  label="Due"
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="px-2 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-sm text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none"
+                  onChange={setDueDate}
+                  placeholder="No date"
+                  className="w-full min-w-0"
                 />
               </div>
             </div>
@@ -271,7 +288,7 @@ export function TaskDetailModal({
               <label className="block text-sm text-[var(--text-secondary)] mb-1">Description</label>
               <RichTextEditor value={description} onChange={setDescription} minHeight="200px" />
             </div>
-            <div>
+            <div ref={subtasksSectionRef}>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <label className="text-sm text-[var(--text-secondary)]">Subtasks</label>
                 <span className="text-xs text-[var(--text-muted)]">
@@ -282,11 +299,29 @@ export function TaskDetailModal({
                 {subtasks.map((subtask) => (
                   <li
                     key={subtask.id}
-                    className="flex items-center gap-2 group py-1 rounded hover:bg-[var(--bg-hover)]/50"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                      setHighlightedSubtaskId(subtask.id);
+                      setTimeout(() => setHighlightedSubtaskId(null), 1500);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                        setHighlightedSubtaskId(subtask.id);
+                        setTimeout(() => setHighlightedSubtaskId(null), 1500);
+                      }
+                    }}
+                    className={`flex items-center gap-2 group py-1 rounded hover:bg-[var(--bg-hover)]/50 cursor-pointer transition-colors ${highlightedSubtaskId === subtask.id ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-base)] bg-[var(--bg-hover)]/50" : ""}`}
                   >
                     <button
                       type="button"
-                      onClick={() => handleSubtaskToggle(subtask)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSubtaskToggle(subtask);
+                      }}
                       className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--accent)] cursor-pointer shrink-0"
                       aria-label={subtask.completed ? "Mark incomplete" : "Mark complete"}
                     >
@@ -300,6 +335,7 @@ export function TaskDetailModal({
                       type="text"
                       defaultValue={subtask.title}
                       onBlur={(e) => handleSubtaskTitleBlur(subtask, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.currentTarget.blur();
@@ -309,7 +345,10 @@ export function TaskDetailModal({
                     />
                     <button
                       type="button"
-                      onClick={() => handleSubtaskDelete(subtask.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSubtaskDelete(subtask.id);
+                      }}
                       className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[var(--bg-active)] text-[var(--text-muted)] cursor-pointer shrink-0"
                       aria-label="Delete subtask"
                     >

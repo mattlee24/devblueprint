@@ -36,7 +36,7 @@ export default function RootLayout({
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('devblueprint-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();`,
+            __html: `document.documentElement.setAttribute('data-theme','light');`,
           }}
         />
         <ThemeProvider>

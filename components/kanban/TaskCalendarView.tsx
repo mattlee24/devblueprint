@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import type { TaskRow } from "@/lib/queries/tasks";
 import { formatDate } from "@/lib/utils";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, ArrowRight } from "lucide-react";
 
 interface TaskCalendarViewProps {
   tasks: TaskRow[];
@@ -59,7 +59,7 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
             className="p-2 rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] cursor-pointer"
             aria-label="Previous month"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
           <button
             type="button"
@@ -74,7 +74,7 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
             className="p-2 rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] cursor-pointer"
             aria-label="Next month"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -113,15 +113,28 @@ export default function ProjectDetailPage() {
     }
   }
 
-  function handleBoardConfigChange(board_config: BoardConfig) {
+  async function handleBoardConfigChange(board_config: BoardConfig) {
     if (!project) return;
-    updateProject(project.id, { board_config }).then((res) => {
-      if (res.error) toast.error(res.error?.message ?? "Failed to save board settings");
-      else if (res.data) {
-        setProject(res.data);
-        toast.success("Board settings saved");
+    const newOrder = board_config.columnOrder ?? [];
+    const firstStatus = newOrder[0];
+    if (firstStatus) {
+      const toMigrate = tasks.filter((t) => !newOrder.includes(t.status));
+      for (const t of toMigrate) {
+        await updateTask(t.id, { status: firstStatus });
       }
-    });
+      if (toMigrate.length > 0) {
+        setTasks((prev) =>
+          prev.map((t) => (toMigrate.some((m) => m.id === t.id) ? { ...t, status: firstStatus } : t))
+        );
+        toast.success(`${toMigrate.length} task(s) moved to ${board_config.columnLabels?.[firstStatus] ?? firstStatus}`);
+      }
+    }
+    const res = await updateProject(project.id, { board_config });
+    if (res.error) toast.error(res.error?.message ?? "Failed to save board settings");
+    else if (res.data) {
+      setProject(res.data);
+      toast.success("Board settings saved");
+    }
   }
 
   function handleArchive() {

@@ -272,6 +272,7 @@ export function KanbanBoard({
           }}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+          statusOptions={columns.map((col) => ({ value: col.id, label: col.label }))}
         />
       )}
 
@@ -283,6 +284,7 @@ export function KanbanBoard({
           onCreate={handleCreateTask}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+          statusOptions={columns.map((col) => ({ value: col.id, label: col.label }))}
         />
       )}
 

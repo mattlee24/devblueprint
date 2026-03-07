@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { ProposalSlide, ProposalSlideBlock } from "@/lib/queries/proposals";
-import { ChevronLeft, ChevronRight, X, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, X, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export interface ProposalDeckPreviewProps {
@@ -218,7 +218,7 @@ export function ProposalDeckPreview({
           className="shrink-0 w-12 flex items-center justify-center border-r border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-[var(--text-primary)]"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ArrowLeft className="w-6 h-6" />
         </button>
 
         <div
@@ -287,7 +287,7 @@ export function ProposalDeckPreview({
           className="shrink-0 w-12 flex items-center justify-center border-l border-[var(--border)] bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-[var(--text-primary)]"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ArrowRight className="w-6 h-6" />
         </button>
       </div>
 

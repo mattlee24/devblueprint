@@ -8,15 +8,12 @@ import {
   FileSignature,
   FileText,
   Clock,
-  Sun,
-  Moon,
   Search,
   LayoutDashboard,
   Users,
   BarChart3,
   Settings,
 } from "lucide-react";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface GlobalContextMenuProps {
   x: number;
@@ -29,7 +26,6 @@ const MENU_WIDTH = 220;
 export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
-  const { theme, toggleTheme } = useTheme();
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -137,23 +133,6 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
       >
         <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
         Log time
-      </button>
-
-      <div className="border-t border-[var(--border)] my-1" />
-      <button
-        type="button"
-        onClick={() => {
-          toggleTheme();
-          onClose();
-        }}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
-      >
-        {theme === "dark" ? (
-          <Sun className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
-        ) : (
-          <Moon className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
-        )}
-        {theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       </button>
 
       <div className="border-t border-[var(--border)] my-1" />

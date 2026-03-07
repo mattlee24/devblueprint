@@ -12,6 +12,7 @@ import { getTimeLogs, updateTimeLog } from "@/lib/queries/timeLogs";
 import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -237,23 +238,23 @@ export default function InvoiceDetailPage() {
           }}
           className="max-w-[140px]"
         />
-        <Input
+        <DatePicker
           label="Issue date"
-          type="date"
           value={invoice.issue_date}
-          onChange={async (e) => {
-            const res = await updateInvoice(invoice.id, { issue_date: e.target.value });
+          onChange={async (value) => {
+            const res = await updateInvoice(invoice.id, { issue_date: value });
             if (res.data) setInvoice(res.data);
           }}
+          placeholder="Issue date"
         />
-        <Input
+        <DatePicker
           label="Due date"
-          type="date"
           value={invoice.due_date ?? ""}
-          onChange={async (e) => {
-            const res = await updateInvoice(invoice.id, { due_date: e.target.value || null });
+          onChange={async (value) => {
+            const res = await updateInvoice(invoice.id, { due_date: value || null });
             if (res.data) setInvoice(res.data);
           }}
+          placeholder="Due date"
         />
       </div>
 

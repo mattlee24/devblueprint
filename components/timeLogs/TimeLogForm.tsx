@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Button } from "@/components/ui/Button";
 import type { ClientRow } from "@/lib/queries/clients";
 import type { ProjectRow } from "@/lib/queries/projects";
@@ -92,11 +93,11 @@ export function TimeLogForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
+      <DatePicker
         label="Date"
-        type="date"
         value={loggedDate}
-        onChange={(e) => setLoggedDate(e.target.value)}
+        onChange={setLoggedDate}
+        placeholder="Pick date"
       />
       <Select
         label="Client"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useId } from "react";
-import { ChevronDown } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 
 export interface SelectOption {
   value: string;
@@ -105,12 +105,12 @@ export function Select({
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => handleKeyDown(e, !open)}
         onClick={() => !disabled && setOpen((o) => !o)}
-        className={`w-full px-3 py-2 min-h-[40px] flex items-center justify-between gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-left text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)] cursor-pointer ${error ? "border-[var(--accent-red)]" : ""} ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-[var(--border-active)]"}`}
+        className={`w-full px-3 py-2 min-h-[40px] flex items-center justify-between gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-input)] text-left text-[var(--text-primary)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)] cursor-pointer ${error ? "border-[var(--accent-red)]" : ""} ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-[var(--border-active)]"}`}
       >
         <span className={!selectedOption ? "text-[var(--text-muted)]" : ""}>
           {displayLabel || " "}
         </span>
-        <ChevronDown
+        <ArrowDown
           className={`w-4 h-4 shrink-0 text-[var(--text-muted)] transition-transform ${open ? "rotate-180" : ""}`}
         />
       </div>
@@ -118,7 +118,7 @@ export function Select({
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute left-0 right-0 z-50 mt-1 max-h-60 min-w-full overflow-auto rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-surface)] py-1 shadow-lg"
+          className="absolute left-0 right-0 z-50 mt-1 max-h-60 min-w-full overflow-auto rounded-[var(--radius-input)] border border-[var(--border)] bg-[var(--bg-surface)] py-1 shadow-lg"
           onKeyDown={(e) => handleKeyDown(e, false)}
         >
           {placeholder && !options.some((o) => o.value === "") && (

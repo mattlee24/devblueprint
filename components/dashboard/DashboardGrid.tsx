@@ -12,7 +12,7 @@ import type { InvoiceRow } from "@/lib/queries/invoices";
 import { StatCard } from "./StatCard";
 import { RecentProjects } from "./RecentProjects";
 import { RecentTimeLogs } from "./RecentTimeLogs";
-import { FolderKanban, Users, Clock, Banknote, UserCheck, Calendar, ChevronRight, MoreVertical, StickyNote } from "lucide-react";
+import { FolderKanban, Users, Clock, Banknote, UserCheck, Calendar, MoreVertical, StickyNote } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatHoursShort, formatDate } from "@/lib/utils";
 import { TerminalSectionHeader } from "@/components/ui/Terminal";
@@ -63,6 +63,19 @@ function mergeLayout(
   return Array.from(byId.values());
 }
 
+/** Page gradient CSS variable for widget type/widgetKey (matches list pages). */
+function getWidgetPageGradient(item: DashboardLayoutItem): string | undefined {
+  if (item.type === "stat" && item.widgetKey === "active-projects") return "var(--page-projects)";
+  if (item.type === "stat" && item.widgetKey === "active-clients") return "var(--page-clients)";
+  if (item.type === "stat" && item.widgetKey === "hours-month") return "var(--page-time-logs)";
+  if (item.type === "stat" && item.widgetKey === "unbilled") return "var(--page-invoices)";
+  if (item.type === "recent-projects") return "var(--page-projects)";
+  if (item.type === "recent-time-logs") return "var(--page-time-logs)";
+  if (item.type === "upcoming-tasks") return "var(--page-projects)";
+  if (item.type === "client-activity") return "var(--page-clients)";
+  return undefined;
+}
+
 export function DashboardGrid({
   layout,
   onLayoutChange,
@@ -92,8 +105,9 @@ export function DashboardGrid({
   );
 
   const renderWidget = (item: DashboardLayoutItem) => {
+    const pageGradient = getWidgetPageGradient(item);
     const wrap = (content: React.ReactNode) => (
-      <div className={`h-full flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] ${!isCustomizing ? "card-hover shadow-soft bg-[var(--bg-surface)]" : "bg-[var(--bg-surface)]"}`} style={!isCustomizing ? { background: "var(--gradient-card)" } : undefined}>
+      <div className={`h-full flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] ${!isCustomizing ? "card-hover shadow-soft bg-[var(--bg-surface)]" : "bg-[var(--bg-surface)]"}`} style={!isCustomizing ? { background: pageGradient ?? "var(--gradient-card)" } : undefined}>
         {isCustomizing && onRemoveWidget && (
           <div className="flex justify-end p-1 border-b border-[var(--border)]">
             <button
@@ -167,7 +181,7 @@ export function DashboardGrid({
             )}
             {data.upcomingTasks.length > 10 && (
               <Link href="/projects" className="inline-flex items-center gap-2 mt-2 text-xs text-[var(--accent)] hover:underline cursor-pointer">
-                <ChevronRight className="w-3.5 h-3.5" /> View all projects
+                View all projects
               </Link>
             )}
           </div>
@@ -234,25 +248,43 @@ export function DashboardGrid({
   };
 
   const rglLayout = toRGLayout(layout);
+  const cols = 24;
+  const rowHeight = 40;
+  const cellW = width / cols;
+  const gridLineBg = isCustomizing
+    ? `linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+       linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px)`
+    : undefined;
+  const gridLineBgSize = isCustomizing ? `${cellW}px ${rowHeight}px` : undefined;
 
   return (
-    <div ref={containerRef} className="w-full">
-    <GridLayout
-      className="layout"
-      layout={rglLayout}
-      onLayoutChange={handleLayoutChange}
-      width={width}
-      gridConfig={{ cols: 24, rowHeight: 40 }}
-      compactor={noCompactor}
-      dragConfig={{ enabled: isCustomizing, handle: isCustomizing ? undefined : ".no-drag" }}
-      resizeConfig={{ enabled: isCustomizing }}
-    >
-      {layout.map((item) => (
-        <div key={item.id} className={isCustomizing ? "" : "no-drag"}>
-          {renderWidget(item)}
-        </div>
-      ))}
-    </GridLayout>
+    <div ref={containerRef} className="w-full relative">
+      {isCustomizing && (
+        <div
+          className="absolute inset-0 pointer-events-none rounded-[var(--radius-card)] opacity-60"
+          style={{
+            backgroundImage: gridLineBg,
+            backgroundSize: gridLineBgSize,
+          }}
+          aria-hidden
+        />
+      )}
+      <GridLayout
+        className="layout relative z-10"
+        layout={rglLayout}
+        onLayoutChange={handleLayoutChange}
+        width={width}
+        gridConfig={{ cols, rowHeight }}
+        compactor={noCompactor}
+        dragConfig={{ enabled: isCustomizing, handle: isCustomizing ? undefined : ".no-drag" }}
+        resizeConfig={{ enabled: isCustomizing }}
+      >
+        {layout.map((item) => (
+          <div key={item.id} className={isCustomizing ? "" : "no-drag"}>
+            {renderWidget(item)}
+          </div>
+        ))}
+      </GridLayout>
     </div>
   );
 }

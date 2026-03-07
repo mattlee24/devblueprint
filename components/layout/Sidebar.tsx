@@ -12,29 +12,24 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   Search,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useTheme } from "@/components/providers/ThemeProvider";
-import { Button } from "@/components/ui/Button";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Projects", icon: FolderKanban },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/proposals", label: "Proposals", icon: FileSignature },
-  { href: "/time-logs", label: "Time Logs", icon: Clock },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
+const navItems: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; navVar: string }[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, navVar: "var(--nav-dashboard)" },
+  { href: "/projects", label: "Projects", icon: FolderKanban, navVar: "var(--nav-projects)" },
+  { href: "/clients", label: "Clients", icon: Users, navVar: "var(--nav-clients)" },
+  { href: "/proposals", label: "Proposals", icon: FileSignature, navVar: "var(--nav-proposals)" },
+  { href: "/time-logs", label: "Time Logs", icon: Clock, navVar: "var(--nav-time-logs)" },
+  { href: "/invoices", label: "Invoices", icon: FileText, navVar: "var(--nav-invoices)" },
+  { href: "/reports", label: "Reports", icon: BarChart3, navVar: "var(--nav-reports)" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -47,8 +42,8 @@ export function Sidebar() {
     : "?";
 
   return (
-    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden bg-[var(--bg-surface)]" style={{ background: "var(--gradient-sidebar)" }}>
-      <div className="absolute left-0 top-0 w-1 h-full opacity-80" style={{ background: "var(--gradient-accent)" }} aria-hidden />
+    <aside className="no-print w-56 min-h-screen border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden bg-transparent">
+      <div className="absolute left-0 top-0 w-1 h-full opacity-60" style={{ background: "var(--gradient-accent)" }} aria-hidden />
       <div className="flex-1 flex flex-col relative z-10">
       <div className="p-4 border-b border-[var(--border)]">
         <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
@@ -69,7 +64,7 @@ export function Sidebar() {
         </button>
       </div>
       <nav className="flex-1 p-2 flex flex-col gap-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, navVar }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
@@ -77,12 +72,18 @@ export function Sidebar() {
               href={href}
               className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
                 isActive
-                  ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
+                  ? "bg-[var(--bg-hover)]"
                   : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)]"
               }`}
+              style={isActive ? { borderLeftColor: navVar, color: navVar } : undefined}
             >
-              <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-[var(--accent)]/15" : "bg-[var(--bg-elevated)]"}`}>
-                <Icon className="w-4 h-4" />
+              <span
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "" : "bg-[var(--bg-elevated)]"}`}
+                style={isActive ? { backgroundColor: `color-mix(in srgb, ${navVar} 18%, transparent)` } : undefined}
+              >
+                <span style={isActive ? { color: navVar } : undefined}>
+                  <Icon className="w-4 h-4" />
+                </span>
               </span>
               {label}
             </Link>
@@ -94,24 +95,21 @@ export function Sidebar() {
             href="/settings"
             className={`flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 cursor-pointer ${
               pathname === "/settings"
-                ? "bg-[var(--bg-hover)] border-[var(--accent)] text-[var(--accent)]"
+                ? "bg-[var(--bg-hover)]"
                 : "border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)]"
             }`}
+            style={pathname === "/settings" ? { borderLeftColor: "var(--nav-settings)", color: "var(--nav-settings)" } : undefined}
           >
-            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${pathname === "/settings" ? "bg-[var(--accent)]/15" : "bg-[var(--bg-elevated)]"}`}>
-              <Settings className="w-4 h-4" />
+            <span
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${pathname === "/settings" ? "" : "bg-[var(--bg-elevated)]"}`}
+              style={pathname === "/settings" ? { backgroundColor: "color-mix(in srgb, var(--nav-settings) 18%, transparent)" } : undefined}
+            >
+              <span style={pathname === "/settings" ? { color: "var(--nav-settings)" } : undefined}>
+                <Settings className="w-4 h-4" />
+              </span>
             </span>
             Settings
           </Link>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-badge)] text-sm transition-[var(--transition)] border-l-2 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-active)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] w-full text-left cursor-pointer"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
-            {theme === "dark" ? "Light mode" : "Dark mode"}
-          </button>
           <button
             type="button"
             onClick={handleSignOut}

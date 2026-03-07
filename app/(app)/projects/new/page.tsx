@@ -15,7 +15,7 @@ import type { TaskTemplate } from "@/lib/types";
 import type { ProjectInput } from "@/lib/types";
 import { getClients } from "@/lib/queries/clients";
 import { getProposal, updateProposal } from "@/lib/queries/proposals";
-import { createProject } from "@/lib/queries/projects";
+import { createProject, type BoardConfig } from "@/lib/queries/projects";
 import { createTask } from "@/lib/queries/tasks";
 import type { ClientRow } from "@/lib/queries/clients";
 import type { ProjectType } from "@/lib/types";
@@ -32,12 +32,16 @@ function NewProjectForm() {
   const [taskProgress, setTaskProgress] = useState<{ current: number; total: number } | undefined>();
   const [blueprintPhase, setBlueprintPhase] = useState<string>("");
   const [generatedCounts, setGeneratedCounts] = useState<{ features?: number; tasks?: number } | undefined>();
+  const defaultBoardConfig: BoardConfig = {
+    columnOrder: ["todo", "in_progress", "in_review", "done"],
+    columnLabels: { todo: "To do", in_progress: "In progress", in_review: "In review", done: "Done" },
+  };
   const [previewReady, setPreviewReady] = useState<{
     blueprint: Blueprint;
     tasks: TaskTemplate[];
     input: ProjectInput;
+    board_config?: BoardConfig | null;
     rawResponse?: string | null;
-    /** Full JSON body from API when rawResponse is missing (for debugging) */
     fullApiResponse?: string | null;
   } | null>(null);
   const [creating, setCreating] = useState(false);
@@ -162,6 +166,10 @@ function NewProjectForm() {
       const aiTasks = Array.isArray(data.tasks) ? data.tasks.length : 0;
       const useAi = res.ok && data.blueprint && Array.isArray(data.tasks) && aiFeatures >= 12 && aiTasks >= 25;
 
+      let board_config: BoardConfig | undefined = data?.board_config && typeof data.board_config === "object" && Array.isArray((data.board_config as BoardConfig).columnOrder)
+        ? (data.board_config as BoardConfig)
+        : undefined;
+
       if (useAi) {
         blueprint = data.blueprint as Blueprint;
         tasks = data.tasks as TaskTemplate[];
@@ -172,11 +180,18 @@ function NewProjectForm() {
       } else {
         blueprint = generateBlueprint(input) as Blueprint;
         tasks = generateTasks(input, blueprint) as TaskTemplate[];
+        if (!board_config) board_config = defaultBoardConfig;
         setGeneratedCounts({
           features: blueprint.coreFeatures?.length ?? 0,
           tasks: tasks.length,
         });
       }
+      if (!board_config) board_config = defaultBoardConfig;
+      setGenerationStep("validating");
+      await new Promise((r) => setTimeout(r, 800));
+      setPreviewReady({ blueprint, tasks, input, board_config, rawResponse, fullApiResponse });
+      setGenerating(false);
+      return;
     } catch {
       clearInterval(phaseInterval);
       setBlueprintPhase("");
@@ -192,7 +207,7 @@ function NewProjectForm() {
     setGenerationStep("validating");
     await new Promise((r) => setTimeout(r, 800));
 
-    setPreviewReady({ blueprint, tasks, input, rawResponse, fullApiResponse });
+    setPreviewReady({ blueprint, tasks, input, board_config: defaultBoardConfig, rawResponse, fullApiResponse });
     setGenerating(false);
   }
 
@@ -205,7 +220,7 @@ function NewProjectForm() {
     setGenerationStep("creating_project");
     setTaskProgress(undefined);
 
-    const { blueprint, tasks, input } = data;
+    const { blueprint, tasks, input, board_config } = data;
 
     const { data: project, error } = await createProject({
       title: input.title,
@@ -216,7 +231,7 @@ function NewProjectForm() {
       stack: input.stack,
       blueprint: blueprint as unknown as Record<string, unknown>,
       user_flow: null,
-      board_config: { columnOrder: ["todo", "in_progress", "in_review", "done"] },
+      board_config: board_config ?? defaultBoardConfig,
     });
 
     if (error || !project) {

@@ -82,6 +82,10 @@ export function TaskBoardSection({
   const boardConfig = (project.board_config as BoardConfig | null) ?? null;
   const categories = boardConfig?.categories?.length ? boardConfig.categories : DEFAULT_CATEGORIES;
   const priorities = boardConfig?.priorities?.length ? boardConfig.priorities : DEFAULT_PRIORITIES;
+  const columnOrder = boardConfig?.columnOrder?.length ? boardConfig.columnOrder : ["todo", "in_progress", "in_review", "done"];
+  const columnLabels = boardConfig?.columnLabels ?? { todo: "To do", in_progress: "In progress", in_review: "In review", done: "Done" };
+  const statusOptions = columnOrder.map((id) => ({ value: id, label: columnLabels[id] ?? id }));
+  const defaultStatusForNewTask = (columnOrder[0] ?? "todo") as TaskStatus;
 
   async function handleCreateTask(payload: {
     title: string;
@@ -195,16 +199,18 @@ export function TaskBoardSection({
         }}
         categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
         priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+        statusOptions={statusOptions}
       />
 
       {addTaskOpen && (
         <AddTaskModal
           open={addTaskOpen}
           onClose={() => setAddTaskOpen(false)}
-          defaultStatus={"todo" as TaskStatus}
+          defaultStatus={defaultStatusForNewTask}
           onCreate={handleCreateTask}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+          statusOptions={statusOptions}
         />
       )}
     </div>

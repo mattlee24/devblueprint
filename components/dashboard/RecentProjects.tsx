@@ -3,7 +3,7 @@ import type { ProjectRow } from "@/lib/queries/projects";
 import { Badge } from "@/components/ui/Badge";
 import { TerminalSectionHeader } from "@/components/ui/Terminal";
 import { formatDate } from "@/lib/utils";
-import { FolderKanban, ChevronRight } from "lucide-react";
+import { FolderKanban } from "lucide-react";
 
 interface RecentProjectsProps {
   projects: ProjectRow[];
@@ -52,10 +52,9 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
       )}
       <Link
         href="/projects"
-        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline"
+        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline cursor-pointer"
       >
         View all
-        <ChevronRight className="w-4 h-4 shrink-0" />
       </Link>
     </div>
   );

@@ -9,11 +9,8 @@ import {
   FolderKanban,
   FileText,
   FileSignature,
-  ChevronRight,
   UserPlus,
   Clock,
-  Sun,
-  Moon,
   Link2,
   RefreshCw,
 } from "lucide-react";
@@ -27,7 +24,6 @@ import type { ProjectRow } from "@/lib/queries/projects";
 import type { InvoiceRow } from "@/lib/queries/invoices";
 import type { ProposalRow } from "@/lib/queries/proposals";
 import { Modal } from "@/components/ui/Modal";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 type SearchResult =
   | { type: "client"; id: string; title: string; subtitle?: string }
@@ -78,7 +74,6 @@ function matchKeywords(keywords: string[], term: string): boolean {
 
 export function CommandPalette() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [clients, setClients] = useState<ClientRow[]>([]);
@@ -175,15 +170,6 @@ export function CommandPalette() {
       });
     }
 
-    const themeAction: PaletteItem = {
-      kind: "action",
-      label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-      icon: theme === "dark" ? Sun : Moon,
-      onSelect: () => {
-        toggleTheme();
-        setOpen(false);
-      },
-    };
     const copyDashboardAction: PaletteItem = {
       kind: "action",
       label: "Copy dashboard link",
@@ -218,8 +204,6 @@ export function CommandPalette() {
         setOpen(false);
       },
     };
-    const themeKeywords = ["theme", "light", "dark", "mode", "toggle"];
-    const themeMatches = !term || matchTerm(themeAction.label, term) || themeKeywords.some((k) => term.includes(k));
     const copyDashboardMatches = !term || matchTerm("Copy dashboard link", term) || (term.includes("copy") && term.includes("dashboard"));
     const copyPageMatches = !term || matchTerm("Copy link to this page", term) || (term.includes("copy") && term.includes("link"));
     const refreshMatches = !term || matchTerm("Refresh data", term) || term.includes("refresh");
@@ -228,7 +212,6 @@ export function CommandPalette() {
       (a) => ({ kind: "action" as const, label: a.label, href: a.href, onSelect: a.onSelect, icon: a.icon })
     );
     const extraActions: PaletteItem[] = [
-      ...(themeMatches ? [themeAction] : []),
       ...(copyDashboardMatches ? [copyDashboardAction] : []),
       ...(copyPageMatches ? [copyPageAction] : []),
       ...(refreshMatches ? [refreshAction] : []),
@@ -239,7 +222,7 @@ export function CommandPalette() {
       (n) => ({ kind: "nav" as const, label: n.label, href: n.href, keys: n.keys })
     );
     return [...actions, ...results, ...nav];
-  }, [term, clients, projects, proposals, invoices, theme, toggleTheme]);
+  }, [term, clients, projects, proposals, invoices]);
 
   const totalSelectable = items.length;
   const normalizedIndex = totalSelectable > 0 ? ((selectedIndex % totalSelectable) + totalSelectable) % totalSelectable : 0;
@@ -423,7 +406,6 @@ export function CommandPalette() {
                                 <p className="text-xs text-[var(--text-muted)] truncate">{item.result.subtitle}</p>
                               )}
                             </div>
-                            <ChevronRight className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
                           </Link>
                           );
                         })()}

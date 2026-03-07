@@ -8,7 +8,8 @@ export type ProjectType =
 
 export type ProjectStatus = "active" | "archived" | "completed" | "on_hold";
 export type ClientStatus = "active" | "inactive" | "archived";
-export type TaskStatus = "backlog" | "todo" | "in_progress" | "in_review" | "done";
+/** Task status is the board column id (string). Use board config columnOrder/columnLabels for options. */
+export type TaskStatus = string;
 export type TaskPriority = "p1" | "p2" | "p3";
 export type TaskCategory =
   | "dev"

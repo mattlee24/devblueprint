@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProposalSlideBlock, ProposalSlideBlockType } from "@/lib/queries/proposals";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 
 const BLOCK_TYPES: { value: ProposalSlideBlockType; label: string }[] = [
   { value: "heading", label: "Heading" },
@@ -42,7 +42,7 @@ export function ProposalSlideBlockEditor({
           className="p-0.5 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
           aria-label="Move block up"
         >
-          <ChevronUp className="w-4 h-4" />
+          <ArrowUp className="w-4 h-4" />
         </button>
         <button
           type="button"
@@ -51,7 +51,7 @@ export function ProposalSlideBlockEditor({
           className="p-0.5 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
           aria-label="Move block down"
         >
-          <ChevronDown className="w-4 h-4" />
+          <ArrowDown className="w-4 h-4" />
         </button>
       </div>
       <div className="flex-1 min-w-0 space-y-1">

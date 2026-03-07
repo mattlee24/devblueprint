@@ -52,13 +52,15 @@ export default function InvoicesPage() {
 
   return (
     <main className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <FileText className="w-7 h-7 shrink-0 text-[var(--accent-green)]" />
+      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex items-center justify-between" style={{ background: "var(--page-invoices)" }}>
+        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-teal)]/20 text-[var(--accent-teal)]">
+            <FileText className="w-6 h-6" />
+          </span>
           Invoices
         </h1>
         <Link href="/invoices/new">
-          <Button>
+          <Button className="cursor-pointer">
             <Plus className="w-4 h-4 shrink-0" />
             New invoice
           </Button>

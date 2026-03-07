@@ -84,10 +84,10 @@ export default function ProjectsPage() {
 
   return (
     <main className="p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4" style={{ background: "var(--page-projects)" }}>
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-mint)]/20 text-[var(--accent-mint)]">
+            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-blue)]/20 text-[var(--accent-blue)]">
               <FolderKanban className="w-6 h-6" />
             </span>
             Projects

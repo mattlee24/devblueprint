@@ -3,7 +3,7 @@ import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import { TerminalSectionHeader } from "@/components/ui/Terminal";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
-import { Clock, ChevronRight } from "lucide-react";
+import { Clock } from "lucide-react";
 
 interface RecentTimeLogsProps {
   logs: TimeLogRow[];
@@ -58,10 +58,9 @@ export function RecentTimeLogs({ logs }: RecentTimeLogsProps) {
       )}
       <Link
         href="/time-logs"
-        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline"
+        className="inline-flex items-center gap-2 mt-3 text-sm text-[var(--accent)] hover:underline cursor-pointer"
       >
         View all
-        <ChevronRight className="w-4 h-4 shrink-0" />
       </Link>
     </div>
   );

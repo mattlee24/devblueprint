@@ -4,14 +4,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateBlueprint as generateBlueprintFallback } from "@/lib/blueprintEngine";
 import type { Blueprint, TaskTemplate, ProjectInput } from "@/lib/types";
 
-const TASK_STATUSES = ["backlog", "todo", "in_progress", "in_review", "done"] as const;
 const TASK_PRIORITIES = ["p1", "p2", "p3"] as const;
 const TASK_CATEGORIES = ["dev", "design", "content", "seo", "devops", "testing", "other"] as const;
 const TASK_EFFORTS = ["low", "medium", "high"] as const;
 
-function coerceTask(raw: Record<string, unknown>, position: number): TaskTemplate {
-  const rawStatus = raw.status as TaskTemplate["status"] | undefined;
-  const status = rawStatus === "backlog" ? "todo" : (TASK_STATUSES.includes(rawStatus ?? "todo") ? (rawStatus as TaskTemplate["status"]) : "todo");
+const FALLBACK_STAGE_IDS = ["todo", "in_progress", "in_review", "done"];
+
+function coerceTask(raw: Record<string, unknown>, position: number, stageIds: string[]): TaskTemplate {
+  const rawStatus = raw.status as string | undefined;
+  const status = (typeof rawStatus === "string" && stageIds.includes(rawStatus)) ? rawStatus : (stageIds[0] ?? "todo");
   return {
     title: typeof raw.title === "string" ? raw.title : "Task",
     description: typeof raw.description === "string" ? raw.description : undefined,
@@ -81,8 +82,11 @@ BLUEPRINT REQUIREMENTS:
 
 7. SUMMARY: One short paragraph summarizing the blueprint (no scores).
 
+8. BOARD STAGES: Output "boardStages": an array of 4–7 workflow stages that fit this project. Each stage: "id" (lowercase slug, e.g. "discovery", "design", "build", "review", "launch") and "label" (e.g. "Discovery", "Design", "Build", "Review", "Launch"). For a website use stages like Discovery, Design, Build, Review, Launch. For an internal tool use Backlog, Spec, Implement, Test, Deploy. Order matters. Every task's "status" must be one of these stage ids (use the first stage for tasks that do not clearly fit a later stage).
+
 Respond with a single JSON object only (no markdown, no code fence). Schema:
 {
+  "boardStages": [{"id": "string", "label": "string"}],
   "blueprint": {
     "technicalRequirements": [{"text": "string"}],
     "coreFeatures": [{"name": "string", "type": "core"|"nice-to-have"|"advanced", "effort": "string", "description": "string", "userStories": ["string"]}],
@@ -125,13 +129,32 @@ Return a single JSON object only. You must include at least 12 items in coreFeat
     // Strip markdown code fence if present
     const jsonMatch = content.match(/^```(?:json)?\s*([\s\S]*?)```$/m);
     if (jsonMatch) content = jsonMatch[1].trim();
-    const parsed = JSON.parse(content) as { blueprint?: unknown; tasks?: unknown[] };
+    const parsed = JSON.parse(content) as { blueprint?: unknown; tasks?: unknown[]; boardStages?: Array<{ id?: string; label?: string }> };
     const rawBlueprint = parsed.blueprint as Record<string, unknown> | undefined;
     const rawTasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+    const rawBoardStages = Array.isArray(parsed.boardStages) ? parsed.boardStages : [];
 
     if (!rawBlueprint || typeof rawBlueprint !== "object") {
       return NextResponse.json({ error: "Invalid blueprint in AI response" }, { status: 500 });
     }
+
+    const stageIds: string[] = [];
+    const columnLabels: Record<string, string> = {};
+    for (const s of rawBoardStages) {
+      const id = typeof s?.id === "string" && s.id.trim() ? s.id.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "") : null;
+      const label = typeof s?.label === "string" && s.label.trim() ? s.label.trim() : (id ?? "");
+      if (id && !stageIds.includes(id)) {
+        stageIds.push(id);
+        columnLabels[id] = label;
+      }
+    }
+    if (stageIds.length === 0) {
+      FALLBACK_STAGE_IDS.forEach((id, i) => {
+        stageIds.push(id);
+        columnLabels[id] = ["To do", "In progress", "In review", "Done"][i] ?? id;
+      });
+    }
+    const board_config = { columnOrder: stageIds, columnLabels };
 
     const blueprint: Blueprint = {
       technicalRequirements: Array.isArray(rawBlueprint.technicalRequirements)
@@ -176,7 +199,7 @@ Return a single JSON object only. You must include at least 12 items in coreFeat
       summary: typeof rawBlueprint.summary === "string" ? rawBlueprint.summary : "Blueprint generated.",
     };
 
-    const tasks: TaskTemplate[] = rawTasks.map((t, i) => coerceTask(t as Record<string, unknown>, i));
+    const tasks: TaskTemplate[] = rawTasks.map((t, i) => coerceTask(t as Record<string, unknown>, i, stageIds));
 
     // If AI returned fewer than 12 features, pad with rule-based features so we always have enough
     const minFeatures = 12;
@@ -208,7 +231,7 @@ Return a single JSON object only. You must include at least 12 items in coreFeat
       }
     }
 
-    const payload = { blueprint, tasks, rawResponse: content };
+    const payload = { blueprint, tasks, board_config, rawResponse: content };
     return NextResponse.json(payload);
   } catch (err) {
     const message = err instanceof Error ? err.message : "AI request failed";

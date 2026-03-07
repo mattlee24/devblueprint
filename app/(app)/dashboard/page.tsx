@@ -172,8 +172,8 @@ export default function DashboardPage() {
   return (
     <main className="p-6">
       <div
-        className="rounded-[var(--radius-card)] p-8 mb-6 border border-[var(--border-subtle)] shadow-card card-hover"
-        style={{ background: "var(--gradient-hero)" }}
+        className="rounded-[var(--radius-card)] p-8 mb-6 border border-[var(--border-subtle)] shadow-card"
+        style={{ background: "var(--page-dashboard)" }}
       >
         <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
           <span className="w-12 h-12 rounded-xl flex items-center justify-center bg-[var(--accent)]/20 text-[var(--accent)]">
@@ -199,10 +199,23 @@ export default function DashboardPage() {
             {isCustomizing ? "Done" : "Customize"}
           </Button>
           {isCustomizing && (
-            <Button onClick={() => setAddWidgetOpen(true)} className="cursor-pointer">
-              <Plus className="w-4 h-4 shrink-0" />
-              Add widget
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setLayout([...DEFAULT_DASHBOARD_LAYOUT]);
+                  persistLayout(DEFAULT_DASHBOARD_LAYOUT);
+                  toast.success("Dashboard reset to default");
+                }}
+                className="cursor-pointer"
+              >
+                Reset to default
+              </Button>
+              <Button onClick={() => setAddWidgetOpen(true)} className="cursor-pointer">
+                <Plus className="w-4 h-4 shrink-0" />
+                Add widget
+              </Button>
+            </>
           )}
         </div>
       </div>

@@ -83,10 +83,10 @@ export default function ClientsPage() {
 
   return (
     <main className="p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4" style={{ background: "var(--page-clients)" }}>
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-teal)]/20 text-[var(--accent-teal)]">
+            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-green)]/20 text-[var(--accent-green)]">
               <Users className="w-6 h-6" />
             </span>
             Clients

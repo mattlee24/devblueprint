@@ -12,6 +12,7 @@ import { BarChart3, Clock, Banknote } from "lucide-react";
 import { TerminalSectionHeader } from "@/components/ui/Terminal";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 type DateRangeKey = "this_month" | "last_month" | "custom";
 const NOW = new Date();
@@ -71,10 +72,14 @@ export default function ReportsPage() {
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <BarChart3 className="w-7 h-7 shrink-0 text-[var(--accent)]" />
-        Reports
-      </h1>
+      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)]" style={{ background: "var(--page-reports)" }}>
+        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--text-muted)]/20 text-[var(--text-secondary)]">
+            <BarChart3 className="w-6 h-6" />
+          </span>
+          Reports
+        </h1>
+      </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <Select
@@ -89,19 +94,9 @@ export default function ReportsPage() {
         />
         {dateRange === "custom" && (
           <>
-            <input
-              type="date"
-              value={customFrom}
-              onChange={(e) => setCustomFrom(e.target.value)}
-              className="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--bg-base)] text-sm"
-            />
+            <DatePicker value={customFrom} onChange={setCustomFrom} placeholder="From" className="min-w-[160px]" />
             <span className="text-[var(--text-muted)]">to</span>
-            <input
-              type="date"
-              value={customTo}
-              onChange={(e) => setCustomTo(e.target.value)}
-              className="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--bg-base)] text-sm"
-            />
+            <DatePicker value={customTo} onChange={setCustomTo} placeholder="To" className="min-w-[160px]" />
           </>
         )}
       </div>
