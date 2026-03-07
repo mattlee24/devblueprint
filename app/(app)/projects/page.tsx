@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 type StatusFilter = "all" | "active" | "completed" | "archived";
 type SortKey = "newest" | "oldest" | "alpha";
@@ -76,31 +78,27 @@ export default function ProjectsPage() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4" style={{ background: "var(--page-projects)" }}>
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-blue)]/20 text-[var(--accent-blue)]">
-              <FolderKanban className="w-6 h-6" />
-            </span>
-            Projects
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">Manage your projects, tasks and progress.</p>
-        </div>
-        <Link href="/projects/new">
-          <Button className="cursor-pointer">
-            <Plus className="w-4 h-4 shrink-0" />
-            New project
-          </Button>
-        </Link>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Projects"
+        description="Manage your projects, tasks and progress."
+        icon={FolderKanban}
+        action={
+          <Link href="/projects/new">
+            <Button className="cursor-pointer">
+              <Plus className="w-4 h-4 shrink-0" />
+              New project
+            </Button>
+          </Link>
+        }
+      />
       <div className="flex flex-wrap gap-4 mb-6">
         <Input
           placeholder="Search..."
@@ -114,10 +112,10 @@ export default function ProjectsPage() {
               key={s}
               type="button"
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1 text-sm rounded border transition-[var(--transition)] ${
+              className={`px-3 py-2 text-sm rounded-full border transition-colors duration-150 ${
                 statusFilter === s
-                  ? "border-[var(--accent-green)] text-[var(--accent-green)]"
-                  : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
+                  ? "bg-[var(--accent)] text-[var(--accent-foreground)] border-[var(--accent)]"
+                  : "border-[var(--border)] text-[var(--text-secondary)] hover:bg-neutral-100 hover:border-[var(--border)]"
               }`}
             >
               {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -185,6 +183,6 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
-    </main>
+    </PageContainer>
   );
 }

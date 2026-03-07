@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/types";
@@ -80,59 +79,89 @@ export function AddTaskModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={`New task · ${statusLabel}`}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={`New task · ${statusLabel}`}
+      contentClassName="max-w-md rounded-2xl shadow-xl border border-neutral-200 bg-white"
+      contentInnerClassName="p-6"
+    >
       <div className="space-y-4">
-        <Input
-          label="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Task title"
-        />
         <div>
-          <label className="block text-sm text-[var(--text-secondary)] mb-1">Description (optional)</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task title"
+            className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Description (optional)</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
-            rows={2}
-            className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none"
+            rows={3}
+            minLength={0}
+            className="w-full min-h-[80px] rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-colors resize-y"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <Select
             label="Priority"
             options={priorityOptions}
             value={priority}
             onChange={(e) => setPriority(e.target.value as TaskPriority)}
+            fullWidth={false}
+            className="w-full"
+            leading={
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  priority === "p1" ? "bg-red-500" : priority === "p2" ? "bg-amber-400" : "bg-green-500"
+                }`}
+              />
+            }
           />
           <Select
             label="Category"
             options={categoryOptions}
             value={category}
             onChange={(e) => setCategory(e.target.value as TaskCategory)}
+            fullWidth={false}
+            className="w-full"
           />
           <Select
             label="Effort"
             options={EFFORT_OPTIONS}
             value={effort}
             onChange={(e) => setEffort(e.target.value as TaskEffort)}
-          />
-          <DatePicker
-            label="Due date (optional)"
-            value={dueDate}
-            onChange={setDueDate}
-            placeholder="No date"
+            fullWidth={false}
             className="w-full"
           />
+          <div className="col-span-2">
+            <DatePicker
+              label="Due date (optional)"
+              value={dueDate}
+              onChange={setDueDate}
+              placeholder="No date"
+              className="w-full"
+            />
+          </div>
         </div>
-        <div className="flex gap-2 pt-2">
-          <Button onClick={handleCreate} disabled={!title.trim() || saving}>
+        <div className="flex items-center gap-2 pt-2 border-t border-neutral-100 mt-4">
+          <Button onClick={handleCreate} disabled={!title.trim() || saving} className="cursor-pointer flex items-center gap-1.5">
             <Plus className="w-4 h-4 shrink-0" />
             {saving ? "Adding…" : "Add task"}
           </Button>
-          <Button variant="secondary" onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+          >
             Cancel
-          </Button>
+          </button>
         </div>
       </div>
     </Modal>

@@ -51,12 +51,12 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <CalendarIcon className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
+        <CalendarIcon className="w-5 h-5 text-neutral-500 shrink-0" />
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={goPrev}
-            className="p-2 rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] cursor-pointer"
+            className="p-2 rounded border border-neutral-200 hover:bg-neutral-50 cursor-pointer"
             aria-label="Previous month"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -64,14 +64,14 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
           <button
             type="button"
             onClick={goToday}
-            className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-primary)] cursor-pointer"
+            className="px-3 py-2 rounded border border-neutral-200 hover:bg-neutral-50 text-sm font-medium text-neutral-900 cursor-pointer"
           >
             {monthLabel}
           </button>
           <button
             type="button"
             onClick={goNext}
-            className="p-2 rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] cursor-pointer"
+            className="p-2 rounded border border-neutral-200 hover:bg-neutral-50 cursor-pointer"
             aria-label="Next month"
           >
             <ArrowRight className="w-4 h-4" />
@@ -80,18 +80,18 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
       </div>
 
       {unscheduled.length > 0 && (
-        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
-          <h3 className="text-sm font-medium text-[var(--text-muted)] mb-2">No due date</h3>
+        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-2">Unscheduled tasks</h3>
           <ul className="space-y-1">
             {unscheduled.map((task) => (
               <li key={task.id}>
                 <button
                   type="button"
                   onClick={() => onTaskClick(task)}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-[var(--bg-hover)] text-sm text-[var(--text-primary)] cursor-pointer"
+                  className="w-full text-left px-3 py-2 rounded hover:bg-neutral-100 text-sm text-neutral-900 cursor-pointer"
                 >
                   {task.title}
-                  <span className="ml-2 text-xs text-[var(--text-muted)]">{task.status.replace("_", " ")}</span>
+                  <span className="ml-2 text-xs text-neutral-500">{task.status.replace("_", " ")}</span>
                 </button>
               </li>
             ))}
@@ -99,25 +99,26 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
         </div>
       )}
 
-      <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-[var(--border)] bg-[var(--bg-surface)]">
+      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-neutral-200 bg-neutral-50">
           {WEEKDAYS.map((wd) => (
-            <div key={wd} className="py-2 px-1 text-center text-xs font-medium text-[var(--text-muted)]">
+            <div key={wd} className="py-2 px-1 text-center text-xs font-medium text-neutral-500">
               {wd}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 auto-rows-fr min-h-[400px]">
+        <div className="grid grid-cols-7 auto-rows-fr min-h-[420px]">
           {days.map((cell, i) => {
             const isCurrentMonth = cell.date.getMonth() === month;
+            const isWeekend = cell.date.getDay() === 0 || cell.date.getDay() === 6;
             return (
               <div
                 key={i}
-                className={`min-h-[80px] border-b border-r border-[var(--border)] last:border-r-0 p-2 ${
-                  isCurrentMonth ? "bg-[var(--bg-elevated)]" : "bg-[var(--bg-surface)]/50"
+                className={`min-h-[100px] border-b border-r border-neutral-200 last:border-r-0 p-2 ${
+                  isCurrentMonth ? (isWeekend ? "bg-neutral-50" : "bg-white") : "bg-neutral-50/50"
                 }`}
               >
-                <div className={`text-xs font-medium mb-1 ${isCurrentMonth ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>
+                <div className={`text-xs font-medium mb-1 ${isCurrentMonth ? "text-neutral-900" : "text-neutral-400"}`}>
                   {cell.date.getDate()}
                 </div>
                 <ul className="space-y-1">
@@ -126,7 +127,7 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
                       <button
                         type="button"
                         onClick={() => onTaskClick(task)}
-                        className="w-full text-left px-2 py-1 rounded text-xs truncate hover:bg-[var(--bg-hover)] cursor-pointer border-l-2 border-[var(--accent)] bg-[var(--bg-surface)]/80"
+                        className="w-full text-left px-2 py-1 rounded text-xs truncate hover:opacity-90 cursor-pointer bg-teal-500 text-white"
                         title={task.title}
                       >
                         {task.title}
@@ -134,7 +135,7 @@ export function TaskCalendarView({ tasks, onTaskClick }: TaskCalendarViewProps) 
                     </li>
                   ))}
                   {cell.tasks.length > 3 && (
-                    <li className="text-xs text-[var(--text-muted)] pl-2">
+                    <li className="text-xs text-neutral-500 pl-2">
                       +{cell.tasks.length - 3} more
                     </li>
                   )}

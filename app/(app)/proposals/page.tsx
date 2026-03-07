@@ -9,7 +9,11 @@ import { FileSignature, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Card } from "@/components/ui/Card";
 import { formatDate } from "@/lib/utils";
 
 type ProposalWithClient = ProposalRow & { clients?: { name: string } | null };
@@ -49,54 +53,52 @@ export default function ProposalsPage() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex items-center justify-between" style={{ background: "var(--page-proposals)" }}>
-        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-purple)]/20 text-[var(--accent-purple)]">
-            <FileSignature className="w-6 h-6" />
-          </span>
-          Proposals
-        </h1>
-        <Link href="/proposals/new">
-          <Button className="cursor-pointer">
-            <Plus className="w-4 h-4 shrink-0" />
-            New proposal
-          </Button>
-        </Link>
-      </div>
-      <div className="flex flex-wrap gap-4 mb-4 items-center">
+    <PageContainer>
+      <PageHeader
+        title="Proposals"
+        description="Create and manage proposals for your clients."
+        icon={FileSignature}
+        action={
+          <Link href="/proposals/new">
+            <Button className="cursor-pointer">
+              <Plus className="w-4 h-4 shrink-0" />
+              New proposal
+            </Button>
+          </Link>
+        }
+      />
+      <div className="flex flex-wrap gap-4 mb-6 items-center">
         <Input
           placeholder="Search by title or client..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <select
+        <Select
           value={clientFilter}
           onChange={(e) => setClientFilter(e.target.value)}
-          className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-sm"
-        >
-          <option value="all">All clients</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "all", label: "All clients" },
+            ...clients.map((c) => ({ value: c.id, label: c.name })),
+          ]}
+          className="min-w-[180px]"
+        />
         {["all", "draft", "sent", "agreed", "declined"].map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 text-sm rounded border ${
-              statusFilter === s ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)]"
+            className={`px-3 py-2 text-sm rounded-[var(--radius-md)] border transition-[var(--transition)] ${
+              statusFilter === s
+                ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
+                : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
             }`}
           >
             {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -104,7 +106,8 @@ export default function ProposalsPage() {
         ))}
       </div>
       {filtered.length === 0 ? (
-        <EmptyState
+        <div className="mt-6">
+          <EmptyState
           title={proposals.length === 0 ? "No proposals yet" : "No results for this filter"}
           description={
             proposals.length === 0
@@ -124,32 +127,44 @@ export default function ProposalsPage() {
             )
           }
         />
+        </div>
       ) : (
-        <ul className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((p) => (
-            <li key={p.id}>
-              <Link
-                href={`/proposals/${p.id}`}
-                className="block border border-[var(--border)] rounded-lg p-4 hover:border-[var(--border-active)] transition-[var(--transition)]"
-                data-context-menu="proposal"
-                data-context-id={p.id}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{p.title}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
-                      {(p.clients as { name?: string } | null)?.name ?? "No client"} · {formatDate(p.updated_at)}
-                    </p>
-                  </div>
-                  <Badge variant={p.status === "agreed" ? "success" : p.status === "declined" ? "danger" : "default"}>
-                    {p.status.replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </Badge>
+            <Link
+              key={p.id}
+              href={`/proposals/${p.id}`}
+              className="block group"
+              data-context-menu="proposal"
+              data-context-id={p.id}
+            >
+              <Card hover className="h-full">
+                <div className="p-5">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="w-11 h-11 rounded-[var(--radius-lg)] flex items-center justify-center bg-[var(--accent-purple)]/15 text-[var(--accent-purple)] shrink-0">
+                  <FileSignature className="w-5 h-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors truncate">
+                    {p.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] mt-0.5">
+                    {(p.clients as { name?: string } | null)?.name ?? "No client"}
+                  </p>
                 </div>
-              </Link>
-            </li>
+              </div>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <Badge variant={p.status === "agreed" ? "success" : p.status === "declined" ? "danger" : "default"}>
+                  {p.status.replace(/\b\w/g, (c) => c.toUpperCase())}
+                </Badge>
+                <span className="text-xs text-[var(--text-muted)]">{formatDate(p.updated_at)}</span>
+              </div>
+                </div>
+              </Card>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
-    </main>
+    </PageContainer>
   );
 }

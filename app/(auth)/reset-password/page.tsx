@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] p-8 shadow-sm text-center">
+      <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-lg)] bg-[var(--surface)] p-8 shadow-[var(--shadow-card)] text-center">
         <h1 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">Password updated</h1>
         <p className="text-[var(--text-secondary)] text-sm mb-6">
           Your password has been reset. Redirecting you to sign in…
@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] p-8 shadow-sm">
+    <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-lg)] bg-[var(--surface)] p-8 shadow-[var(--shadow-card)]">
       <h1 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">Set new password</h1>
       <p className="text-[var(--text-secondary)] text-sm mb-8">
         Enter your new password below.
@@ -104,7 +104,8 @@ export default function ResetPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 px-4 bg-[var(--accent)] text-[var(--accent-foreground)] font-medium rounded-[var(--radius-card)] border-0 hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full py-2.5 px-4 text-[var(--accent-foreground)] font-medium rounded-[var(--radius-md)] border-0 hover:opacity-90 transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+          style={{ background: "var(--gradient-accent)" }}
         >
           {loading ? "Updating…" : "Update password"}
         </button>

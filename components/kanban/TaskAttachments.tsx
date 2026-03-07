@@ -31,6 +31,7 @@ export function TaskAttachments({
 }: TaskAttachmentsProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const uploadFile = useCallback(
     async (file: File) => {
@@ -95,66 +96,79 @@ export function TaskAttachments({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
-        <Paperclip className="w-4 h-4 text-[var(--text-muted)]" />
-        Attachments
-      </h3>
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        className={`border border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
-          dragOver ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-[var(--border)] bg-[var(--bg-elevated)]/50"
-        }`}
-      >
-        <label className="flex flex-col items-center gap-2 cursor-pointer">
-          <input
-            type="file"
-            multiple
-            className="hidden"
-            onChange={handleFileInput}
-            disabled={uploading}
-          />
-          {uploading ? (
-            <Loader2 className="w-8 h-8 animate-spin text-[var(--accent)]" />
-          ) : (
-            <Paperclip className="w-8 h-8 text-[var(--text-muted)]" />
+      {attachments.length === 0 && !expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="text-sm text-teal-500 hover:text-teal-600 font-medium cursor-pointer flex items-center gap-1.5"
+        >
+          <Paperclip className="w-4 h-4" />
+          + Add attachment
+        </button>
+      ) : (
+        <>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
+            <Paperclip className="w-4 h-4" />
+            Attachments
+          </h3>
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
+              dragOver ? "border-teal-400 bg-teal-50/50" : "border-neutral-200 bg-neutral-50"
+            }`}
+          >
+            <label className="flex flex-col items-center gap-2 cursor-pointer">
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileInput}
+                disabled={uploading}
+              />
+              {uploading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+              ) : (
+                <Paperclip className="w-8 h-8 text-neutral-400" />
+              )}
+              <span className="text-sm text-neutral-500">
+                {uploading ? "Uploading…" : "Drop files or click to upload"}
+              </span>
+            </label>
+          </div>
+          {attachments.length > 0 && (
+            <ul className="space-y-2">
+              {attachments.map((att) => (
+                <li
+                  key={att.id}
+                  className="flex items-center gap-2 py-2 px-3 rounded-lg bg-neutral-50 border border-neutral-200"
+                >
+                  <FileText className="w-4 h-4 shrink-0 text-neutral-400" />
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(att)}
+                    className="flex-1 min-w-0 text-left text-sm text-neutral-900 truncate hover:text-teal-600 cursor-pointer"
+                  >
+                    {att.filename}
+                  </button>
+                  <span className="text-xs text-neutral-500 shrink-0">{formatBytes(att.byte_size)}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(att)}
+                    className="p-1 rounded hover:bg-neutral-200 text-neutral-400 hover:text-red-600 cursor-pointer"
+                    aria-label="Remove attachment"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
-          <span className="text-sm text-[var(--text-secondary)]">
-            {uploading ? "Uploading…" : "Drop files or click to upload"}
-          </span>
-        </label>
-      </div>
-      {attachments.length > 0 && (
-        <ul className="space-y-2">
-          {attachments.map((att) => (
-            <li
-              key={att.id}
-              className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]"
-            >
-              <FileText className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
-              <button
-                type="button"
-                onClick={() => handleDownload(att)}
-                className="flex-1 min-w-0 text-left text-sm text-[var(--text-primary)] truncate hover:text-[var(--accent)] cursor-pointer"
-              >
-                {att.filename}
-              </button>
-              <span className="text-xs text-[var(--text-muted)] shrink-0">{formatBytes(att.byte_size)}</span>
-              <button
-                type="button"
-                onClick={() => handleDelete(att)}
-                className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--accent-red)] cursor-pointer"
-                aria-label="Remove attachment"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </li>
-          ))}
-        </ul>
+        </>
       )}
     </div>
   );

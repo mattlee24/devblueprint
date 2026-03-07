@@ -13,6 +13,9 @@ import {
   Clock,
   Link2,
   RefreshCw,
+  LayoutDashboard,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getClients } from "@/lib/queries/clients";
@@ -34,7 +37,7 @@ type SearchResult =
 type PaletteItem =
   | { kind: "action"; label: string; href?: string; onSelect?: () => void; icon: React.ComponentType<{ className?: string }> }
   | { kind: "result"; result: SearchResult }
-  | { kind: "nav"; label: string; href: string; keys: string };
+  | { kind: "nav"; label: string; href: string; keys: string; icon: React.ComponentType<{ className?: string }> };
 
 const QUICK_ACTIONS: {
   label: string;
@@ -51,15 +54,15 @@ const QUICK_ACTIONS: {
   // Toggle theme is added in component via useTheme
 ];
 
-const NAV_ITEMS: { keys: string; label: string; href: string; keywords: string[] }[] = [
-  { keys: "G D", label: "Go to Dashboard", href: "/dashboard", keywords: ["dashboard", "home"] },
-  { keys: "G P", label: "Go to Projects", href: "/projects", keywords: ["projects", "list"] },
-  { keys: "G C", label: "Go to Clients", href: "/clients", keywords: ["clients", "customers"] },
-  { keys: "G O", label: "Go to Proposals", href: "/proposals", keywords: ["proposals", "onboarding"] },
-  { keys: "G T", label: "Go to Time Logs", href: "/time-logs", keywords: ["time", "logs", "hours"] },
-  { keys: "G I", label: "Go to Invoices", href: "/invoices", keywords: ["invoices", "billing"] },
-  { keys: "G R", label: "Go to Reports", href: "/reports", keywords: ["reports", "analytics"] },
-  { keys: "G S", label: "Go to Settings", href: "/settings", keywords: ["settings", "preferences"] },
+const NAV_ITEMS: { keys: string; label: string; href: string; keywords: string[]; icon: React.ComponentType<{ className?: string }> }[] = [
+  { keys: "G D", label: "Dashboard", href: "/dashboard", keywords: ["dashboard", "home"], icon: LayoutDashboard },
+  { keys: "G P", label: "Projects", href: "/projects", keywords: ["projects", "list"], icon: FolderKanban },
+  { keys: "G C", label: "Clients", href: "/clients", keywords: ["clients", "customers"], icon: Users },
+  { keys: "G O", label: "Proposals", href: "/proposals", keywords: ["proposals", "onboarding"], icon: FileSignature },
+  { keys: "G T", label: "Time Logs", href: "/time-logs", keywords: ["time", "logs", "hours"], icon: Clock },
+  { keys: "G I", label: "Invoices", href: "/invoices", keywords: ["invoices", "billing"], icon: FileText },
+  { keys: "G R", label: "Reports", href: "/reports", keywords: ["reports", "analytics"], icon: BarChart3 },
+  { keys: "G S", label: "Settings", href: "/settings", keywords: ["settings", "preferences"], icon: Settings },
 ];
 
 function matchTerm(text: string, term: string): boolean {
@@ -219,7 +222,7 @@ export function CommandPalette() {
     const actions: PaletteItem[] = [...baseActions, ...extraActions];
     const results: PaletteItem[] = searchResults.map((r) => ({ kind: "result" as const, result: r }));
     const nav: PaletteItem[] = NAV_ITEMS.filter((n) => matchTerm(n.label, term) || matchKeywords(n.keywords, term)).map(
-      (n) => ({ kind: "nav" as const, label: n.label, href: n.href, keys: n.keys })
+      (n) => ({ kind: "nav" as const, label: n.label, href: n.href, keys: n.keys, icon: n.icon })
     );
     return [...actions, ...results, ...nav];
   }, [term, clients, projects, proposals, invoices]);
@@ -294,10 +297,17 @@ export function CommandPalette() {
   }
 
   return (
-    <Modal open={open} onClose={() => setOpen(false)} title="" contentClassName="max-w-2xl w-full p-0 overflow-hidden">
-      <div className="w-full">
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--border)] bg-[var(--bg-elevated)] rounded-t-[var(--radius-card)]">
-          <Search className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
+    <Modal
+      open={open}
+      onClose={() => setOpen(false)}
+      title=""
+      overlayClassName="bg-black/40 backdrop-blur-sm"
+      contentClassName="max-w-lg w-full p-0 overflow-hidden rounded-2xl shadow-2xl border border-neutral-200 bg-white"
+    >
+      <div className="w-full flex flex-col">
+        {/* Search bar: borderless on white */}
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-100">
+          <Search className="w-5 h-5 shrink-0 text-neutral-400" aria-hidden />
           <input
             type="text"
             value={query}
@@ -307,134 +317,148 @@ export function CommandPalette() {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Search or run a command..."
-            className="flex-1 bg-transparent border-none outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+            className="flex-1 bg-transparent border-none outline-none text-base text-neutral-900 placeholder:text-neutral-400 min-w-0"
             autoFocus
           />
-          <kbd className="hidden sm:inline text-[10px] text-[var(--text-muted)] px-1.5 py-0.5 rounded border border-[var(--border)]">Esc</kbd>
+          <kbd className="hidden sm:inline-flex font-mono text-xs bg-neutral-100 border border-neutral-200 rounded px-1.5 py-0.5 text-neutral-500">
+            Esc
+          </kbd>
         </div>
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
+        <div ref={listRef} className="max-h-[60vh] overflow-y-auto flex-1 min-h-0">
           {loading ? (
-            <p className="py-4 text-center text-sm text-[var(--text-muted)]">Loading...</p>
+            <p className="py-6 text-center text-sm text-neutral-500">Loading...</p>
+          ) : items.length === 0 ? (
+            <p className="py-6 px-4 text-sm text-neutral-500">
+              {term ? `No results for "${query}"` : "Type to search or run a command."}
+            </p>
           ) : (
-            <>
-              {items.length === 0 ? (
-                <p className="py-4 px-3 text-sm text-[var(--text-muted)]">
-                  {term ? `No results for "${query}"` : "Type to search or run a command."}
-                </p>
-              ) : (
-                <div className="py-2">
-                  {items.map((item, i) => {
-                    const isSelected = i === normalizedIndex;
-                    const actionCount = items.filter((x) => x.kind === "action").length;
-                    const resultCount = items.filter((x) => x.kind === "result").length;
-                    const firstResultIdx = actionCount;
-                    const firstNavIdx = actionCount + resultCount;
+            <div className="py-2">
+              {items.map((item, i) => {
+                const isSelected = i === normalizedIndex;
+                const actionCount = items.filter((x) => x.kind === "action").length;
+                const resultCount = items.filter((x) => x.kind === "result").length;
+                const firstResultIdx = actionCount;
+                const firstNavIdx = actionCount + resultCount;
+                const rowClass = `flex items-center gap-3 py-2.5 rounded-lg mx-1 cursor-pointer transition-colors ${
+                  isSelected
+                    ? "bg-teal-50 border-l-2 border-teal-500 pl-[calc(1rem-2px)] pr-4"
+                    : "px-4 hover:bg-neutral-50"
+                }`;
+                const iconTileClass = "w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0";
 
-                    return (
-                      <div key={i}>
-                        {i === 0 && item.kind === "action" && (
-                          <p className="px-3 pt-2 pb-1 text-[10px] text-[var(--text-muted)]">
-                            Quick actions
-                          </p>
-                        )}
-                        {i === firstResultIdx && resultCount > 0 && (
-                          <p className="px-3 pt-3 pb-1 text-[10px] text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
-                            Search results
-                          </p>
-                        )}
-                        {i === firstNavIdx && (
-                          <p className="px-3 pt-3 pb-1 text-[10px] text-[var(--text-muted)] border-t border-[var(--border)] mt-1">
-                            Go to
-                          </p>
-                        )}
-                        {item.kind === "action" &&
-                          (item.href ? (
-                            <Link
-                              href={item.href}
-                              data-index={i}
-                              onClick={() => setOpen(false)}
-                              className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
-                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
-                              }`}
-                            >
-                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent)]" />
-                              <span className="text-sm font-medium">{item.label}</span>
-                            </Link>
-                          ) : (
-                            <button
-                              type="button"
-                              data-index={i}
-                              onClick={() => item.onSelect?.()}
-                              className={`flex items-center gap-3 px-3 py-2 w-full text-left transition-[var(--transition)] cursor-pointer ${
-                                isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
-                              }`}
-                            >
-                              <item.icon className="w-4 h-4 shrink-0 text-[var(--accent)]" />
-                              <span className="text-sm font-medium">{item.label}</span>
-                            </button>
-                          ))}
-                        {item.kind === "result" && (() => {
-                          const ResultIcon =
+                return (
+                  <div key={i}>
+                    {i === 0 && item.kind === "action" && (
+                      <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+                        Quick actions
+                      </p>
+                    )}
+                    {i === firstResultIdx && resultCount > 0 && (
+                      <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-neutral-400 border-t border-neutral-100 mt-1">
+                        Search results
+                      </p>
+                    )}
+                    {i === firstNavIdx && (
+                      <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-neutral-400 border-t border-neutral-100 mt-1">
+                        Go to
+                      </p>
+                    )}
+                    {item.kind === "action" &&
+                      (item.href ? (
+                        <Link
+                          href={item.href}
+                          data-index={i}
+                          onClick={() => setOpen(false)}
+                          className={rowClass}
+                        >
+                          <span className={iconTileClass}>
+                            <item.icon className="w-4 h-4 text-neutral-600" />
+                          </span>
+                          <span className="text-sm font-medium text-neutral-900">{item.label}</span>
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          data-index={i}
+                          onClick={() => item.onSelect?.()}
+                          className={`${rowClass} w-full text-left`}
+                        >
+                          <span className={iconTileClass}>
+                            <item.icon className="w-4 h-4 text-neutral-600" />
+                          </span>
+                          <span className="text-sm font-medium text-neutral-900">{item.label}</span>
+                        </button>
+                      ))}
+                    {item.kind === "result" && (() => {
+                      const ResultIcon =
+                        item.result.type === "client"
+                          ? Users
+                          : item.result.type === "project"
+                            ? FolderKanban
+                            : item.result.type === "proposal"
+                              ? FileSignature
+                              : FileText;
+                      return (
+                        <Link
+                          href={
                             item.result.type === "client"
-                              ? Users
+                              ? `/clients/${item.result.id}`
                               : item.result.type === "project"
-                                ? FolderKanban
+                                ? `/projects/${item.result.id}`
                                 : item.result.type === "proposal"
-                                  ? FileSignature
-                                  : FileText;
-                          return (
-                          <Link
-                            href={
-                              item.result.type === "client"
-                                ? `/clients/${item.result.id}`
-                                : item.result.type === "project"
-                                  ? `/projects/${item.result.id}`
-                                  : item.result.type === "proposal"
-                                    ? `/proposals/${item.result.id}`
-                                    : `/invoices/${item.result.id}`
-                            }
-                            data-index={i}
-                            onClick={() => setOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
-                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
-                            }`}
-                          >
-                            <ResultIcon className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{item.result.title}</p>
-                              {item.result.subtitle && (
-                                <p className="text-xs text-[var(--text-muted)] truncate">{item.result.subtitle}</p>
-                              )}
-                            </div>
-                          </Link>
-                          );
-                        })()}
-                        {item.kind === "nav" && (
-                          <Link
-                            href={item.href}
-                            data-index={i}
-                            onClick={() => setOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2 text-left transition-[var(--transition)] cursor-pointer ${
-                              isSelected ? "bg-[var(--bg-hover)]" : "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]"
-                            }`}
-                          >
-                            <kbd className="w-12 text-[10px] text-[var(--text-muted)] font-mono">{item.keys}</kbd>
-                            <span className="text-sm">{item.label}</span>
-                          </Link>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              <div className="border-t border-[var(--border)] px-3 py-2 mt-1">
-                <p className="text-[10px] text-[var(--text-muted)]">
-                  ↑↓ Navigate · Enter Select · Esc Close
-                  {selectedItem?.kind === "result" && " · ⌘L Copy link"}
-                </p>
-              </div>
-            </>
+                                  ? `/proposals/${item.result.id}`
+                                  : `/invoices/${item.result.id}`
+                          }
+                          data-index={i}
+                          onClick={() => setOpen(false)}
+                          className={rowClass}
+                        >
+                          <span className={iconTileClass}>
+                            <ResultIcon className="w-4 h-4 text-neutral-500" />
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-neutral-900 truncate">{item.result.title}</p>
+                            {item.result.subtitle && (
+                              <p className="text-xs text-neutral-500 truncate">{item.result.subtitle}</p>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })()}
+                    {item.kind === "nav" && (
+                      <Link
+                        href={item.href}
+                        data-index={i}
+                        onClick={() => setOpen(false)}
+                        className={rowClass}
+                      >
+                        <span className={iconTileClass}>
+                          <item.icon className="w-4 h-4 text-neutral-500" />
+                        </span>
+                        <span className="text-sm font-medium text-neutral-900 flex-1">{item.label}</span>
+                        <span className="flex items-center gap-1 ml-auto">
+                          {item.keys.split(" ").map((k) => (
+                            <kbd
+                              key={k}
+                              className="font-mono text-xs bg-neutral-100 border border-neutral-200 rounded px-1.5 py-0.5 text-neutral-600"
+                            >
+                              {k}
+                            </kbd>
+                          ))}
+                        </span>
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
+        </div>
+        <div className="border-t border-neutral-100 px-4 py-2 flex-shrink-0">
+          <p className="text-xs text-neutral-400">
+            ↑↓ navigate · ↵ select · Esc close
+            {selectedItem?.kind === "result" && " · ⌘L Copy link"}
+          </p>
         </div>
       </div>
     </Modal>

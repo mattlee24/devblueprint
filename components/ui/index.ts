@@ -9,4 +9,4 @@ export { ProgressBar } from "./ProgressBar";
 export { ProgressRing } from "./ProgressRing";
 export { Select } from "./Select";
 export { Tabs } from "./Tabs";
-export { Terminal, TerminalSectionHeader } from "./Terminal";
+export { Terminal, TerminalSectionHeader, WidgetSectionHeader } from "./Terminal";

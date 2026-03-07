@@ -42,17 +42,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden app-page-bg" data-page={pageKey}>
-      {/* Desktop: always visible. Sidebar sits on page background; semi-transparent so tint shows through */}
+    <div
+      className="flex h-screen w-full overflow-hidden bg-[var(--bg-base)]"
+    >
+      {/* Sidebar: almost full height with margin, does not scroll; shadow on wrapper so it isn't clipped */}
+      <div className="hidden lg:flex flex-col flex-shrink-0 h-screen py-5 pl-5 pr-2">
+        <div className="flex flex-col w-[248px] rounded-[var(--radius-lg)] shadow-[var(--shadow-sidebar)] flex-1 min-h-0 shrink-0">
+          <aside
+            className="no-print flex flex-col flex-1 min-h-0 rounded-[var(--radius-lg)] bg-[var(--surface)] overflow-hidden"
+            style={{ border: "1px solid var(--card-border)" }}
+          >
+            <Sidebar />
+          </aside>
+        </div>
+      </div>
+      {/* Mobile: fixed sidebar overlay */}
       <aside
-        className={`no-print border-r border-[var(--border)] flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-30 w-56 h-screen lg:min-h-0 transition-transform duration-200 ease-out lg:translate-x-0 lg:rounded-r-[var(--radius-page)] ${
+        className={`no-print flex flex-col fixed inset-y-0 left-0 z-30 w-[248px] h-screen transition-transform duration-200 ease-out lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-        style={{ background: "rgba(255, 255, 255, 0.88)" }}
+        } rounded-r-[var(--radius-lg)] shadow-[var(--shadow-sidebar)] bg-[var(--surface)]`}
+        style={{ borderLeft: "none", borderWidth: "1px", borderColor: "var(--card-border)" }}
       >
         <Sidebar />
       </aside>
-      {/* Mobile backdrop when sidebar open */}
       {sidebarOpen && (
         <button
           type="button"
@@ -61,25 +73,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <div className="flex-1 min-h-0 overflow-auto flex flex-col min-w-0">
-        {/* Mobile header with menu button */}
-        <header className="lg:hidden sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] rounded-b-[var(--radius-page)]" style={{ background: "rgba(255, 255, 255, 0.95)" }}>
+      {/* Main: full width; page content is constrained and centered by PageContainer */}
+      <div
+        className="flex-1 min-h-0 overflow-auto flex flex-col min-w-0 bg-[var(--bg-base)]"
+        data-page={pageKey}
+      >
+        <header className="lg:hidden sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)]">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-[var(--radius-input)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] cursor-pointer"
+            className="p-2 rounded-[var(--radius-md)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] cursor-pointer"
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/dashboard" className="text-lg font-semibold text-[var(--accent)] truncate cursor-pointer">
+          <Link
+            href="/dashboard"
+            className="text-lg font-semibold text-[var(--accent)] truncate cursor-pointer"
+          >
             DevBlueprint
           </Link>
         </header>
-        <div className="flex-1 p-3 sm:p-4 min-h-0">
-          <div className="h-full min-h-[calc(100vh-8rem)] rounded-[var(--radius-page)] overflow-auto max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </div>
+        <div className="flex-1 min-h-0 w-full">
+          {children}
         </div>
       </div>
     </div>

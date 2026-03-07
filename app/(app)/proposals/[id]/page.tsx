@@ -10,6 +10,7 @@ import { getProfile } from "@/lib/queries/profiles";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { GeneratedProposalView } from "@/components/proposals/GeneratedProposalView";
 import { ProposalDeckEditor } from "@/components/proposals/ProposalDeckEditor";
@@ -22,7 +23,7 @@ type ProposalWithClient = ProposalRow & { clients?: { id: string; name: string }
 export default function ProposalDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = typeof params?.id === "string" && params.id.trim() ? params.id.trim() : null;
   const [proposal, setProposal] = useState<ProposalWithClient | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,10 @@ export default function ProposalDetailPage() {
   const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     getProposal(id).then((res) => {
       setProposal((res.data ?? null) as ProposalWithClient | null);
       setLoading(false);
@@ -47,7 +52,7 @@ export default function ProposalDetailPage() {
   }, []);
 
   async function handleStatusUpdate(status: "agreed" | "declined") {
-    const { error } = await updateProposal(id, { status });
+    const { error } = await updateProposal(id!, { status });
     if (error) {
       toast.error(error.message ?? "Failed to update status");
       return;
@@ -59,7 +64,7 @@ export default function ProposalDetailPage() {
 
   async function handleDelete() {
     setDeleteLoading(true);
-    const { error } = await deleteProposal(id);
+    const { error } = await deleteProposal(id!);
     setDeleteLoading(false);
     if (error) {
       toast.error(error.message ?? "Failed to delete proposal");
@@ -71,7 +76,7 @@ export default function ProposalDetailPage() {
   }
 
   async function handleSlidesSave(slides: ProposalSlide[]) {
-    const { error } = await updateProposal(id, { slides });
+    const { error } = await updateProposal(id!, { slides });
     if (error) {
       toast.error(error.message ?? "Failed to save slides");
       return;
@@ -82,7 +87,7 @@ export default function ProposalDetailPage() {
   async function handleEnableShare() {
     setShareLoading(true);
     try {
-      const res = await fetch(`/api/proposals/${id}/share`, { method: "POST" });
+      const res = await fetch(`/api/proposals/${id!}/share`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error ?? "Failed to create share link");
@@ -101,7 +106,7 @@ export default function ProposalDetailPage() {
   async function handleDisableShare() {
     setShareLoading(true);
     try {
-      const res = await fetch(`/api/proposals/${id}/share/disable`, { method: "POST" });
+      const res = await fetch(`/api/proposals/${id!}/share/disable`, { method: "POST" });
       if (!res.ok) {
         const data = await res.json();
         toast.error(data.error ?? "Failed to disable link");
@@ -132,10 +137,22 @@ export default function ProposalDetailPage() {
     }
   }
 
+  if (!id) {
+    return (
+      <main>
+        <PageContainer>
+          <p className="text-[var(--text-secondary)]">Proposal not found.</p>
+          <Link href="/proposals" className="text-[var(--accent)] hover:underline mt-2 inline-block cursor-pointer">Back to proposals</Link>
+        </PageContainer>
+      </main>
+    );
+  }
   if (loading || !proposal) {
     return (
-      <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+      <main>
+        <PageContainer>
+          <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+        </PageContainer>
       </main>
     );
   }
@@ -145,7 +162,8 @@ export default function ProposalDetailPage() {
   const hasGenerated = generated && Object.keys(generated).length > 0;
 
   return (
-    <main className="p-6">
+    <main>
+      <PageContainer>
       <Breadcrumbs
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -323,6 +341,7 @@ export default function ProposalDetailPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      </PageContainer>
     </main>
   );
 }

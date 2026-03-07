@@ -197,6 +197,7 @@ export function TaskBoardSection({
           if (detailTask) onTaskDelete(detailTask.id);
           setDetailTask(null);
         }}
+        projectName={project.title}
         categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
         priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
         statusOptions={statusOptions}

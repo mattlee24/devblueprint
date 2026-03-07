@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -12,19 +13,20 @@ import type { TaskRow } from "@/lib/queries/tasks";
 import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import { ProjectHeader } from "@/components/projects/ProjectHeader";
 import { BlueprintTab } from "@/components/blueprint/BlueprintTab";
-import { ScopeTab } from "@/components/projects/ScopeTab";
 import { TaskBoardSection } from "@/components/kanban/TaskBoardSection";
 import { Tabs } from "@/components/ui/Tabs";
-import { ProgressRing } from "@/components/ui/ProgressRing";
+import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Clock } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { formatHoursShort, formatCurrency } from "@/lib/utils";
 import type { Blueprint } from "@/lib/types";
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = typeof params?.id === "string" && params.id.trim() ? params.id.trim() : null;
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLogRow[]>([]);
@@ -36,11 +38,17 @@ export default function ProjectDetailPage() {
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
 
   useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      setError("Project not found");
+      return;
+    }
+    const projectId = id;
     async function load() {
       const [pRes, tRes, tlRes] = await Promise.all([
-        getProject(id),
-        getTasksByProject(id),
-        getTimeLogs({ projectId: id }),
+        getProject(projectId),
+        getTasksByProject(projectId),
+        getTimeLogs({ projectId }),
       ]);
       if (pRes.error) setError(pRes.error.message);
       else setProject(pRes.data ?? null);
@@ -52,14 +60,16 @@ export default function ProjectDetailPage() {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
+    const projectId = id;
     const supabase = createClient();
     channelRef.current = supabase
-      .channel(`tasks:project=${id}`)
+      .channel(`tasks:project=${projectId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "tasks", filter: `project_id=eq.${id}` },
+        { event: "*", schema: "public", table: "tasks", filter: `project_id=eq.${projectId}` },
         () => {
-          getTasksByProject(id).then((r) => setTasks(r.data ?? []));
+          getTasksByProject(projectId).then((r) => setTasks(r.data ?? []));
         }
       )
       .subscribe();
@@ -93,7 +103,7 @@ export default function ProjectDetailPage() {
 
   async function handleTaskCreate(task: Partial<TaskRow> & { title: string }) {
     const res = await createTask({
-      project_id: id,
+      project_id: id!,
       title: task.title,
       description: task.description ?? null,
       status: (task.status as TaskRow["status"]) ?? "backlog",
@@ -161,7 +171,7 @@ export default function ProjectDetailPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `project-${project.title.replace(/\s+/g, "-").toLowerCase()}-${id.slice(0, 8)}.json`;
+    a.download = `project-${project.title.replace(/\s+/g, "-").toLowerCase()}-${id!.slice(0, 8)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -180,17 +190,32 @@ export default function ProjectDetailPage() {
     router.refresh();
   }
 
+  if (!id) {
+    return (
+      <main>
+        <PageContainer>
+          <p className="text-[var(--text-secondary)]">Project not found.</p>
+          <Link href="/projects" className="text-[var(--accent)] hover:underline mt-2 inline-block cursor-pointer">Back to projects</Link>
+        </PageContainer>
+      </main>
+    );
+  }
   if (loading) {
     return (
-      <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
+      <main>
+        <PageContainer>
+          <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
+        </PageContainer>
       </main>
     );
   }
   if (error || !project) {
     return (
-      <main className="p-6">
-        <p className="text-[var(--accent-red)]">Something went wrong. {error ?? "Project not found"}</p>
+      <main>
+        <PageContainer>
+          <p className="text-[var(--accent-red)]">Something went wrong. {error ?? "Project not found"}</p>
+          <Link href="/projects" className="text-[var(--accent)] hover:underline mt-2 inline-block cursor-pointer">Back to projects</Link>
+        </PageContainer>
       </main>
     );
   }
@@ -204,23 +229,30 @@ export default function ProjectDetailPage() {
 
   const blueprint = project.blueprint as Blueprint | null;
 
+  const boardConfig = project.board_config as BoardConfig | null;
+  const defaultTaskStatus = (boardConfig?.columnOrder?.length ? boardConfig.columnOrder[0] : "todo") as string;
+
   const tabs = [
     {
       id: "blueprint",
       label: "Blueprint",
-      content: <BlueprintTab blueprint={blueprint} />,
-    },
-    {
-      id: "scope",
-      label: "Scope & context",
-      content: <ScopeTab project={project} blueprint={blueprint} />,
+      content: (
+        <BlueprintTab
+          blueprint={blueprint}
+          projectId={id!}
+          projectUpdatedAt={project.updated_at}
+          onTaskCreate={handleTaskCreate}
+          defaultTaskStatus={defaultTaskStatus}
+          taskCount={tasks.length}
+        />
+      ),
     },
     {
       id: "tasks",
       label: "Task Board",
       content: (
         <TaskBoardSection
-          projectId={id}
+          projectId={id!}
           project={project}
           tasks={tasks}
           onTaskUpdate={handleTaskUpdate}
@@ -234,37 +266,44 @@ export default function ProjectDetailPage() {
       id: "timelogs",
       label: "Time Logs",
       content: (
-        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden">
-          <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
-            <p className="text-sm text-[var(--text-secondary)]">
-              Total: <span className="font-medium text-[var(--text-primary)]">{formatHoursShort(hoursLogged)}</span>
+        <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+          <div className="p-4 border-b border-neutral-200 flex flex-wrap justify-between items-center gap-3">
+            <p className="text-sm text-neutral-500">
+              Total: <span className="font-medium text-neutral-900">{formatHoursShort(hoursLogged)}</span>
               {" · "}
-              Billable: <span className="font-medium text-[var(--accent)]">{formatCurrency(billableAmount, currency)}</span>
+              Billable: <span className="font-medium text-teal-600">{formatCurrency(billableAmount, currency)}</span>
             </p>
+            <Link
+              href={`/time-logs?project=${project.id}`}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-500 text-white text-sm font-medium hover:bg-teal-600 cursor-pointer"
+            >
+              <Clock className="w-4 h-4 shrink-0" />
+              + Log time
+            </Link>
           </div>
           {timeLogs.length === 0 ? (
-            <p className="text-[var(--text-muted)] p-6 text-center">No time logs for this project.</p>
+            <p className="text-neutral-400 p-6 text-center text-sm">No time logs for this project.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface)]">
-                  <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">Date</th>
-                  <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">Description</th>
-                  <th className="text-right py-3 px-4 text-[var(--text-muted)] font-medium">Hours</th>
-                  <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">Billable</th>
-                  <th className="text-right py-3 px-4 text-[var(--text-muted)] font-medium">Amount</th>
+                <tr className="border-b border-neutral-200 bg-neutral-50">
+                  <th className="text-left py-3 px-4 text-xs uppercase tracking-wider text-neutral-400 font-semibold">Date</th>
+                  <th className="text-left py-3 px-4 text-xs uppercase tracking-wider text-neutral-400 font-semibold">Description</th>
+                  <th className="text-right py-3 px-4 text-xs uppercase tracking-wider text-neutral-400 font-semibold">Hours</th>
+                  <th className="text-left py-3 px-4 text-xs uppercase tracking-wider text-neutral-400 font-semibold">Billable</th>
+                  <th className="text-right py-3 px-4 text-xs uppercase tracking-wider text-neutral-400 font-semibold">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {timeLogs.map((log) => (
-                  <tr key={log.id} className="border-b border-[var(--border)] last:border-0">
-                    <td className="py-3 px-4 text-[var(--text-secondary)]">{log.logged_date}</td>
-                    <td className="py-3 px-4 text-[var(--text-primary)]">{log.description}</td>
+                  <tr key={log.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                    <td className="py-3 px-4 text-neutral-600">{log.logged_date}</td>
+                    <td className="py-3 px-4 text-neutral-900">{log.description}</td>
                     <td className="text-right py-3 px-4">{log.hours}</td>
                     <td className="py-3 px-4">
-                      <span className={log.billable ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}>
+                      <Badge variant={log.billable ? "teal" : "muted"}>
                         {log.billable ? "Billable" : "Non-billable"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="text-right py-3 px-4 font-medium">
                       {log.billable && log.hourly_rate != null
@@ -279,62 +318,11 @@ export default function ProjectDetailPage() {
         </div>
       ),
     },
-    {
-      id: "overview",
-      label: "Overview",
-      content: (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 flex items-center gap-4">
-              <ProgressRing value={doneCount} max={tasks.length || 1} />
-              <div>
-                <p className="text-xs text-[var(--text-muted)]">Tasks complete</p>
-                <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  {doneCount} <span className="text-[var(--text-muted)] font-normal">/ {tasks.length}</span>
-                </p>
-              </div>
-            </div>
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)]">Open tasks</p>
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{tasks.length - doneCount}</p>
-            </div>
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)]">Hours logged</p>
-              <p className="text-2xl font-bold text-[var(--accent)]">{formatHoursShort(hoursLogged)}</p>
-            </div>
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)]">Billable amount</p>
-              <p className="text-2xl font-bold text-[var(--accent)]">{formatCurrency(billableAmount, currency)}</p>
-            </div>
-          </div>
-          {project.description && (
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] mb-2">Project description</p>
-              <p className="text-sm text-[var(--text-secondary)] whitespace-pre-line">{project.description}</p>
-            </div>
-          )}
-          {(project.stack as string[])?.length > 0 && (
-            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
-              <p className="text-xs text-[var(--text-muted)] mb-2">Stack</p>
-              <div className="flex flex-wrap gap-2">
-                {(project.stack as string[]).map((s) => (
-                  <span
-                    key={s}
-                    className="px-2 py-1 rounded border border-[var(--border)] text-sm text-[var(--text-secondary)]"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      ),
-    },
   ];
 
   return (
-    <main className="p-6">
+    <main>
+      <PageContainer>
       <Breadcrumbs
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -348,6 +336,8 @@ export default function ProjectDetailPage() {
         taskCount={tasks.length}
         doneCount={doneCount}
         hoursLogged={hoursLogged}
+        billableAmount={billableAmount}
+        currency={currency}
         onArchive={handleArchive}
         onExportJson={handleExportJson}
         onDelete={() => setDeleteConfirmOpen(true)}
@@ -363,6 +353,7 @@ export default function ProjectDetailPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      </PageContainer>
     </main>
   );
 }

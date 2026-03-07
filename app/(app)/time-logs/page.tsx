@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { TableCard } from "@/components/ui/TableCard";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { TimeLogForm, type TimeLogFormData } from "@/components/timeLogs/TimeLogForm";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
@@ -131,26 +134,25 @@ function TimeLogsContent() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex items-center justify-between" style={{ background: "var(--page-time-logs)" }}>
-        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-amber)]/20 text-[var(--accent-amber)]">
-            <Clock className="w-6 h-6" />
-          </span>
-          Time Logs
-        </h1>
-        <Button onClick={() => setDrawerOpen(true)} className="cursor-pointer">
-          <Plus className="w-4 h-4 shrink-0" />
-          Log time
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Time Logs"
+        description="Track and manage billable and non-billable time."
+        icon={Clock}
+        action={
+          <Button onClick={() => setDrawerOpen(true)} className="cursor-pointer">
+            <Plus className="w-4 h-4 shrink-0" />
+            Log time
+          </Button>
+        }
+      />
       <div className="flex gap-4 mb-6 flex-wrap items-center">
         <Input
           placeholder="Search description..."
@@ -195,8 +197,10 @@ function TimeLogsContent() {
             key={x}
             type="button"
             onClick={() => setBillableFilter(x)}
-            className={`px-3 py-1.5 text-sm rounded border ${
-              billableFilter === x ? "border-[var(--accent-green)] text-[var(--accent-green)]" : "border-[var(--border)]"
+            className={`px-3 py-2 text-sm rounded-[var(--radius-md)] border transition-[var(--transition)] ${
+              billableFilter === x
+                ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
+                : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
             }`}
           >
             {x === "all" ? "All" : x === "billable" ? "Billable" : "Non-billable"}
@@ -236,69 +240,71 @@ function TimeLogsContent() {
           }
         />
       ) : (
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-[var(--border)]">
-            <th className="text-left py-2">Date</th>
-            <th className="text-left py-2">Client</th>
-            <th className="text-left py-2">Project</th>
-            <th className="text-left py-2">Description</th>
-            <th className="text-right py-2">Hours</th>
-            <th className="text-left py-2">Billable</th>
-            <th className="text-right py-2">Amount</th>
-            <th className="text-right py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((log) => (
-            <tr key={log.id} className="border-b border-[var(--border)]">
-              <td className="py-2">{formatDate(log.logged_date)}</td>
-              <td className="py-2">{(log as unknown as { clients?: { name: string } })?.clients?.name ?? "—"}</td>
-              <td className="py-2">{(log as unknown as { projects?: { title: string } })?.projects?.title ?? "—"}</td>
-              <td className="py-2">{log.description}</td>
-              <td className="text-right py-2">{formatHoursShort(log.hours)}</td>
-              <td className="py-2">
-                <Badge variant={log.billable ? "success" : "muted"}>
-                  {log.billable ? "Billable" : "Non-billable"}
-                </Badge>
-              </td>
-              <td className="text-right py-2">
-                {log.billable && log.hourly_rate != null
-                  ? formatCurrency(log.hours * log.hourly_rate, log.currency)
-                  : "—"}
-              </td>
-              <td className="text-right py-2">
-                <div className="inline-flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingLog(log);
-                      setDrawerOpen(true);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--accent)] text-xs"
-                  >
-                    <Pencil className="w-3.5 h-3.5 shrink-0" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(log.id)}
-                    className="inline-flex items-center gap-1.5 text-[var(--accent-red)] hover:underline text-xs"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      )}
-      {filtered.length > 0 && (
-      <div className="sticky bottom-0 mt-4 py-3 px-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-sm">
-        Total: {formatHoursShort(totalHours)} · Billable: {formatHoursShort(billableHours)} · Non-billable: {formatHoursShort(totalHours - billableHours)} · Total value: {formatCurrency(totalValue, "GBP")}
-      </div>
+        <>
+          <TableCard>
+            <table className="app-table w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Date</th>
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Client</th>
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Project</th>
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Description</th>
+                  <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Hours</th>
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Billable</th>
+                  <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Amount</th>
+                  <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((log) => (
+                  <tr key={log.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]">
+                    <td className="py-3 px-4">{formatDate(log.logged_date)}</td>
+                    <td className="py-3 px-4">{(log as unknown as { clients?: { name: string } })?.clients?.name ?? "—"}</td>
+                    <td className="py-3 px-4">{(log as unknown as { projects?: { title: string } })?.projects?.title ?? "—"}</td>
+                    <td className="py-3 px-4">{log.description}</td>
+                    <td className="text-right py-3 px-4">{formatHoursShort(log.hours)}</td>
+                    <td className="py-3 px-4">
+                      <Badge variant={log.billable ? "teal" : "muted"}>
+                        {log.billable ? "Billable" : "Non-billable"}
+                      </Badge>
+                    </td>
+                    <td className="text-right py-3 px-4">
+                      {log.billable && log.hourly_rate != null
+                        ? formatCurrency(log.hours * log.hourly_rate, log.currency)
+                        : "—"}
+                    </td>
+                    <td className="text-right py-3 px-4">
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          aria-label="Edit time log"
+                          onClick={() => {
+                            setEditingLog(log);
+                            setDrawerOpen(true);
+                          }}
+                          className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-neutral-100 transition-colors cursor-pointer"
+                        >
+                          <Pencil className="w-4 h-4 shrink-0" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Delete time log"
+                          onClick={() => handleDelete(log.id)}
+                          className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--accent-red)] hover:bg-red-50 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4 shrink-0" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableCard>
+          <div className="mt-4 border-t border-[var(--border)] py-3 px-4 bg-neutral-50 rounded-b-xl text-sm font-semibold text-[var(--text-primary)]">
+            Total: {formatHoursShort(totalHours)} · Billable: {formatHoursShort(billableHours)} · Non-billable: {formatHoursShort(totalHours - billableHours)} · Total value: {formatCurrency(totalValue, "GBP")}
+          </div>
+        </>
       )}
 
       <Drawer
@@ -321,13 +327,13 @@ function TimeLogsContent() {
           }}
         />
       </Drawer>
-    </main>
+    </PageContainer>
   );
 }
 
 export default function TimeLogsPage() {
   return (
-    <Suspense fallback={<main className="p-6"><div className="animate-pulse text-[var(--text-muted)]">Loading...</div></main>}>
+    <Suspense fallback={<PageContainer><div className="animate-pulse text-[var(--text-muted)]">Loading...</div></PageContainer>}>
       <TimeLogsContent />
     </Suspense>
   );

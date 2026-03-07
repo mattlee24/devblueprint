@@ -18,21 +18,22 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center py-12 px-6 text-center rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-soft ${className}`}
-      style={{ background: "var(--gradient-card)" }}
+      className={`relative flex flex-col items-center justify-center py-12 px-6 text-center rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden ${className}`}
     >
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)", backgroundSize: "24px 24px" }} aria-hidden />
       {Icon && (
-        <div className="mb-4 p-4 rounded-2xl bg-[var(--accent)]/10 border border-[var(--border-subtle)] text-[var(--accent)]">
-          <Icon className="w-10 h-10" />
+        <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#f0fdfa] text-[var(--accent)]">
+          <Icon className="h-6 w-6" />
         </div>
       )}
-      <h3 className="text-[var(--text-primary)] font-medium text-lg mb-1">{title}</h3>
+      <h3 className="relative text-[var(--text-primary)] font-semibold text-lg mb-1">{title}</h3>
       {description && (
-        <p className="text-[var(--text-secondary)] text-sm mb-5 max-w-sm">
+        <p className="relative text-[var(--text-secondary)] text-sm mb-5 max-w-sm leading-relaxed">
           {description}
         </p>
       )}
-      {action && <div>{action}</div>}
+      {action && <div className="relative">{action}</div>}
     </div>
   );
 }

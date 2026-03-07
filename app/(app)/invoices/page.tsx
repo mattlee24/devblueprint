@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { TableCard } from "@/components/ui/TableCard";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 export default function InvoicesPage() {
@@ -44,59 +48,34 @@ export default function InvoicesPage() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex items-center justify-between" style={{ background: "var(--page-invoices)" }}>
-        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-teal)]/20 text-[var(--accent-teal)]">
-            <FileText className="w-6 h-6" />
-          </span>
-          Invoices
-        </h1>
-        <Link href="/invoices/new">
-          <Button className="cursor-pointer">
-            <Plus className="w-4 h-4 shrink-0" />
-            New invoice
-          </Button>
-        </Link>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Invoices"
+        description="Create and track invoices for your clients."
+        icon={FileText}
+        action={
+          <Link href="/invoices/new">
+            <Button className="cursor-pointer">
+              <Plus className="w-4 h-4 shrink-0" />
+              New invoice
+            </Button>
+          </Link>
+        }
+      />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="border border-[var(--border)] rounded-lg p-4 flex items-center gap-3">
-          <Receipt className="w-5 h-5 shrink-0 text-[var(--text-muted)]" />
-          <div>
-            <p className="text-xs text-[var(--text-muted)]">Total Invoiced</p>
-            <p className="text-xl font-semibold">{formatCurrency(totalInvoiced)}</p>
-          </div>
-        </div>
-        <div className="border border-[var(--border)] rounded-lg p-4 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 shrink-0 text-[var(--accent-green)]" />
-          <div>
-            <p className="text-xs text-[var(--text-muted)]">Paid</p>
-            <p className="text-xl font-semibold text-[var(--accent-green)]">{formatCurrency(paid)}</p>
-          </div>
-        </div>
-        <div className="border border-[var(--border)] rounded-lg p-4 flex items-center gap-3">
-          <Clock className="w-5 h-5 shrink-0 text-[var(--text-muted)]" />
-          <div>
-            <p className="text-xs text-[var(--text-muted)]">Outstanding</p>
-            <p className="text-xl font-semibold">{formatCurrency(outstanding)}</p>
-          </div>
-        </div>
-        <div className="border border-[var(--border)] rounded-lg p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-[var(--accent-red)]" />
-          <div>
-            <p className="text-xs text-[var(--text-muted)]">Overdue</p>
-            <p className="text-xl font-semibold text-[var(--accent-red)]">{overdue}</p>
-          </div>
-        </div>
+        <StatCard label="Total Invoiced" value={formatCurrency(totalInvoiced)} icon={Receipt} />
+        <StatCard label="Paid" value={formatCurrency(paid)} icon={CheckCircle} valueClassName="text-[var(--accent-green)]" />
+        <StatCard label="Outstanding" value={formatCurrency(outstanding)} icon={Clock} />
+        <StatCard label="Overdue" value={overdue} icon={AlertCircle} valueClassName={overdue > 0 ? "text-red-500" : ""} />
       </div>
-      <div className="flex flex-wrap gap-4 mb-4 items-center">
+      <div className="flex flex-wrap gap-4 mb-6 items-center">
         <Input
           placeholder="Search by invoice # or client..."
           value={search}
@@ -108,8 +87,10 @@ export default function InvoicesPage() {
             key={s}
             type="button"
             onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 text-sm rounded border ${
-              statusFilter === s ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)]"
+            className={`px-3 py-2 text-sm rounded-[var(--radius-md)] border transition-[var(--transition)] ${
+              statusFilter === s
+                ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
+                : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
             }`}
           >
             {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -147,60 +128,62 @@ export default function InvoicesPage() {
           }
         />
       ) : (
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-[var(--border)]">
-            <th className="text-left py-2">Invoice #</th>
-            <th className="text-left py-2">Client</th>
-            <th className="text-left py-2">Issued</th>
-            <th className="text-left py-2">Due</th>
-            <th className="text-right py-2">Amount</th>
-            <th className="text-left py-2">Status</th>
-            <th className="text-right py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((inv) => (
-            <tr
-              key={inv.id}
-              className="border-b border-[var(--border)]"
-              data-context-menu="invoice"
-              data-context-id={inv.id}
-            >
-              <td className="py-2">{inv.invoice_number}</td>
-              <td className="py-2">{(inv as unknown as { clients?: { name: string } })?.clients?.name ?? "—"}</td>
-              <td className="py-2">{formatDate(inv.issue_date)}</td>
-              <td className="py-2">{inv.due_date ? formatDate(inv.due_date) : "—"}</td>
-              <td className="text-right py-2">{formatCurrency(inv.total, inv.currency)}</td>
-              <td className="py-2">
-                <Badge
-                  variant={
-                    inv.status === "paid"
-                      ? "success"
-                      : inv.status === "overdue"
-                        ? "danger"
-                      : inv.status === "sent"
-                        ? "default"
-                      : "muted"
-                  }
+        <TableCard>
+          <table className="app-table w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
+                <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Invoice #</th>
+                <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Client</th>
+                <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Issued</th>
+                <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Due</th>
+                <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Amount</th>
+                <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Status</th>
+                <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((inv) => (
+                <tr
+                  key={inv.id}
+                  className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]"
+                  data-context-menu="invoice"
+                  data-context-id={inv.id}
                 >
-                  {inv.status.replace(/\b\w/g, (c) => c.toUpperCase())}
-                </Badge>
-              </td>
-              <td className="text-right py-2">
-                <Link
-                  href={`/invoices/${inv.id}`}
-                  className="inline-flex items-center gap-2 text-[var(--accent)] hover:underline text-sm"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                  View
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <td className="py-3 px-4">{inv.invoice_number}</td>
+                  <td className="py-3 px-4">{(inv as unknown as { clients?: { name: string } })?.clients?.name ?? "—"}</td>
+                  <td className="py-3 px-4">{formatDate(inv.issue_date)}</td>
+                  <td className="py-3 px-4">{inv.due_date ? formatDate(inv.due_date) : "—"}</td>
+                  <td className="text-right py-3 px-4">{formatCurrency(inv.total, inv.currency)}</td>
+                  <td className="py-3 px-4">
+                    <Badge
+                      variant={
+                        inv.status === "paid"
+                          ? "success"
+                          : inv.status === "overdue"
+                            ? "danger"
+                            : inv.status === "sent"
+                              ? "default"
+                              : "muted"
+                      }
+                    >
+                      {inv.status.replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </Badge>
+                  </td>
+                  <td className="text-right py-3 px-4">
+                    <Link
+                      href={`/invoices/${inv.id}`}
+                      className="inline-flex items-center gap-2 text-[var(--accent)] hover:underline text-sm cursor-pointer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableCard>
       )}
-    </main>
+    </PageContainer>
   );
 }

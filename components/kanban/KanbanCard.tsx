@@ -1,11 +1,8 @@
 "use client";
 
 import type { TaskRow } from "@/lib/queries/tasks";
-import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
 import { GripVertical } from "lucide-react";
-
-const PRIORITY_VARIANT = { p1: "danger" as const, p2: "warning" as const, p3: "muted" as const };
 
 interface KanbanCardProps {
   task: TaskRow;
@@ -13,7 +10,6 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ task, onOpen }: KanbanCardProps) {
-  const priorityVariant = PRIORITY_VARIANT[task.priority as keyof typeof PRIORITY_VARIANT] ?? "default";
   const dueDate = task.due_date ?? null;
   const isOverdue = dueDate ? new Date(dueDate).toDateString() < new Date().toDateString() : false;
 
@@ -23,21 +19,23 @@ export function KanbanCard({ task, onOpen }: KanbanCardProps) {
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => e.key === "Enter" && onOpen()}
-      className="group w-full border border-[var(--border)] rounded-lg p-3 bg-[var(--bg-elevated)] hover:border-[var(--border-active)] transition-all cursor-pointer text-left"
+      className="group w-full border border-neutral-200 rounded-lg p-3 bg-white shadow-sm hover:shadow-md hover:border-neutral-300 transition-shadow duration-150 cursor-pointer text-left"
     >
       <div className="flex items-start gap-2">
-        <span className="mt-0.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden>
+        <span className="mt-0.5 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden>
           <GripVertical className="w-3.5 h-3.5" />
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{task.title}</p>
+          <p className="text-sm font-medium text-neutral-900 truncate">{task.title}</p>
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-            <Badge variant={priorityVariant} className="text-[10px] px-1.5 py-0">
-              {task.priority.replace(/\b\w/g, (c) => c.toUpperCase())}
-            </Badge>
-            <span className="text-[10px] text-[var(--text-muted)]">{task.category}</span>
+            <span
+              className={`h-2 w-2 rounded-full shrink-0 ${task.priority === "p1" ? "bg-red-500" : task.priority === "p2" ? "bg-amber-400" : "bg-green-500"}`}
+              aria-hidden
+            />
+            <span className="text-[10px] text-neutral-500">{task.priority.toUpperCase()}</span>
+            <span className="text-[10px] text-neutral-500">{task.category}</span>
             {dueDate && (
-              <span className={`text-[10px] ${isOverdue ? "text-[var(--accent-warning)] font-medium" : "text-[var(--text-muted)]"}`}>
+              <span className={`text-[10px] ${isOverdue ? "text-amber-600 font-medium" : "text-neutral-500"}`}>
                 {isOverdue ? "Overdue" : `Due ${formatDate(dueDate)}`}
               </span>
             )}

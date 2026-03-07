@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { TaskRow } from "@/lib/queries/tasks";
@@ -54,6 +53,7 @@ interface TaskDetailModalProps {
   onClose: () => void;
   onSave: (updates: Partial<TaskRow>) => Promise<void>;
   onDelete: () => void;
+  projectName?: string;
   categoryOptions?: { value: string; label: string }[];
   priorityOptions?: { value: string; label: string }[];
   statusOptions?: { value: string; label: string }[];
@@ -65,6 +65,7 @@ export function TaskDetailModal({
   onClose,
   onSave,
   onDelete,
+  projectName,
   categoryOptions = CATEGORY_OPTIONS,
   priorityOptions = PRIORITY_OPTIONS,
   statusOptions = FALLBACK_STATUS_OPTIONS,
@@ -213,85 +214,91 @@ export function TaskDetailModal({
 
   if (!task) return null;
 
+  const statusColor =
+    status === "done" ? "bg-green-500" : status === "in_review" ? "bg-amber-400" : status === "in_progress" ? "bg-blue-500" : "bg-neutral-300";
+  const priorityDot =
+    priority === "p1" ? "bg-red-500" : priority === "p2" ? "bg-amber-400" : "bg-green-500";
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Task details"
-      contentClassName="max-w-7xl w-[92vw] max-h-[94vh] flex flex-col"
+      title={task.title}
+      overlayClassName="bg-black/40 backdrop-blur-sm"
+      contentClassName="max-w-4xl w-full max-h-[94vh] flex flex-col rounded-2xl shadow-xl border border-neutral-200 bg-white"
       contentInnerClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-0"
     >
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] flex-1 min-h-0 overflow-hidden">
         {/* Left column: task content */}
-        <div className="flex-1 min-w-0 flex flex-col overflow-hidden border-r border-[var(--border)]">
-          <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+        <div className="flex flex-col min-w-0 overflow-hidden border-r border-neutral-200">
+          <div className="p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
+            {/* Breadcrumb + title */}
+            {projectName && (
+              <p className="text-xs text-neutral-400">
+                {projectName} › {title || task.title}
+              </p>
+            )}
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task title"
-              className="w-full text-xl font-semibold bg-transparent border-0 border-b border-transparent focus:border-[var(--border-active)] focus:outline-none pb-1 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              className="w-full text-2xl font-semibold font-mono bg-transparent border-0 border-b border-transparent focus:border-teal-400 focus:outline-none pb-1 text-neutral-900 placeholder:text-neutral-400"
             />
-            {/* Compact controls: 2x2 / 3x3 responsive grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1">Status</label>
-                <Select
-                  label=""
-                  options={statusOptions}
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                  className="w-full min-w-0"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1">Priority</label>
-                <Select
-                  label=""
-                  options={priorityOptions}
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                  className="w-full min-w-0"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1">Category</label>
-                <Select
-                  label=""
-                  options={categoryOptions}
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as TaskCategory)}
-                  className="w-full min-w-0"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1">Effort</label>
-                <Select
-                  label=""
-                  options={EFFORT_OPTIONS}
-                  value={effort}
-                  onChange={(e) => setEffort(e.target.value as TaskEffort)}
-                  className="w-full min-w-0"
-                />
-              </div>
-              <div>
-                <DatePicker
-                  label="Due"
-                  value={dueDate}
-                  onChange={setDueDate}
-                  placeholder="No date"
-                  className="w-full min-w-0"
-                />
-              </div>
+            {/* Metadata row: compact pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                label=""
+                options={statusOptions}
+                value={status}
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                fullWidth={false}
+                triggerClassName="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 text-xs font-medium hover:bg-neutral-50 min-h-0 h-auto w-auto min-w-0"
+                leading={<span className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`} />}
+              />
+              <Select
+                label=""
+                options={priorityOptions}
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                fullWidth={false}
+                triggerClassName="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 text-xs font-medium hover:bg-neutral-50 min-h-0 h-auto w-auto min-w-0"
+                leading={<span className={`w-2 h-2 rounded-full shrink-0 ${priorityDot}`} />}
+              />
+              <Select
+                label=""
+                options={categoryOptions}
+                value={category}
+                onChange={(e) => setCategory(e.target.value as TaskCategory)}
+                fullWidth={false}
+                triggerClassName="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 text-xs font-medium hover:bg-neutral-50 min-h-0 h-auto w-auto min-w-0"
+              />
+              <Select
+                label=""
+                options={EFFORT_OPTIONS}
+                value={effort}
+                onChange={(e) => setEffort(e.target.value as TaskEffort)}
+                fullWidth={false}
+                triggerClassName="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 text-xs font-medium hover:bg-neutral-50 min-h-0 h-auto w-auto min-w-0"
+              />
+              <DatePicker
+                label=""
+                value={dueDate}
+                onChange={setDueDate}
+                placeholder="No date"
+                className="w-auto min-w-0"
+              />
             </div>
             <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-1">Description</label>
-              <RichTextEditor value={description} onChange={setDescription} minHeight="200px" />
+              <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1">Description</label>
+              <div className="border border-neutral-200 rounded-lg overflow-hidden">
+                <RichTextEditor value={description} onChange={setDescription} minHeight="160px" className="border-0 rounded-none" />
+              </div>
             </div>
             <div ref={subtasksSectionRef}>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="text-sm text-[var(--text-secondary)]">Subtasks</label>
-                <span className="text-xs text-[var(--text-muted)]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Subtasks</span>
+                <span className="bg-neutral-100 text-neutral-500 text-xs px-1.5 rounded-full">
                   {subtasks.filter((s) => s.completed).length}/{subtasks.length}
                 </span>
               </div>
@@ -314,7 +321,7 @@ export function TaskDetailModal({
                         setTimeout(() => setHighlightedSubtaskId(null), 1500);
                       }
                     }}
-                    className={`flex items-center gap-2 group py-1 rounded hover:bg-[var(--bg-hover)]/50 cursor-pointer transition-colors ${highlightedSubtaskId === subtask.id ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-base)] bg-[var(--bg-hover)]/50" : ""}`}
+                    className={`flex items-center gap-2 group py-1 rounded hover:bg-neutral-50 cursor-pointer transition-colors ${highlightedSubtaskId === subtask.id ? "ring-2 ring-teal-400 ring-offset-2 ring-offset-white bg-neutral-50" : ""}`}
                   >
                     <button
                       type="button"
@@ -322,11 +329,11 @@ export function TaskDetailModal({
                         e.stopPropagation();
                         handleSubtaskToggle(subtask);
                       }}
-                      className="p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--accent)] cursor-pointer shrink-0"
+                      className="p-0.5 rounded text-neutral-400 hover:text-teal-500 cursor-pointer shrink-0"
                       aria-label={subtask.completed ? "Mark incomplete" : "Mark complete"}
                     >
                       {subtask.completed ? (
-                        <CheckSquare className="w-5 h-5 text-[var(--accent)]" />
+                        <CheckSquare className="w-5 h-5 text-teal-500" />
                       ) : (
                         <Square className="w-5 h-5" />
                       )}
@@ -341,7 +348,7 @@ export function TaskDetailModal({
                           e.currentTarget.blur();
                         }
                       }}
-                      className={`flex-1 min-w-0 bg-transparent border-0 border-b border-transparent focus:border-[var(--border-active)] focus:outline-none py-1 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] ${subtask.completed ? "line-through text-[var(--text-muted)]" : ""}`}
+                      className={`flex-1 min-w-0 bg-transparent border-0 border-b border-transparent focus:border-teal-400 focus:outline-none py-1 text-sm text-neutral-900 placeholder:text-neutral-400 ${subtask.completed ? "line-through text-neutral-500" : ""}`}
                     />
                     <button
                       type="button"
@@ -349,7 +356,7 @@ export function TaskDetailModal({
                         e.stopPropagation();
                         handleSubtaskDelete(subtask.id);
                       }}
-                      className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[var(--bg-active)] text-[var(--text-muted)] cursor-pointer shrink-0"
+                      className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-neutral-100 text-neutral-400 cursor-pointer shrink-0"
                       aria-label="Delete subtask"
                     >
                       <X className="w-4 h-4" />
@@ -358,25 +365,23 @@ export function TaskDetailModal({
                 ))}
               </ul>
               <div className="flex gap-2 mt-2">
-                <Input
+                <input
                   value={newSubtaskTitle}
                   onChange={(e) => setNewSubtaskTitle(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleAddSubtask();
                   }}
                   placeholder="Add a subtask…"
-                  className="flex-1"
+                  className="flex-1 rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 focus:outline-none"
                 />
-                <Button
+                <button
                   type="button"
-                  variant="secondary"
                   onClick={handleAddSubtask}
                   disabled={!newSubtaskTitle.trim()}
-                  className="cursor-pointer shrink-0"
+                  className="text-teal-500 hover:text-teal-600 text-sm font-medium cursor-pointer disabled:opacity-50"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add
-                </Button>
+                  + Add
+                </button>
               </div>
             </div>
             <TaskAttachments
@@ -385,27 +390,33 @@ export function TaskDetailModal({
               onAttachmentsChange={setAttachments}
             />
           </div>
-          <div className="p-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2 bg-[var(--bg-elevated)]/50">
-            <div className="text-xs text-[var(--text-muted)] flex gap-4">
+          <div className="p-4 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 bg-neutral-50/50">
+            <div className="text-xs text-neutral-400 font-mono flex gap-4">
               <span>Created {formatDate(task.created_at)}</span>
               <span>Updated {formatDate(task.updated_at)}</span>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-                {saving ? "Saving…" : "Save"}
-              </Button>
-              <Button variant="secondary" onClick={onClose} className="cursor-pointer">
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={handleDelete} className="cursor-pointer">
-                <Trash2 className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 text-sm font-medium cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4 inline-block mr-1.5 align-middle" />
                 Delete task
-              </Button>
+              </button>
+              <div className="ml-auto flex gap-2">
+                <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
+                  {saving ? "Saving…" : "Save"}
+                </Button>
+                <Button variant="secondary" onClick={onClose} className="cursor-pointer">
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         </div>
         {/* Right column: comments */}
-        <div className="w-full lg:w-[380px] flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] bg-[var(--bg-elevated)]/30">
+        <div className="w-full lg:w-[280px] flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-neutral-200 bg-neutral-50/30">
           <div className="p-4 flex-1 min-h-0 overflow-hidden flex flex-col">
             <ThreadedComments
               taskId={task.id}

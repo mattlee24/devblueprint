@@ -117,7 +117,7 @@ function NewProposalForm() {
             rows={5}
             className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)] text-sm"
           />
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-neutral-400 italic mt-1">
             The more detail you provide, the better the generated proposal.
           </p>
         </div>
@@ -138,7 +138,7 @@ function NewProposalForm() {
             ))}
           </select>
         </div>
-        <Button onClick={handleGenerate} disabled={!canGenerate || generating}>
+        <Button className="w-full sm:w-auto" onClick={handleGenerate} disabled={!canGenerate || generating}>
           {generating ? "Generating…" : "Generate proposal"}
         </Button>
       </div>

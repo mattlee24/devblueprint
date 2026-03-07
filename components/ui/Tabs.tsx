@@ -1,24 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { type ReactNode } from "react";
 
 interface Tab {
   id: string;
   label: string;
   content: ReactNode;
-}
-
-interface TabsContextValue {
-  activeId: string;
-  setActiveId: (id: string) => void;
-}
-
-const TabsContext = createContext<TabsContextValue | null>(null);
-
-function useTabs() {
-  const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error("Tabs components must be used within Tabs");
-  return ctx;
 }
 
 interface TabsProps {
@@ -27,32 +15,36 @@ interface TabsProps {
   className?: string;
 }
 
-export function Tabs({ tabs, defaultTab = tabs[0]?.id ?? "", className = "" }: TabsProps) {
-  const [activeId, setActiveId] = useState(defaultTab);
-
+export function Tabs({
+  tabs,
+  defaultTab = tabs[0]?.id ?? "",
+  className = "",
+}: TabsProps) {
   return (
-    <TabsContext.Provider value={{ activeId, setActiveId }}>
-      <div className={className}>
-        <div className="flex border-b border-[var(--border)] gap-1 mb-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveId(tab.id)}
-              className={`px-4 py-2 text-sm font-medium transition-[var(--transition)] border-b-2 -mb-px cursor-pointer ${
-                activeId === tab.id
-                  ? "border-[var(--accent)] text-[var(--accent)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)]"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        <div className="animate-in fade-in duration-150">
-          {tabs.find((t) => t.id === activeId)?.content}
-        </div>
-      </div>
-    </TabsContext.Provider>
+    <TabsPrimitive.Root
+      defaultValue={defaultTab}
+      className={className}
+    >
+      <TabsPrimitive.List className="flex border-b border-[var(--border)] gap-1 mb-4 rounded-t-[var(--radius-sm)]">
+        {tabs.map((tab) => (
+          <TabsPrimitive.Trigger
+            key={tab.id}
+            value={tab.id}
+            className="px-4 py-2 text-sm font-medium transition-[var(--transition)] border-b-2 -mb-px cursor-pointer rounded-t-[var(--radius-sm)] data-[state=active]:border-[var(--accent)] data-[state=active]:text-[var(--accent)] border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+          >
+            {tab.label}
+          </TabsPrimitive.Trigger>
+        ))}
+      </TabsPrimitive.List>
+      {tabs.map((tab) => (
+        <TabsPrimitive.Content
+          key={tab.id}
+          value={tab.id}
+          className="outline-none data-[state=inactive]:hidden"
+        >
+          {tab.content}
+        </TabsPrimitive.Content>
+      ))}
+    </TabsPrimitive.Root>
   );
 }

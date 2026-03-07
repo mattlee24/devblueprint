@@ -16,9 +16,17 @@ export function KanbanColumn({
   tasks,
   onCardOpen,
 }: KanbanColumnProps) {
+  const columnBorder: Record<string, string> = {
+    todo: "border-t-neutral-300",
+    in_progress: "border-t-blue-500",
+    in_review: "border-t-amber-500",
+    done: "border-t-green-500",
+  };
+  const borderClass = columnBorder[columnId] ?? "border-t-neutral-300";
+
   return (
-    <div className="min-w-[240px] w-60 flex-shrink-0 border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-surface)] p-3">
-      <h3 className="text-xs font-medium text-[var(--text-muted)] mb-3">
+    <div className={`min-w-[240px] w-60 flex-shrink-0 border border-neutral-200 rounded-xl bg-white p-3 border-t-4 ${borderClass}`}>
+      <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">
         {title}
       </h3>
       <div className="space-y-2">

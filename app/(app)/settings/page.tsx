@@ -8,8 +8,11 @@ import { getProfile, upsertProfile } from "@/lib/queries/profiles";
 import type { ProfileRow } from "@/lib/queries/profiles";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { TerminalSectionHeader } from "@/components/ui/Terminal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Settings } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -109,19 +112,21 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6 max-w-2xl">
-      <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+    <PageContainer>
+      <PageHeader title="Settings" description="Manage your profile and preferences." icon={Settings} />
 
-      <section className="mb-8">
-        <TerminalSectionHeader>Profile</TerminalSectionHeader>
-        <div className="space-y-4 mt-4">
+      <div className="max-w-2xl space-y-6">
+      <Card>
+        <CardHeader title="Profile" titleClassName="uppercase tracking-widest text-neutral-400" />
+        <CardContent>
+        <div className="space-y-4">
           <Input
             label="Display name"
             value={profile.display_name ?? ""}
@@ -131,11 +136,13 @@ export default function SettingsPage() {
             Email (from auth): {user?.email ?? "—"}
           </p>
         </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="mb-8">
-        <TerminalSectionHeader>Business info (for invoices)</TerminalSectionHeader>
-        <div className="space-y-4 mt-4">
+      <Card>
+        <CardHeader title="Business info (for invoices)" titleClassName="uppercase tracking-widest text-neutral-400" />
+        <CardContent>
+        <div className="space-y-4">
           <Input
             label="Company logo (URL)"
             type="url"
@@ -174,11 +181,13 @@ export default function SettingsPage() {
             onChange={(e) => setProfile((p) => ({ ...p, tax_number: e.target.value }))}
           />
         </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="mb-8">
-        <TerminalSectionHeader>Defaults</TerminalSectionHeader>
-        <div className="space-y-4 mt-4">
+      <Card>
+        <CardHeader title="Defaults" titleClassName="uppercase tracking-widest text-neutral-400" />
+        <CardContent>
+        <div className="space-y-4">
           <Input
             label="Default currency"
             value={profile.default_currency ?? "GBP"}
@@ -197,15 +206,16 @@ export default function SettingsPage() {
             onChange={(e) => setProfile((p) => ({ ...p, default_tax_rate: e.target.value ? parseFloat(e.target.value) : 0 }))}
           />
         </div>
-      </section>
+        <div className="flex gap-2 pt-2">
+          <Button onClick={handleSave} className="cursor-pointer">Save changes</Button>
+        </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex gap-2">
-        <Button onClick={handleSave}>Save changes</Button>
-      </div>
-
-      <section className="mt-12 pt-8 border-t border-[var(--border)]">
-        <TerminalSectionHeader>Demo data</TerminalSectionHeader>
-        <p className="text-sm text-[var(--text-muted)] mt-2 mb-4">
+      <Card>
+        <CardHeader title="Demo data" titleClassName="uppercase tracking-widest text-neutral-400" />
+        <CardContent>
+        <p className="text-sm text-[var(--text-muted)] mb-4">
           Add sample data to your account. &quot;Seed all&quot; creates clients, projects, tasks, time logs, and invoices.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -229,11 +239,13 @@ export default function SettingsPage() {
             {seedAllMessage ?? seedMessage}
           </p>
         )}
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="mt-12 pt-8 border-t border-[var(--border)]">
-        <TerminalSectionHeader>Danger zone</TerminalSectionHeader>
-        <p className="text-sm text-[var(--text-muted)] mt-2 mb-4">
+      <Card>
+        <CardHeader title="Danger zone" titleClassName="uppercase tracking-widest text-neutral-400" />
+        <CardContent>
+        <p className="text-sm text-[var(--text-muted)] mb-4">
           Delete your account and all data. This cannot be undone.
         </p>
         <Button variant="danger" onClick={() => setDeleteOpen(true)}>
@@ -242,7 +254,9 @@ export default function SettingsPage() {
         {deleteMessage && (
           <p className="text-sm mt-2 text-[var(--accent-red)]">{deleteMessage}</p>
         )}
-      </section>
+        </CardContent>
+      </Card>
+      </div>
 
       <ConfirmDialog
         open={deleteOpen}
@@ -254,6 +268,6 @@ export default function SettingsPage() {
         variant="danger"
         loading={deleteLoading}
       />
-    </main>
+    </PageContainer>
   );
 }

@@ -15,6 +15,8 @@ import { ClientCard } from "@/components/clients/ClientCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<ClientRow[]>([]);
@@ -75,31 +77,27 @@ export default function ClientsPage() {
 
   if (loading) {
     return (
-      <main className="p-6">
+      <PageContainer>
         <div className="animate-pulse text-[var(--text-muted)]">Loading…</div>
-      </main>
+      </PageContainer>
     );
   }
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4" style={{ background: "var(--page-clients)" }}>
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-3 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-green)]/20 text-[var(--accent-green)]">
-              <Users className="w-6 h-6" />
-            </span>
-            Clients
-          </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">Your clients and their projects.</p>
-        </div>
-        <Link href="/clients/new">
-          <Button className="cursor-pointer">
-            <UserPlus className="w-4 h-4 shrink-0" />
-            New client
-          </Button>
-        </Link>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Clients"
+        description="Your clients and their projects."
+        icon={Users}
+        action={
+          <Link href="/clients/new">
+            <Button className="cursor-pointer">
+              <UserPlus className="w-4 h-4 shrink-0" />
+              New client
+            </Button>
+          </Link>
+        }
+      />
       <div className="flex gap-4 mb-6 flex-wrap">
         <Input
           placeholder="Search..."
@@ -112,10 +110,10 @@ export default function ClientsPage() {
             key={s}
             type="button"
             onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 text-sm rounded border transition-[var(--transition)] ${
+            className={`px-3 py-2 text-sm rounded-[var(--radius-md)] border transition-[var(--transition)] ${
               statusFilter === s
-                ? "border-[var(--accent)] text-[var(--accent)]"
-                : "border-[var(--border)] text-[var(--text-secondary)]"
+                ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/10"
+                : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-active)]"
             }`}
           >
             {s === "all" ? "All" : s.replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -175,6 +173,6 @@ export default function ClientsPage() {
         })
         )}
       </div>
-    </main>
+    </PageContainer>
   );
 }

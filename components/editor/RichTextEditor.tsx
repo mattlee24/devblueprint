@@ -13,6 +13,10 @@ interface RichTextEditorProps {
   placeholder?: string;
   minHeight?: string;
   className?: string;
+  /** Optional class for the toolbar (e.g. border-b border-neutral-200 bg-neutral-50 px-2 py-1.5). */
+  toolbarClassName?: string;
+  /** Optional class for the content area (e.g. bg-white px-4 py-3). */
+  contentClassName?: string;
 }
 
 export function RichTextEditor({
@@ -21,6 +25,8 @@ export function RichTextEditor({
   placeholder = "Write a description…",
   minHeight = "200px",
   className = "",
+  toolbarClassName,
+  contentClassName,
 }: RichTextEditorProps) {
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -37,7 +43,7 @@ export function RichTextEditor({
     content: value || "",
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none min-h-[200px] px-3 py-2 focus:outline-none text-[var(--text-primary)]",
+        class: `prose prose-invert max-w-none min-h-[200px] focus:outline-none text-neutral-900 ${contentClassName ?? "px-4 py-3"}`,
       },
     },
     onUpdate: ({ editor }) => {
@@ -61,13 +67,13 @@ export function RichTextEditor({
       className={`rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden ${className}`}
       style={{ minHeight }}
     >
-      <Toolbar editor={editor} />
+      <Toolbar editor={editor} toolbarClassName={toolbarClassName} />
       <EditorContent editor={editor} />
     </div>
   );
 }
 
-function Toolbar({ editor }: { editor: Editor | null }) {
+function Toolbar({ editor, toolbarClassName }: { editor: Editor | null; toolbarClassName?: string }) {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkOpen, setLinkOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
@@ -111,7 +117,9 @@ function Toolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;
 
   return (
-    <div className="flex items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg-hover)]/50 px-2 py-1 flex-wrap">
+    <div
+      className={`flex items-center gap-0.5 flex-wrap border-b border-neutral-200 bg-neutral-50 px-2 py-1.5 ${toolbarClassName ?? ""}`}
+    >
       <div className="flex items-center gap-0.5">
         <button
           type="button"

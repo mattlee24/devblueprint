@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
+import { Clock } from "lucide-react";
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -164,8 +166,10 @@ export default function InvoiceDetailPage() {
 
   if (loading || !invoice) {
     return (
-      <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+      <main>
+        <PageContainer>
+          <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+        </PageContainer>
       </main>
     );
   }
@@ -173,7 +177,8 @@ export default function InvoiceDetailPage() {
   const client = (invoice as unknown as { clients?: Record<string, unknown> })?.clients;
 
   return (
-    <main className="p-6 invoice-print-content">
+    <main className="invoice-print-content">
+      <PageContainer>
       <Breadcrumbs
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -259,8 +264,11 @@ export default function InvoiceDetailPage() {
       </div>
 
       {timeLogsAvailable.length > 0 && (
-        <div className="mb-6 p-4 border border-[var(--border)] rounded-[var(--radius-card)] bg-[var(--bg-elevated)] no-print">
-          <h2 className="text-sm font-medium mb-2">Add from time logs (billable, not yet on an invoice)</h2>
+        <div className="mb-6 p-5 border border-[var(--border)] rounded-xl bg-neutral-50 no-print border-l-4 border-l-[var(--accent)]">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-2 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[var(--accent)] shrink-0" />
+            Add from time logs (billable, not yet on an invoice)
+          </h2>
           <ul className="space-y-2 mb-3 max-h-48 overflow-y-auto">
             {timeLogsAvailable.map((log) => (
               <li key={log.id} className="flex items-center gap-3 text-sm">
@@ -291,7 +299,7 @@ export default function InvoiceDetailPage() {
           <h2 className="text-sm font-medium">Line items</h2>
           <Button variant="secondary" onClick={addLine}>+ Add row</Button>
         </div>
-        <table className="w-full text-sm invoice-line-items">
+        <table className="app-table w-full text-sm invoice-line-items">
           <thead>
             <tr className="border-b-2 border-[var(--border)] print:border-gray-400">
               <th className="text-left py-3 font-semibold print:text-black">Description</th>
@@ -403,6 +411,7 @@ export default function InvoiceDetailPage() {
         variant="danger"
         loading={deleteLoading}
       />
+      </PageContainer>
     </main>
   );
 }

@@ -134,10 +134,17 @@ export function KanbanBoard({
     setAddTaskColumn(null);
   }
 
+  const columnBorder: Record<string, string> = {
+    todo: "border-t-neutral-300",
+    in_progress: "border-t-blue-500",
+    in_review: "border-t-amber-500",
+    done: "border-t-green-500",
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 text-[var(--text-muted)]">
+        <div className="flex items-center gap-2 text-neutral-500">
           <Filter className="w-4 h-4 shrink-0" />
           <span className="text-sm">Filter</span>
         </div>
@@ -180,9 +187,9 @@ export function KanbanBoard({
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className="flex-shrink-0 w-[320px] flex flex-col rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden"
+                  className={`flex-shrink-0 w-[320px] flex flex-col rounded-xl border border-neutral-200 bg-white overflow-hidden border-t-4 ${columnBorder[col.id] ?? "border-t-neutral-300"}`}
                 >
-                  <div className="p-3 border-b border-[var(--border)] bg-[var(--bg-elevated)] flex items-center justify-between gap-2">
+                  <div className="p-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2">
                     {editingColumnId === col.id ? (
                       <div className="flex-1 flex items-center gap-1">
                         <Input
@@ -198,15 +205,15 @@ export function KanbanBoard({
                         <button
                           type="button"
                           onClick={() => handleColumnLabelSave(col.id)}
-                          className="text-xs text-[var(--accent-green)] hover:underline"
+                          className="text-xs text-teal-600 hover:underline"
                         >
                           Save
                         </button>
                       </div>
                     ) : (
                       <>
-                        <LayoutList className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                        <h3 className="text-sm font-medium text-[var(--text-primary)] truncate flex-1">
+                        <LayoutList className="w-4 h-4 text-neutral-400 shrink-0" />
+                        <h3 className="text-sm font-medium text-neutral-900 truncate flex-1">
                           {col.label}
                         </h3>
                         {onBoardConfigChange && (
@@ -216,7 +223,7 @@ export function KanbanBoard({
                               setEditingColumnId(col.id);
                               setEditingLabel(col.label);
                             }}
-                            className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] cursor-pointer"
+                            className="p-1 rounded hover:bg-neutral-100 text-neutral-400 cursor-pointer"
                             title="Edit column name"
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -243,14 +250,14 @@ export function KanbanBoard({
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-center border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--accent-green)] hover:border-[var(--accent-green)]"
+                    <button
+                      type="button"
                       onClick={() => setAddTaskColumn(col.id)}
+                      className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 p-2 text-sm text-neutral-400 hover:border-teal-400 hover:text-teal-500 transition-colors cursor-pointer"
                     >
                       <Plus className="w-4 h-4 shrink-0" />
                       Add task
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}

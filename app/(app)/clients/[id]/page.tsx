@@ -15,9 +15,11 @@ import { Button } from "@/components/ui/Button";
 import { Tabs } from "@/components/ui/Tabs";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
-import { Trash2 } from "lucide-react";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { Trash2, FolderKanban, Clock, Banknote, AlertCircle } from "lucide-react";
 
 export default function ClientDetailPage() {
   const params = useParams();
@@ -53,8 +55,10 @@ export default function ClientDetailPage() {
 
   if (loading || !client) {
     return (
-      <main className="p-6">
-        <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+      <main>
+        <PageContainer>
+          <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+        </PageContainer>
       </main>
     );
   }
@@ -70,27 +74,15 @@ export default function ClientDetailPage() {
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="border border-[var(--border)] rounded p-4">
-              <p className="text-xs text-[var(--text-muted)]">Total Projects</p>
-              <p className="text-xl font-semibold">{projects.length}</p>
-            </div>
-            <div className="border border-[var(--border)] rounded p-4">
-              <p className="text-xs text-[var(--text-muted)]">Total Hours</p>
-              <p className="text-xl font-semibold">{formatHoursShort(totalHours)}</p>
-            </div>
-            <div className="border border-[var(--border)] rounded p-4">
-              <p className="text-xs text-[var(--text-muted)]">Total Billed</p>
-              <p className="text-xl font-semibold">{formatCurrency(totalBilled, client.currency)}</p>
-            </div>
-            <div className="border border-[var(--border)] rounded p-4">
-              <p className="text-xs text-[var(--text-muted)]">Outstanding</p>
-              <p className="text-xl font-semibold">{formatCurrency(outstanding, client.currency)}</p>
-            </div>
+            <StatCard label="Total Projects" value={projects.length} icon={FolderKanban} />
+            <StatCard label="Total Hours" value={formatHoursShort(totalHours)} icon={Clock} />
+            <StatCard label="Total Billed" value={formatCurrency(totalBilled, client.currency)} icon={Banknote} />
+            <StatCard label="Outstanding" value={formatCurrency(outstanding, client.currency)} icon={AlertCircle} />
           </div>
           <h3 className="text-sm font-medium">Recent activity</h3>
           <ul className="space-y-2">
             {(timeLogs ?? []).slice(0, 10).map((log) => (
-              <li key={log.id} className="flex justify-between text-sm border-b border-[var(--border)] py-2">
+              <li key={log.id} className="flex justify-between text-sm border-b border-[var(--border)] py-2 hover:bg-neutral-50 transition-colors duration-100 -mx-2 px-2 rounded">
                 <span>{formatDate(log.logged_date)} · {(log as unknown as { projects?: { title: string } })?.projects?.title ?? "—"}</span>
                 <span>{log.description} · {formatHoursShort(log.hours)}</span>
               </li>
@@ -143,7 +135,7 @@ export default function ClientDetailPage() {
       id: "timelogs",
       label: "Time Logs",
       content: (
-        <table className="w-full text-sm">
+        <table className="app-table w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border)]">
               <th className="text-left py-2">Date</th>
@@ -201,7 +193,8 @@ export default function ClientDetailPage() {
   ];
 
   return (
-    <main className="p-6">
+    <main>
+      <PageContainer>
       <Breadcrumbs
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -270,6 +263,7 @@ export default function ClientDetailPage() {
         loading={deleteLoading}
       />
       <Tabs tabs={tabs} defaultTab="overview" />
+      </PageContainer>
     </main>
   );
 }

@@ -32,3 +32,12 @@ export function TerminalSectionHeader({ children }: { children: ReactNode }) {
     </h2>
   );
 }
+
+/** Friendly widget section header: icon + label, no terminal styling. */
+export function WidgetSectionHeader({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+      {children}
+    </h2>
+  );
+}

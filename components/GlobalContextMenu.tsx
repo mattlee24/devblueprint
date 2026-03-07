@@ -21,8 +21,6 @@ interface GlobalContextMenuProps {
   onClose: () => void;
 }
 
-const MENU_WIDTH = 220;
-
 export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -88,131 +86,157 @@ export function GlobalContextMenu({ x, y, onClose }: GlobalContextMenuProps) {
   return (
     <div
       ref={ref}
-      className="fixed z-[100] min-w-[220px] py-1 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg-surface)] shadow-lg"
+      className="fixed z-[100] w-56 rounded-xl shadow-lg border border-neutral-200 bg-white p-1"
       style={{ left: position.x, top: position.y }}
     >
-      <p className="px-3 py-1.5 text-[10px] text-[var(--text-muted)] border-b border-[var(--border)]">
+      <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-widest text-neutral-400">
         Quick actions
       </p>
       <button
         type="button"
-        onClick={() => navigate("/projects/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        onClick={openSearch}
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FolderKanban className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <Search className="w-4 h-4 text-neutral-500" />
+        </span>
+        Search…
+        <kbd className="ml-auto font-mono text-[10px] text-neutral-400">⌘K</kbd>
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate("/projects/new")}
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
+      >
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FolderKanban className="w-4 h-4 text-neutral-600" />
+        </span>
         New project
       </button>
       <button
         type="button"
         onClick={() => navigate("/clients/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <UserPlus className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <UserPlus className="w-4 h-4 text-neutral-600" />
+        </span>
         New client
       </button>
       <button
         type="button"
         onClick={() => navigate("/proposals/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FileSignature className="w-4 h-4 text-neutral-600" />
+        </span>
         New proposal
       </button>
       <button
         type="button"
         onClick={() => navigate("/invoices/new")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FileText className="w-4 h-4 text-neutral-600" />
+        </span>
         New invoice
       </button>
       <button
         type="button"
         onClick={() => navigate("/time-logs")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <Clock className="w-4 h-4 text-neutral-600" />
+        </span>
         Log time
       </button>
 
-      <div className="border-t border-[var(--border)] my-1" />
-      <p className="px-3 py-1.5 text-[10px] text-[var(--text-muted)]">
+      <div className="border-t border-neutral-100 my-1" />
+      <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-widest text-neutral-400">
         Go to
       </p>
       <button
         type="button"
         onClick={() => navigate("/dashboard")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <LayoutDashboard className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <LayoutDashboard className="w-4 h-4 text-neutral-500" />
+        </span>
         Dashboard
       </button>
       <button
         type="button"
         onClick={() => navigate("/projects")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FolderKanban className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FolderKanban className="w-4 h-4 text-neutral-500" />
+        </span>
         Projects
       </button>
       <button
         type="button"
         onClick={() => navigate("/clients")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <Users className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <Users className="w-4 h-4 text-neutral-500" />
+        </span>
         Clients
       </button>
       <button
         type="button"
         onClick={() => navigate("/proposals")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FileSignature className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FileSignature className="w-4 h-4 text-neutral-500" />
+        </span>
         Proposals
       </button>
       <button
         type="button"
         onClick={() => navigate("/time-logs")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <Clock className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <Clock className="w-4 h-4 text-neutral-500" />
+        </span>
         Time logs
       </button>
       <button
         type="button"
         onClick={() => navigate("/invoices")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <FileText className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <FileText className="w-4 h-4 text-neutral-500" />
+        </span>
         Invoices
       </button>
       <button
         type="button"
         onClick={() => navigate("/reports")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <BarChart3 className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <BarChart3 className="w-4 h-4 text-neutral-500" />
+        </span>
         Reports
       </button>
       <button
         type="button"
         onClick={() => navigate("/settings")}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
       >
-        <Settings className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+        <span className="w-7 h-7 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+          <Settings className="w-4 h-4 text-neutral-500" />
+        </span>
         Settings
-      </button>
-
-      <div className="border-t border-[var(--border)] my-1" />
-      <button
-        type="button"
-        onClick={openSearch}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[var(--accent)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)] transition-[var(--transition)] cursor-pointer"
-      >
-        <Search className="w-3.5 h-3.5 shrink-0" />
-        Search...
-        <kbd className="ml-auto text-[10px] text-[var(--text-muted)]">⌘K</kbd>
       </button>
     </div>
   );

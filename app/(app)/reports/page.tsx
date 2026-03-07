@@ -9,10 +9,13 @@ import type { TimeLogRow } from "@/lib/queries/timeLogs";
 import type { InvoiceRow } from "@/lib/queries/invoices";
 import type { ClientRow } from "@/lib/queries/clients";
 import { BarChart3, Clock, Banknote } from "lucide-react";
-import { TerminalSectionHeader } from "@/components/ui/Terminal";
 import { formatDate, formatHoursShort, formatCurrency } from "@/lib/utils";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { TableCard } from "@/components/ui/TableCard";
 
 type DateRangeKey = "this_month" | "last_month" | "custom";
 const NOW = new Date();
@@ -71,15 +74,12 @@ export default function ReportsPage() {
   const billableValueInRange = timeLogs.filter((l) => l.billable && l.hourly_rate != null).reduce((s, l) => s + l.hours * (l.hourly_rate ?? 0), 0);
 
   return (
-    <main className="p-6">
-      <div className="rounded-[var(--radius-card)] p-6 mb-6 border border-[var(--border-subtle)]" style={{ background: "var(--page-reports)" }}>
-        <h1 className="text-2xl font-semibold flex items-center gap-2 text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--text-muted)]/20 text-[var(--text-secondary)]">
-            <BarChart3 className="w-6 h-6" />
-          </span>
-          Reports
-        </h1>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Reports"
+        description="Time and revenue summary by date range."
+        icon={BarChart3}
+      />
 
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <Select
@@ -94,9 +94,9 @@ export default function ReportsPage() {
         />
         {dateRange === "custom" && (
           <>
-            <DatePicker value={customFrom} onChange={setCustomFrom} placeholder="From" className="min-w-[160px]" />
+            <DatePicker value={customFrom} onChange={setCustomFrom} placeholder="From" className="min-w-[160px]" aria-label="From date" />
             <span className="text-[var(--text-muted)]">to</span>
-            <DatePicker value={customTo} onChange={setCustomTo} placeholder="To" className="min-w-[160px]" />
+            <DatePicker value={customTo} onChange={setCustomTo} placeholder="To" className="min-w-[160px]" aria-label="To date" />
           </>
         )}
       </div>
@@ -104,80 +104,78 @@ export default function ReportsPage() {
       {loading ? (
         <p className="text-[var(--text-muted)] animate-pulse">Loading...</p>
       ) : (
-        <div className="space-y-8">
-          <section className="border border-[var(--border)] rounded-[var(--radius-card)] p-4 bg-[var(--bg-surface)]">
-            <TerminalSectionHeader>
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4 shrink-0" />
-                Time report — {formatDate(from)} to {formatDate(to)}
-              </span>
-            </TerminalSectionHeader>
-            <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
-              <div className="border border-[var(--border)] rounded p-3">
+        <div className="space-y-6">
+          <TableCard
+            title={`Time report — ${formatDate(from)} to ${formatDate(to)}`}
+            icon={Clock}
+            className="border-l-4 border-l-[var(--accent)]"
+          >
+            <div className="grid grid-cols-2 gap-4 px-5 pb-4">
+              <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3 bg-[var(--bg-elevated)]">
                 <p className="text-xs text-[var(--text-muted)]">Total hours</p>
                 <p className="text-xl font-semibold">{formatHoursShort(totalHoursInRange)}</p>
               </div>
-              <div className="border border-[var(--border)] rounded p-3">
+              <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3 bg-[var(--bg-elevated)]">
                 <p className="text-xs text-[var(--text-muted)]">Billable value</p>
                 <p className="text-xl font-semibold">{formatCurrency(billableValueInRange, "GBP")}</p>
               </div>
             </div>
-            <table className="w-full text-sm">
+            <table className="app-table w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="text-left py-2">Client</th>
-                  <th className="text-right py-2">Hours</th>
-                  <th className="text-right py-2">Value</th>
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
+                  <th className="text-left py-3 px-4 font-medium text-[var(--text-secondary)]">Client</th>
+                  <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Hours</th>
+                  <th className="text-right py-3 px-4 font-medium text-[var(--text-secondary)]">Value</th>
                 </tr>
               </thead>
               <tbody>
                 {Object.entries(timeByClient)
                   .sort(([, a], [, b]) => b.hours - a.hours)
                   .map(([clientId, { hours, value }]) => (
-                    <tr key={clientId} className="border-b border-[var(--border)]">
-                      <td className="py-2">
+                    <tr key={clientId} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] transition-[var(--transition)]">
+                      <td className="py-3 px-4">
                         {clientId === "_none_" ? (
                           "—"
                         ) : (
-                          <Link href={`/clients/${clientId}`} className="text-[var(--accent)] hover:underline">
+                          <Link href={`/clients/${clientId}`} className="text-[var(--accent)] hover:underline cursor-pointer">
                             {clientNames[clientId] ?? clientId}
                           </Link>
                         )}
                       </td>
-                      <td className="text-right py-2">{formatHoursShort(hours)}</td>
-                      <td className="text-right py-2">{formatCurrency(value, "GBP")}</td>
+                      <td className="text-right py-3 px-4">{formatHoursShort(hours)}</td>
+                      <td className="text-right py-3 px-4">{formatCurrency(value, "GBP")}</td>
                     </tr>
                   ))}
               </tbody>
             </table>
             {Object.keys(timeByClient).length === 0 && (
-              <p className="py-4 text-sm text-[var(--text-muted)]">No time logged in this period.</p>
+              <p className="py-4 px-5 text-sm text-[var(--text-muted)]">No time logged in this period.</p>
             )}
-          </section>
+          </TableCard>
 
-          <section className="border border-[var(--border)] rounded-[var(--radius-card)] p-4 bg-[var(--bg-surface)]">
-            <TerminalSectionHeader>
-              <span className="flex items-center gap-2">
-                <Banknote className="w-4 h-4 shrink-0" />
-                Revenue summary — Invoices issued {formatDate(from)} to {formatDate(to)}
-              </span>
-            </TerminalSectionHeader>
-            <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
-              <div className="border border-[var(--border)] rounded p-3">
-                <p className="text-xs text-[var(--text-muted)]">Paid (this period)</p>
-                <p className="text-xl font-semibold text-[var(--accent)]">{formatCurrency(paidInRange, "GBP")}</p>
+          <Card className="border-l-4 border-l-[var(--accent)]">
+            <CardHeader
+              title={`Revenue summary — Invoices issued ${formatDate(from)} to ${formatDate(to)}`}
+              icon={Banknote}
+            />
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3 bg-[var(--bg-elevated)]">
+                  <p className="text-xs text-[var(--text-muted)]">Paid (this period)</p>
+                  <p className="text-xl font-semibold text-[var(--accent)]">{formatCurrency(paidInRange, "GBP")}</p>
+                </div>
+                <div className="rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3 bg-[var(--bg-elevated)]">
+                  <p className="text-xs text-[var(--text-muted)]">Outstanding</p>
+                  <p className="text-xl font-semibold">{formatCurrency(outstandingInRange, "GBP")}</p>
+                </div>
               </div>
-              <div className="border border-[var(--border)] rounded p-3">
-                <p className="text-xs text-[var(--text-muted)]">Outstanding</p>
-                <p className="text-xl font-semibold">{formatCurrency(outstandingInRange, "GBP")}</p>
-              </div>
-            </div>
-            <p className="text-xs text-[var(--text-muted)]">
-              Invoices with issue date in the selected range. Paid = status paid; Outstanding = sent but not paid.
-            </p>
-          </section>
+              <p className="text-xs text-[var(--text-muted)]">
+                Invoices with issue date in the selected range. Paid = status paid; Outstanding = sent but not paid.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       )}
-    </main>
+    </PageContainer>
   );
 }
