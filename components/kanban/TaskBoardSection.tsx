@@ -9,7 +9,6 @@ import { KanbanBoard } from "./KanbanBoard";
 import { TaskListView } from "./TaskListView";
 import { TaskCalendarView } from "./TaskCalendarView";
 import { TaskDetailModal } from "./TaskDetailModal";
-import { AddTaskModal } from "./AddTaskModal";
 import { Button } from "@/components/ui/Button";
 import { LayoutGrid, List, Calendar } from "lucide-react";
 
@@ -23,7 +22,7 @@ interface TaskBoardSectionProps {
   tasks: TaskRow[];
   onTaskUpdate: (taskId: string, updates: Partial<TaskRow>) => Promise<void>;
   onTaskDelete: (taskId: string) => Promise<void>;
-  onTaskCreate: (task: Partial<TaskRow> & { title: string }) => Promise<void>;
+  onTaskCreate: (task: Partial<TaskRow> & { title: string }, options?: { subtaskTitles?: string[] }) => Promise<void>;
   onBoardConfigChange?: (config: BoardConfig) => void;
 }
 
@@ -87,32 +86,30 @@ export function TaskBoardSection({
   const statusOptions = columnOrder.map((id) => ({ value: id, label: columnLabels[id] ?? id }));
   const defaultStatusForNewTask = (columnOrder[0] ?? "todo") as TaskStatus;
 
-  async function handleCreateTask(payload: {
-    title: string;
-    description?: string | null;
-    status: string;
-    priority: string;
-    category: string;
-    effort: string;
-    due_date?: string | null;
-  }) {
-    await onTaskCreate({
-      title: payload.title,
-      description: payload.description ?? null,
-      status: payload.status,
-      priority: payload.priority as TaskRow["priority"],
-      category: payload.category as TaskRow["category"],
-      effort: payload.effort as TaskRow["effort"],
-      due_date: payload.due_date ?? null,
-      position: 0,
-    });
+  async function handleCreateTask(
+    payload: Partial<TaskRow> & { title: string },
+    options?: { subtaskTitles?: string[] }
+  ) {
+    await onTaskCreate(
+      {
+        ...payload,
+        description: payload.description ?? null,
+        status: payload.status ?? defaultStatusForNewTask,
+        priority: (payload.priority as TaskRow["priority"]) ?? "p2",
+        category: (payload.category as TaskRow["category"]) ?? "dev",
+        effort: (payload.effort as TaskRow["effort"]) ?? "medium",
+        due_date: payload.due_date ?? null,
+        position: tasks.length,
+      },
+      options
+    );
     setAddTaskOpen(false);
   }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg border border-[var(--border)] p-1 bg-[var(--bg-elevated)]">
+        <div className="flex rounded-[5px] border border-[var(--border)] p-1 bg-[var(--bg-elevated)]">
           <button
             type="button"
             onClick={() => handleViewChange("kanban")}
@@ -170,6 +167,7 @@ export function TaskBoardSection({
           onTaskCreate={onTaskCreate}
           onBoardConfigChange={onBoardConfigChange}
           onOpenTask={setDetailTask}
+          projectName={project.title}
         />
       )}
       {viewMode === "list" && (
@@ -186,29 +184,33 @@ export function TaskBoardSection({
         <TaskCalendarView tasks={tasks} onTaskClick={setDetailTask} />
       )}
 
-      <TaskDetailModal
-        task={detailTask}
-        open={!!detailTask}
-        onClose={() => setDetailTask(null)}
-        onSave={async (updates) => {
-          if (detailTask) await onTaskUpdate(detailTask.id, updates);
-        }}
-        onDelete={() => {
-          if (detailTask) onTaskDelete(detailTask.id);
-          setDetailTask(null);
-        }}
-        projectName={project.title}
-        categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
-        priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
-        statusOptions={statusOptions}
-      />
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          open={!!detailTask}
+          onClose={() => setDetailTask(null)}
+          onSave={async (updates) => {
+            await onTaskUpdate(detailTask.id, updates);
+          }}
+          onDelete={() => {
+            onTaskDelete(detailTask.id);
+            setDetailTask(null);
+          }}
+          projectName={project.title}
+          categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
+          priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
+          statusOptions={statusOptions}
+        />
+      )}
 
       {addTaskOpen && (
-        <AddTaskModal
+        <TaskDetailModal
+          task={null}
           open={addTaskOpen}
           onClose={() => setAddTaskOpen(false)}
-          defaultStatus={defaultStatusForNewTask}
           onCreate={handleCreateTask}
+          defaultStatus={defaultStatusForNewTask}
+          projectName={project.title}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
           statusOptions={statusOptions}

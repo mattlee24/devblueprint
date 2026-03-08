@@ -16,7 +16,7 @@ import { TaskAttachments } from "./TaskAttachments";
 import { ThreadedComments } from "./ThreadedComments";
 import type { TaskStatus, TaskPriority, TaskCategory, TaskEffort } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { Trash2, X, Plus, CheckSquare, Square } from "lucide-react";
+import { Trash2, X, Plus, CheckSquare, Square, MessageSquare } from "lucide-react";
 
 const FALLBACK_STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "todo", label: "To do" },
@@ -47,32 +47,58 @@ const EFFORT_OPTIONS: { value: TaskEffort; label: string }[] = [
   { value: "high", label: "High" },
 ];
 
-interface TaskDetailModalProps {
-  task: TaskRow | null;
+export type TaskCreatePayload = Partial<TaskRow> & { title: string };
+
+interface TaskDetailModalPropsBase {
   open: boolean;
   onClose: () => void;
-  onSave: (updates: Partial<TaskRow>) => Promise<void>;
-  onDelete: () => void;
   projectName?: string;
   categoryOptions?: { value: string; label: string }[];
   priorityOptions?: { value: string; label: string }[];
   statusOptions?: { value: string; label: string }[];
 }
 
-export function TaskDetailModal({
-  task,
-  open,
-  onClose,
-  onSave,
-  onDelete,
-  projectName,
-  categoryOptions = CATEGORY_OPTIONS,
-  priorityOptions = PRIORITY_OPTIONS,
-  statusOptions = FALLBACK_STATUS_OPTIONS,
-}: TaskDetailModalProps) {
+interface TaskDetailModalPropsEdit extends TaskDetailModalPropsBase {
+  task: TaskRow;
+  onSave: (updates: Partial<TaskRow>) => Promise<void>;
+  onDelete: () => void;
+  onCreate?: never;
+  defaultStatus?: never;
+}
+
+interface TaskDetailModalPropsCreate extends TaskDetailModalPropsBase {
+  task: null;
+  onCreate: (task: TaskCreatePayload, options?: { subtaskTitles?: string[] }) => Promise<void>;
+  defaultStatus: TaskStatus;
+  onSave?: never;
+  onDelete?: never;
+}
+
+type TaskDetailModalProps = TaskDetailModalPropsEdit | TaskDetailModalPropsCreate;
+
+const isCreateMode = (props: TaskDetailModalProps): props is TaskDetailModalPropsCreate =>
+  props.task === null;
+
+export function TaskDetailModal(props: TaskDetailModalProps) {
+  const {
+    task,
+    open,
+    onClose,
+    projectName,
+    categoryOptions = CATEGORY_OPTIONS,
+    priorityOptions = PRIORITY_OPTIONS,
+    statusOptions = FALLBACK_STATUS_OPTIONS,
+  } = props;
+
+  const createMode = isCreateMode(props);
+  const defaultStatus = createMode ? props.defaultStatus : undefined;
+  const onCreate = createMode ? props.onCreate : undefined;
+  const onSave = !createMode ? props.onSave : undefined;
+  const onDelete = !createMode ? props.onDelete : undefined;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<TaskStatus>(statusOptions[0]?.value ?? "todo");
+  const [status, setStatus] = useState<TaskStatus>(defaultStatus ?? statusOptions[0]?.value ?? "todo");
   const [priority, setPriority] = useState<TaskPriority>("p2");
   const [category, setCategory] = useState<TaskCategory>("dev");
   const [effort, setEffort] = useState<TaskEffort>("medium");
@@ -81,6 +107,7 @@ export function TaskDetailModal({
   const [comments, setComments] = useState<TaskCommentWithAuthor[]>([]);
   const [attachments, setAttachments] = useState<TaskAttachmentRow[]>([]);
   const [subtasks, setSubtasks] = useState<SubtaskRow[]>([]);
+  const [createModeSubtaskTitles, setCreateModeSubtaskTitles] = useState<string[]>([]);
   const [highlightedSubtaskId, setHighlightedSubtaskId] = useState<string | null>(null);
   const subtasksSectionRef = useRef<HTMLDivElement>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -118,8 +145,18 @@ export function TaskDetailModal({
       setCategory(task.category as TaskCategory);
       setEffort(task.effort as TaskEffort);
       setDueDate(task.due_date ?? "");
+    } else if (open && createMode) {
+      setTitle("");
+      setDescription("<p></p>");
+      setStatus(defaultStatus ?? statusOptions[0]?.value ?? "todo");
+      setPriority("p2");
+      setCategory("dev");
+      setEffort("medium");
+      setDueDate("");
+      setCreateModeSubtaskTitles([]);
+      setNewSubtaskTitle("");
     }
-  }, [task, statusOptions]);
+  }, [task, statusOptions, open, createMode, defaultStatus]);
 
   useEffect(() => {
     if (open && task?.id) {
@@ -130,29 +167,51 @@ export function TaskDetailModal({
       setComments([]);
       setAttachments([]);
       setSubtasks([]);
-      setNewSubtaskTitle("");
+      if (!createMode) setNewSubtaskTitle("");
     }
-  }, [open, task?.id, loadComments, loadAttachments, loadSubtasks]);
+  }, [open, task?.id, loadComments, loadAttachments, loadSubtasks, createMode]);
 
   async function handleSave() {
-    if (!task) return;
+    if (task) {
+      setSaving(true);
+      const desc = description?.trim();
+      await onSave!({
+        title: title.trim() || task.title,
+        description: desc && desc !== "<p></p>" ? desc : null,
+        status,
+        priority,
+        category,
+        effort,
+        due_date: dueDate.trim() || null,
+      });
+      setSaving(false);
+      onClose();
+    }
+  }
+
+  async function handleCreate() {
+    if (!createMode || !onCreate) return;
+    const t = title.trim();
+    if (!t) return;
     setSaving(true);
-    const desc = description?.trim();
-    await onSave({
-      title: title.trim() || task.title,
-      description: desc && desc !== "<p></p>" ? desc : null,
-      status,
-      priority,
-      category,
-      effort,
-      due_date: dueDate.trim() || null,
-    });
+    await onCreate(
+      {
+        title: t,
+        description: description?.trim() && description !== "<p></p>" ? description : null,
+        status,
+        priority,
+        category,
+        effort,
+        due_date: dueDate.trim() || null,
+      },
+      createModeSubtaskTitles.length > 0 ? { subtaskTitles: createModeSubtaskTitles } : undefined
+    );
     setSaving(false);
     onClose();
   }
 
   function handleDelete() {
-    onDelete();
+    onDelete?.();
     onClose();
   }
 
@@ -200,10 +259,16 @@ export function TaskDetailModal({
   }
 
   async function handleAddSubtask() {
-    const title = newSubtaskTitle.trim();
-    if (!task || !title) return;
+    const titleToAdd = newSubtaskTitle.trim();
+    if (createMode) {
+      if (!titleToAdd) return;
+      setCreateModeSubtaskTitles((prev) => [...prev, titleToAdd]);
+      setNewSubtaskTitle("");
+      return;
+    }
+    if (!task || !titleToAdd) return;
     const { data } = await createSubtask(task.id, {
-      title,
+      title: titleToAdd,
       position: subtasks.length,
     });
     if (data) {
@@ -212,18 +277,24 @@ export function TaskDetailModal({
     }
   }
 
-  if (!task) return null;
+  function removeCreateModeSubtask(index: number) {
+    setCreateModeSubtaskTitles((prev) => prev.filter((_, i) => i !== index));
+  }
 
   const statusColor =
     status === "done" ? "bg-green-500" : status === "in_review" ? "bg-amber-400" : status === "in_progress" ? "bg-blue-500" : "bg-neutral-300";
   const priorityDot =
     priority === "p1" ? "bg-red-500" : priority === "p2" ? "bg-amber-400" : "bg-green-500";
 
+  const displayTitle = task ? task.title : title || "New task";
+  const statusLabel = statusOptions.find((o) => o.value === status)?.label ?? status;
+  const modalTitle = createMode ? `New task · ${statusLabel}` : displayTitle;
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={task.title}
+      title={modalTitle}
       overlayClassName="bg-black/40 backdrop-blur-sm"
       contentClassName="max-w-4xl w-full max-h-[94vh] flex flex-col rounded-2xl shadow-xl border border-neutral-200 bg-white"
       contentInnerClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-0"
@@ -235,7 +306,7 @@ export function TaskDetailModal({
             {/* Breadcrumb + title */}
             {projectName && (
               <p className="text-xs text-neutral-400">
-                {projectName} › {title || task.title}
+                {projectName} › {createMode ? "New task" : title || (task?.title ?? "")}
               </p>
             )}
             <input
@@ -244,6 +315,7 @@ export function TaskDetailModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task title"
               className="w-full text-2xl font-semibold font-mono bg-transparent border-0 border-b border-transparent focus:border-teal-400 focus:outline-none pb-1 text-neutral-900 placeholder:text-neutral-400"
+              aria-label="Task title"
             />
             {/* Metadata row: compact pills */}
             <div className="flex flex-wrap items-center gap-2">
@@ -299,70 +371,90 @@ export function TaskDetailModal({
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Subtasks</span>
                 <span className="bg-neutral-100 text-neutral-500 text-xs px-1.5 rounded-full">
-                  {subtasks.filter((s) => s.completed).length}/{subtasks.length}
+                  {createMode
+                    ? `${createModeSubtaskTitles.length}`
+                    : `${subtasks.filter((s) => s.completed).length}/${subtasks.length}`}
                 </span>
               </div>
               <ul className="space-y-2">
-                {subtasks.map((subtask) => (
-                  <li
-                    key={subtask.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-                      setHighlightedSubtaskId(subtask.id);
-                      setTimeout(() => setHighlightedSubtaskId(null), 1500);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-                        setHighlightedSubtaskId(subtask.id);
-                        setTimeout(() => setHighlightedSubtaskId(null), 1500);
-                      }
-                    }}
-                    className={`flex items-center gap-2 group py-1 rounded hover:bg-neutral-50 cursor-pointer transition-colors ${highlightedSubtaskId === subtask.id ? "ring-2 ring-teal-400 ring-offset-2 ring-offset-white bg-neutral-50" : ""}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSubtaskToggle(subtask);
-                      }}
-                      className="p-0.5 rounded text-neutral-400 hover:text-teal-500 cursor-pointer shrink-0"
-                      aria-label={subtask.completed ? "Mark incomplete" : "Mark complete"}
-                    >
-                      {subtask.completed ? (
-                        <CheckSquare className="w-5 h-5 text-teal-500" />
-                      ) : (
-                        <Square className="w-5 h-5" />
-                      )}
-                    </button>
-                    <input
-                      type="text"
-                      defaultValue={subtask.title}
-                      onBlur={(e) => handleSubtaskTitleBlur(subtask, e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.currentTarget.blur();
-                        }
-                      }}
-                      className={`flex-1 min-w-0 bg-transparent border-0 border-b border-transparent focus:border-teal-400 focus:outline-none py-1 text-sm text-neutral-900 placeholder:text-neutral-400 ${subtask.completed ? "line-through text-neutral-500" : ""}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSubtaskDelete(subtask.id);
-                      }}
-                      className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-neutral-100 text-neutral-400 cursor-pointer shrink-0"
-                      aria-label="Delete subtask"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </li>
-                ))}
+                {createMode
+                  ? createModeSubtaskTitles.map((stTitle, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center gap-2 group py-1 rounded hover:bg-neutral-50 transition-colors"
+                      >
+                        <Square className="w-5 h-5 text-neutral-400 shrink-0" />
+                        <span className="flex-1 min-w-0 text-sm text-neutral-900">{stTitle}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeCreateModeSubtask(index)}
+                          className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-neutral-100 text-neutral-400 cursor-pointer shrink-0"
+                          aria-label="Remove subtask"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))
+                  : subtasks.map((subtask) => (
+                      <li
+                        key={subtask.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => {
+                          subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                          setHighlightedSubtaskId(subtask.id);
+                          setTimeout(() => setHighlightedSubtaskId(null), 1500);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            subtasksSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                            setHighlightedSubtaskId(subtask.id);
+                            setTimeout(() => setHighlightedSubtaskId(null), 1500);
+                          }
+                        }}
+                        className={`flex items-center gap-2 group py-1 rounded hover:bg-neutral-50 cursor-pointer transition-colors ${highlightedSubtaskId === subtask.id ? "ring-2 ring-teal-400 ring-offset-2 ring-offset-white bg-neutral-50" : ""}`}
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubtaskToggle(subtask);
+                          }}
+                          className="p-0.5 rounded text-neutral-400 hover:text-teal-500 cursor-pointer shrink-0"
+                          aria-label={subtask.completed ? "Mark incomplete" : "Mark complete"}
+                        >
+                          {subtask.completed ? (
+                            <CheckSquare className="w-5 h-5 text-teal-500" />
+                          ) : (
+                            <Square className="w-5 h-5" />
+                          )}
+                        </button>
+                        <input
+                          type="text"
+                          defaultValue={subtask.title}
+                          onBlur={(e) => handleSubtaskTitleBlur(subtask, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className={`flex-1 min-w-0 bg-transparent border-0 border-b border-transparent focus:border-teal-400 focus:outline-none py-1 text-sm text-neutral-900 placeholder:text-neutral-400 ${subtask.completed ? "line-through text-neutral-500" : ""}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubtaskDelete(subtask.id);
+                          }}
+                          className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-neutral-100 text-neutral-400 cursor-pointer shrink-0"
+                          aria-label="Delete subtask"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))}
               </ul>
               <div className="flex gap-2 mt-2">
                 <input
@@ -384,30 +476,47 @@ export function TaskDetailModal({
                 </button>
               </div>
             </div>
-            <TaskAttachments
-              taskId={task.id}
-              attachments={attachments}
-              onAttachmentsChange={setAttachments}
-            />
+            {task ? (
+              <TaskAttachments
+                taskId={task.id}
+                attachments={attachments}
+                onAttachmentsChange={setAttachments}
+              />
+            ) : (
+              <div className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-3">
+                <p className="text-sm text-neutral-500">Save the task to add attachments.</p>
+              </div>
+            )}
           </div>
           <div className="p-4 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 bg-neutral-50/50">
-            <div className="text-xs text-neutral-400 font-mono flex gap-4">
-              <span>Created {formatDate(task.created_at)}</span>
-              <span>Updated {formatDate(task.updated_at)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="px-4 py-2 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 text-sm font-medium cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4 inline-block mr-1.5 align-middle" />
-                Delete task
-              </button>
-              <div className="ml-auto flex gap-2">
-                <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-                  {saving ? "Saving…" : "Save"}
-                </Button>
+            {!createMode && task && (
+              <div className="text-xs text-neutral-400 font-mono flex gap-4">
+                <span>Created {formatDate(task.created_at)}</span>
+                <span>Updated {formatDate(task.updated_at)}</span>
+              </div>
+            )}
+            <div className={`flex items-center gap-2 ${createMode ? "" : "ml-auto"}`}>
+              {!createMode && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="px-4 py-2 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 text-sm font-medium cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 inline-block mr-1.5 align-middle" />
+                  Delete task
+                </button>
+              )}
+              <div className={`flex gap-2 ${!createMode ? "ml-auto" : ""}`}>
+                {createMode ? (
+                  <Button onClick={handleCreate} disabled={!title.trim() || saving} className="cursor-pointer flex items-center gap-1.5">
+                    <Plus className="w-4 h-4 shrink-0" />
+                    {saving ? "Adding…" : "Add task"}
+                  </Button>
+                ) : (
+                  <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
+                    {saving ? "Saving…" : "Save"}
+                  </Button>
+                )}
                 <Button variant="secondary" onClick={onClose} className="cursor-pointer">
                   Cancel
                 </Button>
@@ -418,14 +527,24 @@ export function TaskDetailModal({
         {/* Right column: comments */}
         <div className="w-full lg:w-[280px] flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-neutral-200 bg-neutral-50/30">
           <div className="p-4 flex-1 min-h-0 overflow-hidden flex flex-col">
-            <ThreadedComments
-              taskId={task.id}
-              comments={comments}
-              currentUserId={currentUserId}
-              onAddComment={handleAddComment}
-              onAddReply={handleAddReply}
-              onDeleteComment={handleDeleteComment}
-            />
+            {task ? (
+              <ThreadedComments
+                taskId={task.id}
+                comments={comments}
+                currentUserId={currentUserId}
+                onAddComment={handleAddComment}
+                onAddReply={handleAddReply}
+                onDeleteComment={handleDeleteComment}
+              />
+            ) : (
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-2 text-sm font-semibold text-neutral-700 pb-3 border-b border-neutral-100">
+                  <MessageSquare className="w-4 h-4 text-neutral-400" />
+                  Comments
+                </div>
+                <p className="text-sm text-neutral-400 text-center pt-8">Save the task to add comments.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -7,7 +7,6 @@ import type { BoardConfig } from "@/lib/queries/projects";
 import type { TaskStatus } from "@/lib/types";
 import { KanbanCard } from "./KanbanCard";
 import { TaskDetailModal } from "./TaskDetailModal";
-import { AddTaskModal } from "./AddTaskModal";
 import { BoardSettingsModal } from "./BoardSettingsModal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -42,10 +41,12 @@ interface KanbanBoardProps {
   boardConfig: BoardConfig | null;
   onTaskUpdate: (taskId: string, updates: Partial<TaskRow>) => Promise<void>;
   onTaskDelete: (taskId: string) => Promise<void>;
-  onTaskCreate: (task: Partial<TaskRow> & { title: string }) => Promise<void>;
+  onTaskCreate: (task: Partial<TaskRow> & { title: string }, options?: { subtaskTitles?: string[] }) => Promise<void>;
   onBoardConfigChange?: (config: BoardConfig) => void;
   /** When provided, task detail is handled by parent; card click calls this instead of opening internal modal. */
   onOpenTask?: (task: TaskRow) => void;
+  /** Project name for the "New task" modal breadcrumb. */
+  projectName?: string;
 }
 
 export function KanbanBoard({
@@ -56,6 +57,7 @@ export function KanbanBoard({
   onTaskCreate,
   onBoardConfigChange,
   onOpenTask,
+  projectName,
 }: KanbanBoardProps) {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
@@ -111,26 +113,25 @@ export function KanbanBoard({
     setEditingLabel("");
   }
 
-  async function handleCreateTask(payload: {
-    title: string;
-    description?: string | null;
-    status: string;
-    priority: string;
-    category: string;
-    effort: string;
-    due_date?: string | null;
-  }) {
-    const maxPos = Math.max(0, ...byStatus(payload.status).map((t) => t.position), -1);
-    await onTaskCreate({
-      title: payload.title,
-      description: payload.description ?? null,
-      status: payload.status,
-      priority: payload.priority as TaskRow["priority"],
-      category: payload.category as TaskRow["category"],
-      effort: payload.effort as TaskRow["effort"],
-      due_date: payload.due_date ?? null,
-      position: maxPos + 1,
-    });
+  async function handleCreateTask(
+    payload: Partial<TaskRow> & { title: string },
+    options?: { subtaskTitles?: string[] }
+  ) {
+    const status = payload.status ?? addTaskColumn ?? "todo";
+    const maxPos = Math.max(0, ...byStatus(status).map((t) => t.position), -1);
+    await onTaskCreate(
+      {
+        title: payload.title,
+        description: payload.description ?? null,
+        status,
+        priority: (payload.priority as TaskRow["priority"]) ?? "p2",
+        category: (payload.category as TaskRow["category"]) ?? "dev",
+        effort: (payload.effort as TaskRow["effort"]) ?? "medium",
+        due_date: payload.due_date ?? null,
+        position: maxPos + 1,
+      },
+      options
+    );
     setAddTaskColumn(null);
   }
 
@@ -266,17 +267,19 @@ export function KanbanBoard({
         </div>
       </DragDropContext>
 
-      {!onOpenTask && (
+      {!onOpenTask && detailTask && (
         <TaskDetailModal
           task={detailTask}
           open={!!detailTask}
           onClose={() => setDetailTask(null)}
           onSave={async (updates) => {
-            if (detailTask) await onTaskUpdate(detailTask.id, updates);
+            await onTaskUpdate(detailTask.id, updates);
           }}
           onDelete={() => {
-            if (detailTask) onTaskDelete(detailTask.id);
+            onTaskDelete(detailTask.id);
+            setDetailTask(null);
           }}
+          projectName={projectName}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
           statusOptions={columns.map((col) => ({ value: col.id, label: col.label }))}
@@ -284,11 +287,13 @@ export function KanbanBoard({
       )}
 
       {addTaskColumn && (
-        <AddTaskModal
+        <TaskDetailModal
+          task={null}
           open={!!addTaskColumn}
           onClose={() => setAddTaskColumn(null)}
-          defaultStatus={addTaskColumn as TaskStatus}
           onCreate={handleCreateTask}
+          defaultStatus={(addTaskColumn as TaskStatus) ?? "todo"}
+          projectName={projectName}
           categoryOptions={categories.map((c) => ({ value: c.value, label: c.label }))}
           priorityOptions={priorities.map((p) => ({ value: p.value, label: p.label }))}
           statusOptions={columns.map((col) => ({ value: col.id, label: col.label }))}

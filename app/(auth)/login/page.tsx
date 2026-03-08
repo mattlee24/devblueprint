@@ -30,15 +30,15 @@ function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-lg)] bg-[var(--surface)] p-8 shadow-[var(--shadow-card)]">
-      <h1 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">DevBlueprint</h1>
-      <p className="text-[var(--text-secondary)] text-sm mb-8">Sign in to your account</p>
+    <>
+      <h2 className="text-2xl font-semibold font-mono text-neutral-900 mb-1">Sign in</h2>
+      <p className="text-sm text-neutral-500 mb-8">Welcome back</p>
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <p className="text-[var(--accent-red)] text-sm">Something went wrong. Please try again.</p>
+          <p className="text-red-600 text-sm">Something went wrong. Please try again.</p>
         )}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+          <label htmlFor="email" className="block text-sm font-medium text-neutral-600 mb-1.5">
             Email
           </label>
           <input
@@ -47,15 +47,15 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)]"
+            className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-teal-400 focus:border-transparent focus:bg-white outline-none transition"
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--text-secondary)]">
+            <label htmlFor="password" className="block text-sm font-medium text-neutral-600">
               Password
             </label>
-            <Link href="/forgot-password" className="text-xs text-[var(--accent)] hover:underline">
+            <Link href="/forgot-password" className="text-xs text-teal-500 hover:text-teal-700 font-medium">
               Forgot password?
             </Link>
           </div>
@@ -65,33 +65,39 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-[var(--radius-card)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none transition-[var(--transition)]"
+            className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-teal-400 focus:border-transparent focus:bg-white outline-none transition"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 px-4 text-[var(--accent-foreground)] font-medium rounded-[var(--radius-md)] border-0 hover:opacity-90 transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
-          style={{ background: "var(--gradient-accent)" }}
+          className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
-      <p className="mt-6 text-sm text-center text-[var(--text-secondary)]">
+      <p className="mt-6 text-sm text-center text-neutral-500">
         No account?{" "}
-        <Link href="/register" className="text-[var(--accent)] hover:underline font-medium">
+        <Link href="/register" className="text-teal-500 hover:text-teal-700 font-medium">
           Register
         </Link>
       </p>
-    </div>
+    </>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full max-w-[400px] mx-auto border border-[var(--border)] rounded-[var(--radius-lg)] bg-[var(--surface)] p-8 animate-pulse h-80" />
-    }>
+    <Suspense
+      fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-neutral-200 rounded w-1/3" />
+          <div className="h-4 bg-neutral-100 rounded w-2/3" />
+          <div className="h-10 bg-neutral-100 rounded" />
+          <div className="h-10 bg-neutral-100 rounded" />
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

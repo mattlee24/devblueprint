@@ -10,6 +10,8 @@ export interface BoardConfig {
   columnLabels?: Record<string, string>;
   categories?: BoardConfigOption[];
   priorities?: BoardConfigOption[];
+  /** Optional colour key per priority value (e.g. p1 -> "red", p2 -> "amber"). */
+  priorityColors?: Record<string, string>;
 }
 
 export interface ProjectRow {

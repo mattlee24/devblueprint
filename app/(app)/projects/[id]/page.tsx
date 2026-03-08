@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { getProject, updateProject, deleteProject, type BoardConfig } from "@/lib/queries/projects";
 import { getTasksByProject, updateTask, deleteTask, createTask } from "@/lib/queries/tasks";
+import { createSubtask } from "@/lib/queries/subtasks";
 import { getTimeLogs } from "@/lib/queries/timeLogs";
 import type { ProjectRow } from "@/lib/queries/projects";
 import type { TaskRow } from "@/lib/queries/tasks";
@@ -101,7 +102,10 @@ export default function ProjectDetailPage() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   }
 
-  async function handleTaskCreate(task: Partial<TaskRow> & { title: string }) {
+  async function handleTaskCreate(
+    task: Partial<TaskRow> & { title: string },
+    options?: { subtaskTitles?: string[] }
+  ) {
     const res = await createTask({
       project_id: id!,
       title: task.title,
@@ -118,8 +122,14 @@ export default function ProjectDetailPage() {
       return;
     }
     if (res.data) {
+      const newTask = res.data;
+      if (options?.subtaskTitles?.length) {
+        for (let i = 0; i < options.subtaskTitles.length; i++) {
+          await createSubtask(newTask.id, { title: options.subtaskTitles[i], position: i });
+        }
+      }
       toast.success("Task created");
-      setTasks((prev) => [...prev, res.data!]);
+      setTasks((prev) => [...prev, newTask]);
     }
   }
 

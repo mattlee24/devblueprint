@@ -319,56 +319,77 @@ function NewProjectForm() {
   const generateStepIndex = steps.length - 1;
   return (
     <main className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <Link href="/projects" className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]">
+      <div className="mb-6">
+        <Link
+          href="/projects"
+          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition"
+        >
           ← Back to projects
         </Link>
       </div>
-      <WizardShell step={step} steps={steps}>
-        {!fromProposal && step === 0 && (
-          <StepIdentity
-            title={title}
-            description={description}
-            type={type}
-            clientId={clientId}
-            onTitleChange={setTitle}
-            onDescriptionChange={setDescription}
-            onTypeChange={setType}
-            onClientChange={setClientId}
-            clients={clients}
-          />
-        )}
-        {(fromProposal && step === 0) || (!fromProposal && step === 1) ? (
-          <StepStack type={type} selected={stack} onToggle={toggleStack} />
-        ) : null}
-        {step === generateStepIndex && (
-          <div className="space-y-4">
-            <p className="text-[var(--text-secondary)]">
-              Ready to generate detailed blueprint and task board for:
-            </p>
-            <p className="font-medium">{title}</p>
-            <p className="text-sm text-[var(--text-muted)]">
-              {type} · {stack.length} stack items · AI-enhanced when configured
-            </p>
-          </div>
-        )}
-        <div className="flex justify-between mt-8">
-          <Button
-            variant="secondary"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-          >
-            Back
-          </Button>
-          {step < generateStepIndex ? (
-            <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext}>
-              Next
-            </Button>
-          ) : (
-            <Button onClick={handleGenerate}>Generate</Button>
+      <div className="max-w-2xl mx-auto rounded-2xl border border-neutral-200 bg-white shadow-sm px-8 py-8">
+        <WizardShell step={step} steps={steps}>
+          {!fromProposal && step === 0 && (
+            <StepIdentity
+              title={title}
+              description={description}
+              type={type}
+              clientId={clientId}
+              onTitleChange={setTitle}
+              onDescriptionChange={setDescription}
+              onTypeChange={setType}
+              onClientChange={setClientId}
+              clients={clients}
+            />
           )}
-        </div>
-      </WizardShell>
+          {(fromProposal && step === 0) || (!fromProposal && step === 1) ? (
+            <StepStack type={type} selected={stack} onToggle={toggleStack} />
+          ) : null}
+          {step === generateStepIndex && (
+            <div className="space-y-4">
+              <p className="text-neutral-600">
+                Ready to generate detailed blueprint and task board for:
+              </p>
+              <p className="font-medium text-neutral-900">{title}</p>
+              <p className="text-sm text-neutral-500">
+                {type} · {stack.length} stack items · AI-enhanced when configured
+              </p>
+            </div>
+          )}
+          <div className="flex items-center justify-between pt-6 border-t border-neutral-100 mt-6">
+            <button
+              type="button"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
+              className={
+                step === 0
+                  ? "px-4 py-2 text-neutral-300 cursor-not-allowed text-sm"
+                  : "px-4 py-2 text-neutral-600 hover:text-neutral-900 text-sm flex items-center gap-1.5 transition"
+              }
+            >
+              Back
+            </button>
+            {step < generateStepIndex ? (
+              <button
+                type="button"
+                onClick={() => setStep((s) => s + 1)}
+                disabled={!canNext}
+                className="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg text-sm transition disabled:opacity-50"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleGenerate}
+                className="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg text-sm transition"
+              >
+                Generate
+              </button>
+            )}
+          </div>
+        </WizardShell>
+      </div>
     </main>
   );
 }

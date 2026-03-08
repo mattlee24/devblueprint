@@ -314,7 +314,8 @@ function TimeLogsContent() {
           setEditingLog(null);
         }}
         title={editingLog ? "Edit time log" : "Log Time"}
-        width="lg"
+        width="logTime"
+        logTimeStyle={!editingLog}
       >
         <TimeLogForm
           clients={clients}

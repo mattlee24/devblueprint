@@ -51,8 +51,30 @@ export function TaskListView({
   const [sortAsc, setSortAsc] = useState(true);
 
   const columnLabels = boardConfig?.columnLabels ?? {};
+  const columnOrder = boardConfig?.columnOrder ?? DEFAULT_COLUMNS.map((c) => c.id);
   const statusLabel = (status: string) =>
     columnLabels[status] ?? DEFAULT_COLUMNS.find((c) => c.id === status)?.label ?? status;
+
+  // Build status dropdown options from board config so they match Kanban/list/detail modals.
+  // Only include statuses from columnOrder; for each row, if the task's status isn't in the list, add it so the Select can display it (e.g. legacy "backlog").
+  const statusOptionsForTask = (currentStatus: string) => {
+    const labels = boardConfig?.columnLabels ?? {};
+    const fromConfig = columnOrder.map((id) => ({
+      value: id,
+      label: labels[id] ?? DEFAULT_COLUMNS.find((c) => c.id === id)?.label ?? id,
+    }));
+    const inConfig = new Set(fromConfig.map((o) => o.value));
+    if (currentStatus && !inConfig.has(currentStatus)) {
+      return [
+        ...fromConfig,
+        {
+          value: currentStatus,
+          label: columnLabels[currentStatus] ?? DEFAULT_COLUMNS.find((c) => c.id === currentStatus)?.label ?? currentStatus,
+        },
+      ];
+    }
+    return fromConfig;
+  };
 
   const sortedTasks = useMemo(() => {
     const list = [...tasks];
@@ -142,13 +164,7 @@ export function TaskListView({
                         label=""
                         value={task.status}
                         onChange={(e) => onTaskUpdate(task.id, { status: e.target.value })}
-                        options={[
-                          { value: "backlog", label: "Backlog" },
-                          { value: "todo", label: "To do" },
-                          { value: "in_progress", label: "In progress" },
-                          { value: "in_review", label: "In review" },
-                          { value: "done", label: "Done" },
-                        ]}
+                        options={statusOptionsForTask(task.status)}
                         className="min-w-[120px]"
                       />
                     </td>
