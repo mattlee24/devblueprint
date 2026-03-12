@@ -68,8 +68,8 @@ export default function ShareProposalPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-[var(--bg-base)]">
-      <header className="shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
+    <main className="min-h-screen flex flex-col bg-[var(--proposal-canvas-bg,#F9F7F4)]">
+      <header className="shrink-0 border-b border-[#E8E8E8] bg-white px-4 py-3">
         <h1 className="text-lg font-semibold text-[var(--text-primary)] truncate">
           {data.title}
         </h1>

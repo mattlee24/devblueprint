@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Toaster } from "sonner";
-import { PT_Mono, Source_Sans_3 } from "next/font/google";
+import { PT_Mono, Source_Sans_3, DM_Serif_Display, DM_Sans } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
@@ -19,6 +19,19 @@ const sourceSans = Source_Sans_3({
   display: "swap",
 });
 
+const dmSerifDisplay = DM_Serif_Display({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-proposal-display",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-proposal-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "DevBlueprint",
   description: "Developer productivity and client management",
@@ -30,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ptMono.variable} ${sourceSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${ptMono.variable} ${sourceSans.variable} ${dmSerifDisplay.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
         <Script
           id="theme-init"

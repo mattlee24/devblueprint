@@ -1,89 +1,89 @@
 "use client";
 
 import type { ProposalSlideBlock, ProposalSlideBlockType } from "@/lib/queries/proposals";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { Trash2, GripVertical, Type, Heading1, List, ListOrdered, Image as ImageIcon } from "lucide-react";
+import { Select } from "@/components/ui/Select";
 
-const BLOCK_TYPES: { value: ProposalSlideBlockType; label: string }[] = [
-  { value: "heading", label: "Heading" },
-  { value: "paragraph", label: "Paragraph" },
-  { value: "bullets", label: "Bullets" },
-  { value: "numbered", label: "Numbered list" },
-  { value: "image", label: "Image (URL)" },
+const BLOCK_TYPES: { value: ProposalSlideBlockType; label: string; icon: React.ReactNode }[] = [
+  { value: "paragraph", label: "Paragraph", icon: <Type className="w-3.5 h-3.5" /> },
+  { value: "heading", label: "Heading", icon: <Heading1 className="w-3.5 h-3.5" /> },
+  { value: "bullets", label: "Bullets", icon: <List className="w-3.5 h-3.5" /> },
+  { value: "numbered", label: "Numbered list", icon: <ListOrdered className="w-3.5 h-3.5" /> },
+  { value: "image", label: "Image (URL)", icon: <ImageIcon className="w-3.5 h-3.5" /> },
+];
+
+const HEADING_LEVELS = [
+  { value: "1", label: "Level 1" },
+  { value: "2", label: "Level 2" },
+  { value: "3", label: "Level 3" },
 ];
 
 export interface ProposalSlideBlockEditorProps {
   block: ProposalSlideBlock;
   onUpdate: (updates: Partial<ProposalSlideBlock>) => void;
   onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
+  /** When provided, block reorder is via DnD; attach to drag handle. */
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Optional: is this block being dragged (style). */
+  isDragging?: boolean;
 }
 
 export function ProposalSlideBlockEditor({
   block,
   onUpdate,
   onRemove,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
+  dragHandleProps,
+  isDragging = false,
 }: ProposalSlideBlockEditorProps) {
   const isMultiline = block.type === "paragraph" || block.type === "bullets" || block.type === "numbered";
 
   return (
-    <div className="flex gap-2 items-start p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] group">
-      <div className="flex flex-col shrink-0 gap-0.5">
-        <button
-          type="button"
-          onClick={onMoveUp}
-          disabled={!canMoveUp}
-          className="p-0.5 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
-          aria-label="Move block up"
+    <div
+      className={`group relative flex gap-3 items-start rounded-lg border bg-white transition-all duration-150 min-h-[52px] ${
+        isDragging ? "shadow-lg border-teal-300 bg-teal-50/50 opacity-90" : "border-[#E8E8E8] hover:border-[#CBD5E1]"
+      } focus-within:border-[#CBD5E1] focus-within:shadow-[0_0_0_3px_rgba(0,168,150,0.08)] focus-within:ring-0`}
+    >
+      {/* Drag handle (left) — only when dragHandleProps provided */}
+      {dragHandleProps && (
+        <div
+          {...dragHandleProps}
+          className="shrink-0 pt-5 pl-2 cursor-grab active:cursor-grabbing text-[#94a3b8] hover:text-[#64748b] touch-none"
+          aria-label="Drag to reorder"
         >
-          <ArrowUp className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onMoveDown}
-          disabled={!canMoveDown}
-          className="p-0.5 rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
-          aria-label="Move block down"
-        >
-          <ArrowDown className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="flex-1 min-w-0 space-y-1">
-        <select
-          value={block.type}
-          onChange={(e) => onUpdate({ type: e.target.value as ProposalSlideBlockType })}
-          className="text-xs rounded border border-[var(--border)] bg-[var(--bg-base)] px-2 py-1 text-[var(--text-primary)] cursor-pointer"
-        >
-          {BLOCK_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
-        {block.type === "heading" && (
-          <select
-            value={block.level ?? 1}
-            onChange={(e) => onUpdate({ level: Number(e.target.value) })}
-            className="ml-2 text-xs rounded border border-[var(--border)] bg-[var(--bg-base)] px-2 py-1 text-[var(--text-primary)] cursor-pointer"
-          >
-            <option value={1}>Level 1</option>
-            <option value={2}>Level 2</option>
-            <option value={3}>Level 3</option>
-          </select>
-        )}
+          <GripVertical className="w-4 h-4" />
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0 py-4 px-5 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            label=""
+            value={block.type}
+            onChange={(e) => onUpdate({ type: e.target.value as ProposalSlideBlockType })}
+            options={BLOCK_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+            fullWidth={false}
+            className="w-auto min-w-[140px]"
+            triggerClassName="rounded-full border-[#E8E8E8] bg-[#F9F7F4] px-3 py-1.5 text-xs font-medium"
+          />
+          {block.type === "heading" && (
+            <Select
+              label=""
+              value={String(block.level ?? 1)}
+              onChange={(e) => onUpdate({ level: Number(e.target.value) })}
+              options={HEADING_LEVELS}
+              fullWidth={false}
+              className="w-auto min-w-[100px]"
+              triggerClassName="rounded-full border-[#E8E8E8] bg-[#F9F7F4] px-3 py-1.5 text-xs"
+            />
+          )}
+        </div>
         {block.type === "image" ? (
           <input
             type="url"
             value={block.content}
             onChange={(e) => onUpdate({ content: e.target.value })}
             placeholder="Image URL"
-            className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-[#E8E8E8] bg-[#F9F7F4] text-[#1A1A1A] placeholder:text-[#94a3b8] focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition"
           />
         ) : (
           <textarea
@@ -97,14 +97,15 @@ export function ProposalSlideBlockEditor({
                   : "Content..."
             }
             rows={isMultiline ? 3 : 1}
-            className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] resize-y min-h-[2.5rem]"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-[#E8E8E8] bg-[#F9F7F4] text-[#1A1A1A] placeholder:text-[#94a3b8] resize-y min-h-[80px] focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition"
           />
         )}
       </div>
+
       <button
         type="button"
         onClick={onRemove}
-        className="p-1.5 rounded text-[var(--text-muted)] hover:bg-[var(--accent-red)]/10 hover:text-[var(--accent-red)] cursor-pointer shrink-0"
+        className="absolute top-3 right-3 p-1.5 rounded text-[#94a3b8] hover:bg-red-50 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0"
         aria-label="Remove block"
       >
         <Trash2 className="w-4 h-4" />

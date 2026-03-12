@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import type {
   ProposalSlide,
   ProposalSlideBlock,
   ProposalSlideBlockType,
 } from "@/lib/queries/proposals";
-import { Plus, Trash2, GripVertical, Copy } from "lucide-react";
+import { Plus, Trash2, GripVertical, Copy, Type, Heading1, List, ListOrdered, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ProposalSlideBlockEditor } from "./ProposalSlideBlockEditor";
 
@@ -24,11 +25,20 @@ function nextSlideId(): string {
   return `slide-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+const BLOCK_TYPE_ICONS: Record<ProposalSlideBlockType, React.ReactNode> = {
+  paragraph: <Type className="w-4 h-4" />,
+  heading: <Heading1 className="w-4 h-4" />,
+  bullets: <List className="w-4 h-4" />,
+  numbered: <ListOrdered className="w-4 h-4" />,
+  image: <ImageIcon className="w-4 h-4" />,
+};
+
 export function ProposalDeckEditor({
   slides,
   onSlidesChange,
 }: ProposalDeckEditorProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [lastAddedBlockType, setLastAddedBlockType] = useState<ProposalSlideBlockType | null>(null);
   const selectedSlide = slides[selectedIndex] ?? null;
 
   const updateSlides = useCallback(
@@ -71,7 +81,6 @@ export function ProposalDeckEditor({
       };
       const next = [...slides];
       next.splice(index + 1, 0, newSlide);
-      next.forEach((s, i) => ({ ...s, order: i }));
       updateSlides(next.map((s, i) => ({ ...s, order: i })));
       setSelectedIndex(index + 1);
     },
@@ -94,14 +103,14 @@ export function ProposalDeckEditor({
     [slides, selectedIndex, updateSlides]
   );
 
-  const moveSlide = useCallback(
-    (from: number, to: number) => {
-      if (to < 0 || to >= slides.length) return;
+  const onSlideDragEnd = useCallback(
+    (result: DropResult) => {
+      if (!result.destination || result.destination.index === result.source.index) return;
       const next = [...slides];
-      const [removed] = next.splice(from, 1);
-      next.splice(to, 0, removed);
+      const [removed] = next.splice(result.source.index, 1);
+      next.splice(result.destination.index, 0, removed);
       updateSlides(next.map((s, i) => ({ ...s, order: i })));
-      setSelectedIndex(to);
+      setSelectedIndex(result.destination.index);
     },
     [slides, updateSlides]
   );
@@ -109,6 +118,7 @@ export function ProposalDeckEditor({
   const addBlock = useCallback(
     (type: ProposalSlideBlockType = "paragraph") => {
       if (selectedSlide == null) return;
+      setLastAddedBlockType(type);
       const newBlock: ProposalSlideBlock = {
         id: nextBlockId(),
         type,
@@ -139,13 +149,12 @@ export function ProposalDeckEditor({
     [selectedSlide, selectedIndex, updateSlide]
   );
 
-  const moveBlock = useCallback(
-    (blockIndex: number, direction: -1 | 1) => {
-      if (selectedSlide == null) return;
+  const onBlockDragEnd = useCallback(
+    (result: DropResult) => {
+      if (!result.destination || result.destination.index === result.source.index || !selectedSlide) return;
       const blocks = [...(selectedSlide.blocks ?? [])];
-      const to = blockIndex + direction;
-      if (to < 0 || to >= blocks.length) return;
-      [blocks[blockIndex], blocks[to]] = [blocks[to]!, blocks[blockIndex]!];
+      const [removed] = blocks.splice(result.source.index, 1);
+      blocks.splice(result.destination.index, 0, removed);
       updateSlide(selectedIndex, { blocks });
     },
     [selectedSlide, selectedIndex, updateSlide]
@@ -153,9 +162,9 @@ export function ProposalDeckEditor({
 
   if (slides.length === 0) {
     return (
-      <div className="border border-[var(--border)] rounded-xl p-8 bg-[var(--bg-surface)] text-center">
-        <p className="text-[var(--text-muted)] mb-4">No slides yet.</p>
-        <Button onClick={addSlide} className="cursor-pointer">
+      <div className="proposal-editor rounded-2xl border border-[#E8E8E8] p-8 bg-white text-center">
+        <p className="text-[#4A4A4A] mb-4">No slides yet.</p>
+        <Button onClick={addSlide} className="cursor-pointer bg-teal-500 hover:bg-teal-600 text-white">
           <Plus className="w-4 h-4" />
           Add first slide
         </Button>
@@ -163,128 +172,181 @@ export function ProposalDeckEditor({
     );
   }
 
+  const blocks = selectedSlide?.blocks ?? [];
+
   return (
-    <div className="flex gap-4 h-[calc(100vh-18rem)] min-h-[420px]">
-      {/* Slide list */}
-      <aside className="w-56 shrink-0 flex flex-col border border-[var(--border)] rounded-xl bg-[var(--bg-surface)] overflow-hidden">
-        <div className="p-2 border-b border-[var(--border)] flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--text-muted)]">Slides</span>
+    <div className="proposal-editor flex gap-6 h-[calc(100vh-18rem)] min-h-[420px] rounded-2xl p-4 bg-[var(--proposal-shell-bg,#F0EFED)]">
+      {/* Slide list sidebar */}
+      <aside className="w-56 shrink-0 flex flex-col rounded-xl border border-[#E8E8E8] bg-white overflow-hidden shadow-sm">
+        <div className="p-3 border-b border-[#E8E8E8]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#4A4A4A]">Slides</span>
+        </div>
+        <DragDropContext onDragEnd={onSlideDragEnd}>
+          <Droppable droppableId="proposal-slides">
+            {(provided) => (
+              <ul
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex-1 overflow-auto p-2 space-y-0"
+              >
+                {slides.map((slide, i) => (
+                  <Draggable key={slide.id} draggableId={slide.id} index={i}>
+                    {(provided, snapshot) => (
+                      <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="border-b border-[#F0F0F0] last:border-b-0"
+                      >
+                        <div
+                          className={`group flex items-center gap-2 rounded-lg px-2 py-2.5 cursor-pointer transition-all duration-200 ${
+                            i === selectedIndex
+                              ? "bg-teal-50 border-l-2 border-teal-500 pl-[calc(0.5rem-2px)]"
+                              : "border-l-2 border-transparent hover:bg-neutral-100"
+                          }`}
+                          onClick={() => setSelectedIndex(i)}
+                          style={{ ...provided.draggableProps.style }}
+                        >
+                          <div
+                            {...provided.dragHandleProps}
+                            className="shrink-0 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-0.5 touch-none"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <GripVertical className="w-3.5 h-3.5 text-[#94a3b8]" />
+                          </div>
+                          <span className="flex-1 min-w-0 text-sm font-medium text-[#1A1A1A] truncate">
+                            {slide.title || `Slide ${i + 1}`}
+                          </span>
+                          <div className="flex shrink-0 gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                duplicateSlide(i);
+                              }}
+                              className="p-1 rounded hover:bg-neutral-200 text-[#64748b] cursor-pointer"
+                              title="Duplicate"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeSlide(i);
+                              }}
+                              disabled={slides.length <= 1}
+                              className="p-1 rounded hover:bg-red-50 hover:text-red-500 text-[#64748b] disabled:opacity-40 cursor-pointer"
+                              title="Remove slide"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
+        <div className="p-2 border-t border-[#E8E8E8]">
           <button
             type="button"
             onClick={addSlide}
-            className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--accent)] cursor-pointer"
-            title="Add slide"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-teal-600 hover:bg-teal-50 border border-transparent hover:border-teal-200 transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-          </button>
-        </div>
-        <ul className="flex-1 overflow-auto p-1 space-y-0.5">
-          {slides.map((slide, i) => (
-            <li key={slide.id}>
-              <div
-                className={`flex items-center gap-1 rounded-lg px-2 py-2 cursor-pointer border transition-[var(--transition)] ${
-                  i === selectedIndex
-                    ? "bg-[var(--accent)]/15 border-[var(--accent)]"
-                    : "border-transparent hover:bg-[var(--bg-hover)]"
-                }`}
-                onClick={() => setSelectedIndex(i)}
-              >
-                <GripVertical className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-                <span className="flex-1 min-w-0 text-xs truncate text-[var(--text-primary)]">
-                  {slide.title || `Slide ${i + 1}`}
-                </span>
-                <div className="flex shrink-0 gap-0.5">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      duplicateSlide(i);
-                    }}
-                    className="p-0.5 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] cursor-pointer"
-                    title="Duplicate"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeSlide(i);
-                    }}
-                    disabled={slides.length <= 1}
-                    className="p-0.5 rounded hover:bg-[var(--accent-red)]/20 text-[var(--text-muted)] disabled:opacity-40 cursor-pointer"
-                    title="Remove slide"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="p-2 border-t border-[var(--border)] flex gap-1">
-          <button
-            type="button"
-            onClick={() => selectedIndex > 0 && moveSlide(selectedIndex, selectedIndex - 1)}
-            disabled={selectedIndex <= 0}
-            className="flex-1 py-1 text-xs rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
-          >
-            Up
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              selectedIndex < slides.length - 1 && moveSlide(selectedIndex, selectedIndex + 1)
-            }
-            disabled={selectedIndex >= slides.length - 1}
-            className="flex-1 py-1 text-xs rounded border border-[var(--border)] hover:bg-[var(--bg-hover)] disabled:opacity-40 cursor-pointer"
-          >
-            Down
+            Add slide
           </button>
         </div>
         {slides.length < 9 && (
-          <p className="px-2 pb-2 text-[10px] text-[var(--text-muted)]">
+          <p className="px-3 pb-3 text-[10px] text-[#94a3b8]">
             Recommended: at least 9 slides for a full proposal.
           </p>
         )}
       </aside>
 
-      {/* Selected slide editor */}
-      <div className="flex-1 min-w-0 flex flex-col border border-[var(--border)] rounded-xl bg-[var(--bg-surface)] overflow-hidden">
-        <div className="p-3 border-b border-[var(--border)]">
+      {/* Content canvas */}
+      <div className="flex-1 min-w-0 flex flex-col rounded-xl border border-[#E8E8E8] bg-[var(--proposal-canvas-bg,#F9F7F4)] overflow-hidden shadow-sm">
+        {/* Progress bar */}
+        <div className="shrink-0 px-4 pt-3 pb-1">
+          <div className="flex items-center justify-between text-xs text-[#4A4A4A] mb-1">
+            <span>Slide {selectedIndex + 1} of {slides.length}</span>
+          </div>
+          <div className="h-1 bg-neutral-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-teal-500 rounded-full transition-all duration-200"
+              style={{ width: `${((selectedIndex + 1) / slides.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Slide title (large document heading) */}
+        <div className="shrink-0 px-6 pt-2 pb-4">
           <input
             type="text"
             value={selectedSlide?.title ?? ""}
             onChange={(e) => updateSlide(selectedIndex, { title: e.target.value })}
             placeholder="Slide title"
-            className="w-full px-3 py-2 text-lg font-medium rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-active)] focus:outline-none"
+            className="w-full px-0 py-1 text-2xl font-semibold bg-transparent border-0 border-b border-transparent text-[#1A1A1A] placeholder:text-[#94a3b8] focus:outline-none focus:ring-0 focus:border-b focus:border-[#CBD5E1] rounded-none"
           />
         </div>
-        <div className="flex-1 overflow-auto p-4 space-y-3">
-          {(selectedSlide?.blocks ?? []).map((block, bi) => (
-            <ProposalSlideBlockEditor
-              key={block.id}
-              block={block}
-              onUpdate={(u) => updateBlock(bi, u)}
-              onRemove={() => removeBlock(bi)}
-              onMoveUp={() => moveBlock(bi, -1)}
-              onMoveDown={() => moveBlock(bi, 1)}
-              canMoveUp={bi > 0}
-              canMoveDown={bi < (selectedSlide?.blocks?.length ?? 0) - 1}
-            />
-          ))}
-          <div className="flex flex-wrap gap-2 pt-2">
-            <span className="text-xs text-[var(--text-muted)] self-center">Add block:</span>
-            {(["paragraph", "heading", "bullets", "numbered", "image"] as const).map((type) => (
-              <Button
-                key={type}
-                variant="secondary"
-                onClick={() => addBlock(type)}
-                className="cursor-pointer text-xs py-1 px-2"
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Button>
-            ))}
+
+        {/* Block list with DnD */}
+        <div className="flex-1 overflow-auto px-6 pb-6 space-y-4">
+          <DragDropContext onDragEnd={onBlockDragEnd}>
+            <Droppable droppableId="proposal-blocks">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="space-y-4"
+                >
+                  {blocks.map((block, bi) => (
+                    <Draggable key={block.id} draggableId={block.id} index={bi}>
+                      {(provided, snapshot) => (
+                        <div ref={provided.innerRef} {...provided.draggableProps}>
+                          <ProposalSlideBlockEditor
+                            block={block}
+                            onUpdate={(u) => updateBlock(bi, u)}
+                            onRemove={() => removeBlock(bi)}
+                            dragHandleProps={provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement> | undefined}
+                            isDragging={snapshot.isDragging}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+
+          {/* Insert block toolbar */}
+          <div className="pt-4 mt-4 border-t border-[#E8E8E8]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8] mb-3">
+              Insert block
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(["paragraph", "heading", "bullets", "numbered", "image"] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => addBlock(type)}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer ${
+                    lastAddedBlockType === type
+                      ? "border-teal-500 bg-teal-50 text-teal-700"
+                      : "border-[#E8E8E8] bg-white text-[#4A4A4A] hover:border-[#CBD5E1] hover:bg-[#F9F7F4]"
+                  }`}
+                >
+                  {BLOCK_TYPE_ICONS[type]}
+                  {type === "numbered" ? "Numbered list" : type === "image" ? "Image (URL)" : type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

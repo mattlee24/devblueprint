@@ -135,6 +135,30 @@
   /* Scrollbar: neutral thumb (no teal stripe) */
   --scrollbar-thumb: #e5e7eb;
   --scrollbar-track: var(--border-subtle);
+
+  /* Proposal UI: editor + preview (warm off-white, shell, typography) */
+  --proposal-canvas-bg: #F9F7F4;
+  --proposal-shell-bg: #F0EFED;
+  --proposal-heading: #1A1A1A;
+  --proposal-body: #4A4A4A;
+  --proposal-accent: #00A896;
+}
+
+/* Proposal editor/preview: use DM Serif Display + DM Sans (no system-ui in scope) */
+.proposal-editor,
+.proposal-preview {
+  font-family: var(--font-proposal-sans), sans-serif;
+}
+.proposal-preview .proposal-display-font {
+  font-family: var(--font-proposal-display), Georgia, serif;
+}
+
+@keyframes proposalSlideIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.proposal-preview .slide-content-in {
+  animation: proposalSlideIn 0.3s ease-out forwards;
 }
 
 body {
